@@ -1,0 +1,481 @@
+{
+ "generated_at": "2026-11-06T20:08:52+00:00",
+ "generator": "tools/media/build_film.py",
+ "tool_versions": {
+  "python": "3.13.18",
+  "pillow": "12.3.0",
+  "numpy": "2.5.3",
+  "ffmpeg": "ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers"
+ },
+ "honesty": "Edit of client-supplied phone footage (4 iPhone clips, 3 used) and photography (3 stills). Graded, slowed to 0.5x with motion interpolation, slow sub-pixel moves on stills. Not a commissioned campaign film; no video generation.",
+ "films": [
+  {
+   "file": "sf-film-desktop.mp4",
+   "path": "media/processed/film/sf-film-desktop.mp4",
+   "role": "intro",
+   "variant": "desktop",
+   "width": 1920,
+   "height": 1080,
+   "fps": 30,
+   "frames": 384,
+   "duration_s": 12.8,
+   "bytes": 2838647,
+   "budget_bytes": 3500000,
+   "kbps": 1774,
+   "codec": "h264",
+   "profile": "High",
+   "pix_fmt": "yuv420p",
+   "crf": 23,
+   "audio": false,
+   "sha1": "c15b7b5a1051ea8fd7932b6cdffde7095c14f2bb",
+   "title": "STEADFAST hero edit \u2014 supplied footage",
+   "composition": "aperture: 608x1080 plate centred at x 656 in a #000 field, 72 px feathered edges",
+   "ends_on_black_s": 0.4,
+   "logo_baked": false,
+   "segments": [
+    {
+     "shot": "S1",
+     "record_in": 0.0,
+     "record_out": 2.2,
+     "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+     "source_in": 0.5,
+     "source_out": 1.6,
+     "speed": 0.5
+    },
+    {
+     "shot": "S2",
+     "record_in": 2.2,
+     "record_out": 4.0,
+     "source": "media/source/photos/zip-hoodie-blue-grey-front.png"
+    },
+    {
+     "shot": "S3",
+     "record_in": 4.0,
+     "record_out": 5.0,
+     "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+     "source_in": 3.15,
+     "source_out": 3.65,
+     "speed": 0.5
+    },
+    {
+     "shot": "S4",
+     "record_in": 5.0,
+     "record_out": 6.4,
+     "source": "media/source/footage/IMG_4374-night-profile-car.MOV",
+     "source_in": 1.4,
+     "source_out": 2.1,
+     "speed": 0.5
+    },
+    {
+     "shot": "S5",
+     "record_in": 6.4,
+     "record_out": 8.0,
+     "source": "media/source/photos/black-tracksuit-night.jpg"
+    },
+    {
+     "shot": "S6",
+     "record_in": 8.0,
+     "record_out": 9.6,
+     "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+     "source_in": 3.7,
+     "source_out": 4.5,
+     "speed": 0.5
+    },
+    {
+     "shot": "S7",
+     "record_in": 9.6,
+     "record_out": 12.4,
+     "source": "media/source/photos/campaign-back-embossed-set.png"
+    },
+    {
+     "shot": "BLACK",
+     "record_in": 12.4,
+     "record_out": 12.8,
+     "source": "black"
+    }
+   ]
+  },
+  {
+   "file": "sf-film-mobile.mp4",
+   "path": "media/processed/film/sf-film-mobile.mp4",
+   "role": "intro",
+   "variant": "mobile",
+   "width": 720,
+   "height": 1280,
+   "fps": 30,
+   "frames": 384,
+   "duration_s": 12.8,
+   "bytes": 2053275,
+   "budget_bytes": 2400000,
+   "kbps": 1283,
+   "codec": "h264",
+   "profile": "High",
+   "pix_fmt": "yuv420p",
+   "crf": 24,
+   "audio": false,
+   "sha1": "deedf22dc2c57460f8f08a31dec5442c14019b5b",
+   "title": "STEADFAST hero edit \u2014 supplied footage",
+   "composition": "9:16 plates, full frame",
+   "ends_on_black_s": 0.4,
+   "logo_baked": false,
+   "segments": [
+    {
+     "shot": "S1",
+     "record_in": 0.0,
+     "record_out": 2.2,
+     "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+     "source_in": 0.5,
+     "source_out": 1.6,
+     "speed": 0.5
+    },
+    {
+     "shot": "S2",
+     "record_in": 2.2,
+     "record_out": 4.0,
+     "source": "media/source/photos/zip-hoodie-blue-grey-front.png"
+    },
+    {
+     "shot": "S3",
+     "record_in": 4.0,
+     "record_out": 5.0,
+     "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+     "source_in": 3.15,
+     "source_out": 3.65,
+     "speed": 0.5
+    },
+    {
+     "shot": "S4",
+     "record_in": 5.0,
+     "record_out": 6.4,
+     "source": "media/source/footage/IMG_4374-night-profile-car.MOV",
+     "source_in": 1.4,
+     "source_out": 2.1,
+     "speed": 0.5
+    },
+    {
+     "shot": "S5",
+     "record_in": 6.4,
+     "record_out": 8.0,
+     "source": "media/source/photos/black-tracksuit-night.jpg"
+    },
+    {
+     "shot": "S6",
+     "record_in": 8.0,
+     "record_out": 9.6,
+     "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+     "source_in": 3.7,
+     "source_out": 4.5,
+     "speed": 0.5
+    },
+    {
+     "shot": "S7",
+     "record_in": 9.6,
+     "record_out": 12.4,
+     "source": "media/source/photos/campaign-back-embossed-set.png"
+    },
+    {
+     "shot": "BLACK",
+     "record_in": 12.4,
+     "record_out": 12.8,
+     "source": "black"
+    }
+   ]
+  },
+  {
+   "file": "sf-film-loop-desktop.mp4",
+   "path": "media/processed/film/sf-film-loop-desktop.mp4",
+   "role": "loop",
+   "variant": "desktop",
+   "width": 1920,
+   "height": 1080,
+   "fps": 30,
+   "frames": 168,
+   "duration_s": 5.6,
+   "bytes": 935624,
+   "budget_bytes": 1500000,
+   "kbps": 1337,
+   "codec": "h264",
+   "profile": "High",
+   "pix_fmt": "yuv420p",
+   "crf": 23,
+   "audio": false,
+   "sha1": "de7e5efd104c0d3c5ed043a29048178deb9c62c3",
+   "title": "STEADFAST hero edit \u2014 supplied footage",
+   "composition": "aperture: 608x1080 plate centred at x 656 in a #000 field, 72 px feathered edges",
+   "ends_on_black_s": null,
+   "logo_baked": false,
+   "segments": [
+    {
+     "shot": "LOOP",
+     "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+     "source_in": 3.4,
+     "source_out": 4.8,
+     "speed": 0.5,
+     "ping_pong": true
+    }
+   ]
+  },
+  {
+   "file": "sf-film-loop-mobile.mp4",
+   "path": "media/processed/film/sf-film-loop-mobile.mp4",
+   "role": "loop",
+   "variant": "mobile",
+   "width": 720,
+   "height": 1280,
+   "fps": 30,
+   "frames": 168,
+   "duration_s": 5.6,
+   "bytes": 802678,
+   "budget_bytes": 1000000,
+   "kbps": 1147,
+   "codec": "h264",
+   "profile": "High",
+   "pix_fmt": "yuv420p",
+   "crf": 23,
+   "audio": false,
+   "sha1": "c495a26698df2f32868580b61f1dd9140481f78c",
+   "title": "STEADFAST hero edit \u2014 supplied footage",
+   "composition": "9:16 plates, full frame",
+   "ends_on_black_s": null,
+   "logo_baked": false,
+   "segments": [
+    {
+     "shot": "LOOP",
+     "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+     "source_in": 3.4,
+     "source_out": 4.8,
+     "speed": 0.5,
+     "ping_pong": true
+    }
+   ]
+  }
+ ],
+ "theme_assets": [
+  {
+   "file": "sf-film-end-desktop-1600.jpg",
+   "base": "sf-film-end-desktop",
+   "path": "media/processed/film/sf-film-end-desktop-1600.jpg",
+   "width": 1600,
+   "height": 900,
+   "bytes": 49753,
+   "sha1": "8a4828848cd101948f0039d70207c8466b424baf",
+   "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+   "crop": [
+    29,
+    0,
+    547,
+    973
+   ],
+   "ops": [
+    "loop frame 0 (source 3.40 s)",
+    "grade.sh pre + LOOK + S6 layer",
+    "no grain",
+    "no logo",
+    "black-point clamp luma<=6 -> 0, ramp to 12",
+    "aperture composite 1920x1080"
+   ],
+   "owner": "tools/media/build_film.py",
+   "alt": ""
+  },
+  {
+   "file": "sf-film-end-desktop-1600.webp",
+   "base": "sf-film-end-desktop",
+   "path": "media/processed/film/sf-film-end-desktop-1600.webp",
+   "width": 1600,
+   "height": 900,
+   "bytes": 20798,
+   "sha1": "06043063ac97f5700fc703dbb27d0f20fb9b83b6",
+   "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+   "crop": [
+    29,
+    0,
+    547,
+    973
+   ],
+   "ops": [
+    "loop frame 0 (source 3.40 s)",
+    "grade.sh pre + LOOK + S6 layer",
+    "no grain",
+    "no logo",
+    "black-point clamp luma<=6 -> 0, ramp to 12",
+    "aperture composite 1920x1080"
+   ],
+   "owner": "tools/media/build_film.py",
+   "alt": ""
+  },
+  {
+   "file": "sf-film-end-desktop-1920.webp",
+   "base": "sf-film-end-desktop",
+   "path": "media/processed/film/sf-film-end-desktop-1920.webp",
+   "width": 1920,
+   "height": 1080,
+   "bytes": 26000,
+   "sha1": "fe9776b42b1b018f1c855f6400ca16c077bf9420",
+   "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+   "crop": [
+    29,
+    0,
+    547,
+    973
+   ],
+   "ops": [
+    "loop frame 0 (source 3.40 s)",
+    "grade.sh pre + LOOK + S6 layer",
+    "no grain",
+    "no logo",
+    "black-point clamp luma<=6 -> 0, ramp to 12",
+    "aperture composite 1920x1080"
+   ],
+   "owner": "tools/media/build_film.py",
+   "alt": ""
+  },
+  {
+   "file": "sf-film-end-desktop-960.webp",
+   "base": "sf-film-end-desktop",
+   "path": "media/processed/film/sf-film-end-desktop-960.webp",
+   "width": 960,
+   "height": 540,
+   "bytes": 10980,
+   "sha1": "48d817c20b71845498790de8dec1bd9bf23f644a",
+   "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+   "crop": [
+    29,
+    0,
+    547,
+    973
+   ],
+   "ops": [
+    "loop frame 0 (source 3.40 s)",
+    "grade.sh pre + LOOK + S6 layer",
+    "no grain",
+    "no logo",
+    "black-point clamp luma<=6 -> 0, ramp to 12",
+    "aperture composite 1920x1080"
+   ],
+   "owner": "tools/media/build_film.py",
+   "alt": ""
+  },
+  {
+   "file": "sf-film-end-mobile-480.webp",
+   "base": "sf-film-end-mobile",
+   "path": "media/processed/film/sf-film-end-mobile-480.webp",
+   "width": 480,
+   "height": 853,
+   "bytes": 19674,
+   "sha1": "4c75f4146d78c3eb2b3757be14ae2c29c82f469a",
+   "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+   "crop": [
+    29,
+    0,
+    547,
+    973
+   ],
+   "ops": [
+    "loop frame 0 (source 3.40 s)",
+    "grade.sh pre + LOOK + S6 layer",
+    "no grain",
+    "no logo",
+    "black-point clamp luma<=6 -> 0, ramp to 12"
+   ],
+   "owner": "tools/media/build_film.py",
+   "alt": ""
+  },
+  {
+   "file": "sf-film-end-mobile-720.jpg",
+   "base": "sf-film-end-mobile",
+   "path": "media/processed/film/sf-film-end-mobile-720.jpg",
+   "width": 720,
+   "height": 1280,
+   "bytes": 74193,
+   "sha1": "f22fea64f8f2ed08ab8b986318d281610b789ccc",
+   "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+   "crop": [
+    29,
+    0,
+    547,
+    973
+   ],
+   "ops": [
+    "loop frame 0 (source 3.40 s)",
+    "grade.sh pre + LOOK + S6 layer",
+    "no grain",
+    "no logo",
+    "black-point clamp luma<=6 -> 0, ramp to 12"
+   ],
+   "owner": "tools/media/build_film.py",
+   "alt": ""
+  },
+  {
+   "file": "sf-film-end-mobile-720.webp",
+   "base": "sf-film-end-mobile",
+   "path": "media/processed/film/sf-film-end-mobile-720.webp",
+   "width": 720,
+   "height": 1280,
+   "bytes": 29954,
+   "sha1": "d9dbda7b5321caa4ab204738164441df88e3a433",
+   "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+   "crop": [
+    29,
+    0,
+    547,
+    973
+   ],
+   "ops": [
+    "loop frame 0 (source 3.40 s)",
+    "grade.sh pre + LOOK + S6 layer",
+    "no grain",
+    "no logo",
+    "black-point clamp luma<=6 -> 0, ramp to 12"
+   ],
+   "owner": "tools/media/build_film.py",
+   "alt": ""
+  }
+ ],
+ "end_stills": {
+  "sf-film-end-desktop": {
+   "webp_widths": [
+    960,
+    1600,
+    1920
+   ],
+   "fallback_width": 1600,
+   "fallback_ext": "jpg",
+   "width": 1920,
+   "height": 1080,
+   "intrinsic_fallback": [
+    1600,
+    900
+   ],
+   "alt": ""
+  },
+  "sf-film-end-mobile": {
+   "webp_widths": [
+    480,
+    720
+   ],
+   "fallback_width": 720,
+   "fallback_ext": "jpg",
+   "width": 720,
+   "height": 1280,
+   "intrinsic_fallback": [
+    720,
+    1280
+   ],
+   "alt": ""
+  }
+ },
+ "dropped_widths": [
+  {
+   "base": "sf-film-end-desktop",
+   "width": 2400,
+   "native_width": 1920,
+   "reason": "would upscale the 1920x1080 composite (FILM A7)"
+  },
+  {
+   "base": "sf-film-end-mobile",
+   "width": 1080,
+   "native_width": 720,
+   "reason": "1.5x upscale of the 720x1280 plate (FILM A7)"
+  }
+ ]
+}

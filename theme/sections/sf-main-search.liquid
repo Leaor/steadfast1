@@ -1,0 +1,125 @@
+{%- comment -%}
+  Search results (DESIGN §7.4, §7.9): the term in Spectral, a refine field, then the collection
+  toolbar, filter drawer and grid. Pages and journal entries list below the product grid.
+{%- endcomment -%}
+{{ 'sf-collection.css' | asset_url | stylesheet_tag }}
+{{ 'sf-search.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'sf-facets.js' | asset_url }}" defer></script>
+{%- paginate search.results by section.settings.products_per_page -%}
+{%- liquid
+  assign terms = search.terms | default: ''
+  assign clear_url = routes.search_url | append: '?q=' | append: terms | append: '&options%5Bprefix%5D=last'
+  assign card_sizes = '(min-width: 990px) 24vw, (min-width: 750px) 48vw, 50vw'
+  assign product_count = 0
+  assign other_count = 0
+  assign active_filters = 0
+  for filter in search.filters
+    if filter.type == 'price_range'
+      if filter.min_value.value != blank or filter.max_value.value != blank
+        assign active_filters = active_filters | plus: 1
+      endif
+    else
+      assign active_filters = active_filters | plus: filter.active_values.size
+    endif
+  endfor
+  for item in search.results
+    if item.object_type == 'product'
+      assign product_count = product_count | plus: 1
+    else
+      assign other_count = other_count | plus: 1
+    endif
+  endfor
+-%}
+<section class="sf-section sf-main-search sf-tone-ink sf-space-none" data-section-id="{{ section.id }}" aria-labelledby="sf-search-title-{{ section.id }}">
+  <header class="sf-search-header sf-container">
+    <h1 class="sf-search-header__title sf-display-lg" id="sf-search-title-{{ section.id }}">
+      {%- if search.performed -%}
+        <span class="sf-visually-hidden">{{ 'search.title' | t }}: </span>“{{ terms | escape }}”
+      {%- else -%}
+        {{ 'search.title' | t }}
+      {%- endif -%}
+    </h1>
+    {%- if search.performed -%}
+      <p class="sf-search-header__count sf-micro sf-tabular">{{ 'search.results_count' | t: count: search.results_count }}</p>
+    {%- endif -%}
+    <form class="sf-search-header__form" action="{{ routes.search_url }}" method="get" role="search">
+      <label class="sf-visually-hidden" for="sf-search-page-input-{{ section.id }}">{{ 'search.label' | t }}</label>
+      <input class="sf-search-header__input" type="search" id="sf-search-page-input-{{ section.id }}" name="q" value="{{ terms | escape }}" placeholder="{{ 'search.placeholder' | t | escape }}" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <input type="hidden" name="options[prefix]" value="last">
+      <button type="submit" class="sf-btn sf-btn--icon" aria-label="{{ 'search.submit' | t | escape }}">{%- render 'sf-icon', name: 'search', size: 20 -%}</button>
+    </form>
+  </header>
+
+  {%- if search.performed -%}
+    {%- if search.results_count > 0 or active_filters > 0 -%}
+      <sf-facets class="sf-facets" data-section-id="{{ section.id }}" data-default-desktop="4" data-default-mobile="2">
+        {%- render 'sf-facets', results: search, section_id: section.id, action_url: routes.search_url, clear_url: clear_url, count: search.results_count, enable_filtering: section.settings.enable_filtering, enable_sorting: section.settings.enable_sorting, show_density: section.settings.show_density_toggle, terms: terms -%}
+        <div class="sf-facets__results sf-container" data-sf-facets-results>
+          {%- if search.results_count > 0 -%}
+            {%- if product_count > 0 -%}
+              <ul class="sf-product-grid sf-product-grid--d4 sf-product-grid--m2" role="list" data-sf-product-grid>
+                {%- for item in search.results -%}
+                  {%- if item.object_type != 'product' -%}{%- continue -%}{%- endif -%}
+                  {%- liquid
+                    assign c_loading = 'lazy'
+                    if forloop.index <= 4 and paginate.current_page == 1
+                      assign c_loading = 'eager'
+                    endif
+                  -%}
+                  <li class="sf-product-grid__item">
+                    {%- render 'sf-product-card', product: item, sizes: card_sizes, loading: c_loading, heading_level: 2 -%}
+                  </li>
+                {%- endfor -%}
+              </ul>
+            {%- endif -%}
+            {%- if other_count > 0 -%}
+              <div class="sf-search-others">
+                <h2 class="sf-search-others__title sf-micro">{{ 'search.other_results' | t }}</h2>
+                <ul class="sf-search-others__list" role="list">
+                  {%- for item in search.results -%}
+                    {%- if item.object_type == 'product' -%}{%- continue -%}{%- endif -%}
+                    <li class="sf-search-others__item">
+                      <a class="sf-search-others__link" href="{{ item.url }}">
+                        <span class="sf-search-others__type sf-micro">{% if item.object_type == 'article' %}{{ 'search.article_result' | t }}{% else %}{{ 'search.page_result' | t }}{% endif %}</span>
+                        <span class="sf-search-others__name sf-text-xl">{{ item.title | escape }}</span>
+                        {%- assign snippet = item.content | strip_html | truncatewords: 24 -%}
+                        {%- if snippet != blank -%}<span class="sf-search-others__excerpt">{{ snippet }}</span>{%- endif -%}
+                      </a>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            {%- endif -%}
+            {%- render 'sf-pagination', paginate: paginate, type: 'pager' -%}
+          {%- else -%}
+            <div class="sf-collection-empty">
+              <p class="sf-collection-empty__title sf-text-xl">{{ 'collections.empty_filtered' | t }}</p>
+              <a class="sf-btn sf-btn--secondary" href="{{ clear_url }}" data-sf-facet-link><span class="sf-btn__label">{{ 'facets.clear_all' | t }}</span></a>
+            </div>
+          {%- endif -%}
+        </div>
+      </sf-facets>
+    {%- else -%}
+      <div class="sf-search-empty sf-container">
+        <p class="sf-search-empty__title sf-text-xl">{%- assign terms_esc = terms | escape -%}{{ 'search.no_results_html' | t: terms: terms_esc }}</p>
+        <p class="sf-search-empty__hint">{{ 'search.no_results_hint' | t }}</p>
+        <a class="sf-btn sf-btn--secondary" href="{{ routes.all_products_collection_url }}"><span class="sf-btn__label">{{ 'cart.explore' | t }}</span></a>
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+</section>
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "Search results",
+  "class": "sf-shopify-section--main-search",
+  "settings": [
+    { "type": "range", "id": "products_per_page", "label": "Results per page", "min": 8, "max": 48, "step": 4, "default": 24 },
+    { "type": "checkbox", "id": "enable_filtering", "label": "Enable filtering", "default": true },
+    { "type": "checkbox", "id": "enable_sorting", "label": "Enable sorting", "default": true },
+    { "type": "checkbox", "id": "show_density_toggle", "label": "Let visitors change the grid density", "default": true },
+    { "type": "checkbox", "id": "show_vendor", "label": "Show vendor", "default": false }
+  ]
+}
+{% endschema %}

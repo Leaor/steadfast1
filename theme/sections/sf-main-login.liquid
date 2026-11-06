@@ -1,0 +1,65 @@
+{%- comment -%}
+  Log in (classic customer accounts) + password recovery on #recover (works without JS via :target).
+{%- endcomment -%}
+{{ 'sf-content.css' | asset_url | stylesheet_tag }}
+{{ 'sf-customer.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'sf-customer.js' | asset_url }}" defer></script>
+<section class="sf-section sf-customer sf-customer--narrow sf-login sf-tone-ink sf-space-compact" aria-labelledby="sf-login-title">
+  <div class="sf-container sf-customer__inner">
+    <div class="sf-login__recover" id="recover" tabindex="-1">
+      <h2 class="sf-customer__title sf-display-md" id="sf-recover-title">{{ 'customer.recover.title' | t }}</h2>
+      {%- form 'recover_customer_password', class: 'sf-form', novalidate: 'novalidate' -%}
+        {%- if form.posted_successfully? -%}
+          <p class="sf-form__success" role="status" tabindex="-1" data-sf-form-status data-sf-recover-success>{%- render 'sf-icon', name: 'check', size: 16 -%}{{ 'customer.recover.success' | t }}</p>
+        {%- else -%}
+          <p class="sf-customer__lead">{{ 'customer.recover.text' | t }}</p>
+        {%- endif -%}
+        {%- if form.errors -%}
+          <div class="sf-form__errors" role="alert" tabindex="-1" data-sf-error-summary data-sf-recover-error>{{ form.errors | default_errors }}</div>
+        {%- endif -%}
+        <div class="sf-field">
+          <label class="sf-field__label" for="RecoverEmail">{{ 'customer.login.email' | t }}</label>
+          <input class="sf-input" type="email" id="RecoverEmail" name="email" autocomplete="email" autocapitalize="off" spellcheck="false" required aria-required="true"{% if form.errors %} aria-invalid="true"{% endif %}>
+        </div>
+        <div class="sf-form__actions">
+          <button type="submit" class="sf-btn sf-btn--primary"><span class="sf-btn__label">{{ 'customer.recover.submit' | t }}</span></button>
+          <a class="sf-btn sf-btn--text sf-btn--sm" href="#login" data-sf-recover-cancel><span class="sf-btn__label">{{ 'customer.recover.cancel' | t }}</span></a>
+        </div>
+      {%- endform -%}
+    </div>
+
+    <div class="sf-login__main" id="login">
+      <h1 class="sf-customer__title sf-display-md" id="sf-login-title">{{ 'customer.login.title' | t }}</h1>
+      {%- form 'customer_login', class: 'sf-form', novalidate: 'novalidate' -%}
+        {%- if form.errors -%}
+          <div class="sf-form__errors" role="alert" tabindex="-1" data-sf-error-summary>
+            <p class="sf-form__errors-title">{%- render 'sf-icon', name: 'error', size: 16 -%}{{ 'customer.errors_heading' | t }}</p>
+            {{ form.errors | default_errors }}
+          </div>
+        {%- endif -%}
+        <div class="sf-field">
+          <label class="sf-field__label" for="CustomerEmail">{{ 'customer.login.email' | t }}</label>
+          <input class="sf-input" type="email" id="CustomerEmail" name="customer[email]" autocomplete="email" autocapitalize="off" spellcheck="false" required aria-required="true"{% if form.errors contains 'email' %} aria-invalid="true"{% endif %}>
+        </div>
+        <div class="sf-field">
+          <div class="sf-customer__label-row">
+            <label class="sf-field__label" for="CustomerPassword">{{ 'customer.login.password' | t }}</label>
+            <a class="sf-customer__minor" href="#recover" data-sf-recover-open>{{ 'customer.login.forgot' | t }}</a>
+          </div>
+          <input class="sf-input" type="password" id="CustomerPassword" name="customer[password]" autocomplete="current-password" required aria-required="true"{% if form.errors contains 'password' %} aria-invalid="true"{% endif %}>
+        </div>
+        <div class="sf-form__actions">
+          <button type="submit" class="sf-btn sf-btn--primary sf-btn--full"><span class="sf-btn__label">{{ 'customer.login.submit' | t }}</span></button>
+        </div>
+      {%- endform -%}
+      <div class="sf-customer__alt">
+        <p class="sf-customer__alt-label">{{ 'customer.login.no_account' | t }}</p>
+        <a class="sf-btn sf-btn--secondary sf-btn--full" href="{{ routes.account_register_url }}"><span class="sf-btn__label">{{ 'customer.login.create' | t }}</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{ "name": "Log in", "class": "sf-shopify-section--main-login" }
+{% endschema %}

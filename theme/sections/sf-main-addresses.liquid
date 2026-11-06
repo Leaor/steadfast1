@@ -1,0 +1,68 @@
+{%- comment -%}
+  Addresses: list (default first), edit in place, delete (a real POST with _method=delete),
+  add new. Works without JS; sf-customer.js adds toggles, confirm and province syncing.
+{%- endcomment -%}
+{{ 'sf-content.css' | asset_url | stylesheet_tag }}
+{{ 'sf-customer.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'sf-customer.js' | asset_url }}" defer></script>
+{%- paginate customer.addresses by 20 -%}
+<section class="sf-section sf-customer sf-addresses sf-tone-ink sf-space-compact" aria-labelledby="sf-addresses-title">
+  <div class="sf-container">
+    <header class="sf-account__header">
+      <h1 class="sf-customer__title sf-display-lg" id="sf-addresses-title">{{ 'customer.addresses.title' | t }}</h1>
+      {%- render 'sf-account-nav', current: 'addresses' -%}
+    </header>
+
+    <details class="sf-addresses__new" id="address-new"{% if customer.addresses.size == 0 %} open{% endif %}>
+      <summary class="sf-btn sf-btn--secondary"><span class="sf-btn__label">{{ 'customer.addresses.add' | t }}</span></summary>
+      <div class="sf-addresses__panel">
+        <h2 class="sf-account__section-title sf-micro">{{ 'customer.addresses.new_title' | t }}</h2>
+        {%- form 'customer_address', customer.new_address, class: 'sf-form' -%}
+          {%- if form.errors -%}<div class="sf-form__errors" role="alert" tabindex="-1" data-sf-error-summary>{{ form.errors | default_errors }}</div>{%- endif -%}
+          {%- render 'sf-address-form', form: form, id_prefix: 'new' -%}
+          <div class="sf-form__actions">
+            <button type="submit" class="sf-btn sf-btn--primary"><span class="sf-btn__label">{{ 'customer.addresses.add_submit' | t }}</span></button>
+          </div>
+        {%- endform -%}
+      </div>
+    </details>
+
+    {%- if customer.addresses.size > 0 -%}
+      <ul class="sf-addresses__list" role="list">
+        {%- for address in customer.addresses -%}
+          <li class="sf-addresses__item">
+            {%- if address == customer.default_address -%}<p class="sf-addresses__default sf-micro">{{ 'customer.addresses.default' | t }}</p>{%- endif -%}
+            <div class="sf-account__address">{{ address | format_address }}</div>
+            <div class="sf-addresses__actions">
+              <details class="sf-addresses__edit" id="address-edit-{{ address.id }}">
+                <summary class="sf-btn sf-btn--text sf-btn--sm"><span class="sf-btn__label">{{ 'customer.addresses.edit' | t }}</span></summary>
+                <div class="sf-addresses__panel">
+                  <h2 class="sf-account__section-title sf-micro">{{ 'customer.addresses.edit_title' | t }}</h2>
+                  {%- form 'customer_address', address, class: 'sf-form' -%}
+                    {%- if form.errors -%}<div class="sf-form__errors" role="alert">{{ form.errors | default_errors }}</div>{%- endif -%}
+                    {%- render 'sf-address-form', form: form, id_prefix: address.id -%}
+                    <div class="sf-form__actions">
+                      <button type="submit" class="sf-btn sf-btn--primary"><span class="sf-btn__label">{{ 'customer.addresses.save' | t }}</span></button>
+                    </div>
+                  {%- endform -%}
+                </div>
+              </details>
+              <form method="post" action="{{ address.url }}" class="sf-addresses__delete" data-sf-confirm="{{ 'customer.addresses.delete_confirm' | t | escape }}">
+                <input type="hidden" name="_method" value="delete">
+                <button type="submit" class="sf-btn sf-btn--text sf-btn--sm"><span class="sf-btn__label">{{ 'customer.addresses.delete' | t }}</span></button>
+              </form>
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+      {%- render 'sf-pagination', paginate: paginate, type: 'pager' -%}
+    {%- else -%}
+      <p class="sf-account__empty">{{ 'customer.addresses.none' | t }}</p>
+    {%- endif -%}
+  </div>
+</section>
+{%- endpaginate -%}
+
+{% schema %}
+{ "name": "Addresses", "class": "sf-shopify-section--main-addresses" }
+{% endschema %}

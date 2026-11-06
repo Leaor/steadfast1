@@ -1,0 +1,39 @@
+{%- comment -%} Journal index: Spectral title, a three-up grid of article cards, numbered pager. {%- endcomment -%}
+{{ 'sf-content.css' | asset_url | stylesheet_tag }}
+{{ 'sf-collection.css' | asset_url | stylesheet_tag }}
+{%- paginate blog.articles by section.settings.posts_per_page -%}
+<section class="sf-section sf-content sf-main-blog sf-tone-ink sf-space-compact" aria-labelledby="sf-blog-title-{{ section.id }}">
+  <div class="sf-container">
+    <header class="sf-main-blog__header">
+      <h1 class="sf-display-lg" id="sf-blog-title-{{ section.id }}">{{ blog.title | escape }}</h1>
+    </header>
+    {%- if blog.articles.size > 0 -%}
+      <ul class="sf-main-blog__grid" role="list">
+        {%- for article in blog.articles -%}
+          {%- liquid
+            assign a_loading = 'lazy'
+            if forloop.index <= 3
+              assign a_loading = 'eager'
+            endif
+          -%}
+          <li>{%- render 'sf-article-card', article: article, show_image: section.settings.show_image, loading: a_loading -%}</li>
+        {%- endfor -%}
+      </ul>
+      {%- render 'sf-pagination', paginate: paginate, type: 'pager' -%}
+    {%- else -%}
+      <p class="sf-main-blog__empty sf-text-xl">{{ 'blogs.empty' | t }}</p>
+    {%- endif -%}
+  </div>
+</section>
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "Blog posts",
+  "class": "sf-shopify-section--main-blog",
+  "settings": [
+    { "type": "checkbox", "id": "show_image", "label": "Show featured images", "default": true },
+    { "type": "range", "id": "posts_per_page", "label": "Articles per page", "min": 4, "max": 24, "step": 1, "default": 12 }
+  ]
+}
+{% endschema %}

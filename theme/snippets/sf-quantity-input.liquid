@@ -1,0 +1,35 @@
+{%- doc -%}
+  Quantity stepper (DESIGN §6.4): three 44px cells (− | value | +) with a 1px control border.
+  The <input> is a real form field, so it works without JS; <sf-quantity-input> (sf-cart.js)
+  adds the − / + behaviour and dispatches a native bubbling 'change' event.
+
+  @param {string} id - Unique id for the input.
+  @param {string} name - Input name, e.g. 'quantity' or 'updates[]'.
+  @param {number} value - Current value.
+  @param {number} [min] - Minimum (quantity rule). Default 1.
+  @param {number} [max] - Maximum (quantity rule). Blank means none.
+  @param {number} [step] - Increment. Default 1.
+  @param {string} product_title - Used in the − / + labels.
+  @param {string} [key] - Cart line key (cart contexts), rendered as data-key.
+  @param {boolean} [allow_zero] - Cart lines may step down to 0 (removal).
+  @param {string} [form] - Optional form attribute (associates the input with a form by id).
+  @param {string} [class] - Extra classes.
+
+  @example
+  {% render 'sf-quantity-input', id: 'sf-qty-1', name: 'updates[]', value: item.quantity, key: item.key, product_title: item.product.title, allow_zero: true %}
+{%- enddoc -%}
+{%- liquid
+  assign q_min = min | default: 1
+  assign q_step = step | default: 1
+  assign q_value = value | default: q_min
+-%}
+<sf-quantity-input class="sf-qty{% if class != blank %} {{ class }}{% endif %}"{% if allow_zero %} data-allow-zero{% endif %}>
+  <label class="sf-visually-hidden" for="{{ id }}">{{ 'products.quantity' | t }}</label>
+  <button type="button" class="sf-qty__btn" data-sf-qty-minus aria-label="{{ 'products.quantity_decrease' | t: product: product_title | escape }}">
+    {%- render 'sf-icon', name: 'minus', size: 16 -%}
+  </button>
+  <input class="sf-qty__input sf-tabular" type="number" inputmode="numeric" id="{{ id }}" name="{{ name }}" value="{{ q_value }}" min="{% if allow_zero %}0{% else %}{{ q_min }}{% endif %}" step="{{ q_step }}"{% if max != blank %} max="{{ max }}"{% endif %}{% if key != blank %} data-key="{{ key }}"{% endif %}{% if form != blank %} form="{{ form }}"{% endif %}>
+  <button type="button" class="sf-qty__btn" data-sf-qty-plus aria-label="{{ 'products.quantity_increase' | t: product: product_title | escape }}">
+    {%- render 'sf-icon', name: 'plus', size: 16 -%}
+  </button>
+</sf-quantity-input>

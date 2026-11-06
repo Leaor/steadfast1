@@ -1,0 +1,273 @@
+/*
+ * STEADFAST · sf-product-card.css (CORE)
+ * Product card, price, colour swatches and the card actions (quick view, inline size cells,
+ * single add). Spec: DESIGN §6.5, §6.6, §7.5; ARCHITECTURE §4.6 and §15 X1.
+ * The card is one stretched link (the title); swatches and actions sit above it.
+ */
+
+@layer sf.components {
+  .sf-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    color: var(--sf-fg);
+  }
+
+  /* ── media well (4:5, black) ─────────────────────────────── */
+  .sf-card__media {
+    position: relative;
+    aspect-ratio: var(--sf-ratio, var(--sf-ratio-card));
+    overflow: hidden;
+    background: var(--sf-bg-sunken);
+  }
+  .sf-card__media .sf-img,
+  .sf-card__media .sf-placeholder {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 30%;
+  }
+  .sf-card__img--primary { transition: opacity calc(200ms * var(--sf-motion)) var(--sf-ease-in-out); }
+  .sf-card__img--primary.is-swapping { opacity: 0; }
+  .sf-card__img--secondary {
+    opacity: 0;
+    transition: opacity calc(var(--sf-dur-slow) * var(--sf-motion)) var(--sf-ease-in-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .sf-card--has-secondary:hover .sf-card__img--secondary { opacity: 1; }
+  }
+
+  /* Badges: real data only (DESIGN §6.5). */
+  .sf-card__badges {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    pointer-events: none;
+  }
+  .sf-card__badge {
+    display: inline-block;
+    padding: 5px 8px;
+    background: #000;
+    color: var(--sf-fg);
+    font-family: var(--sf-font-label);
+    font-weight: 500;
+    font-size: var(--sf-text-2xs);
+    line-height: 1.2;
+    letter-spacing: var(--sf-tracking-label);
+    text-transform: uppercase;
+  }
+
+  /* ── info ────────────────────────────────────────────────── */
+  .sf-card__info {
+    display: grid;
+    gap: 6px;
+    padding-top: var(--sf-space-3);
+  }
+  @media (min-width: 990px) {
+    .sf-card__info,
+    .sf-card__actions { padding-inline: 12px; }
+  }
+  .sf-card__title {
+    font-family: var(--sf-font-text);
+    font-weight: 400;
+    font-size: var(--sf-text-sm);
+    line-height: 1.4;
+    letter-spacing: 0;
+    text-transform: none;
+    text-wrap: pretty;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+  .sf-card__link { color: inherit; text-decoration: none; }
+  /* The one real link stretches over the whole card. */
+  .sf-card__link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .sf-card__link:focus-visible { outline: none; box-shadow: none; }
+  .sf-card__link:focus-visible::after { outline: 2px solid var(--sf-focus); outline-offset: 2px; box-shadow: 0 0 0 4px var(--sf-ink); }
+  @media (hover: hover) and (pointer: fine) {
+    .sf-card__link:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); }
+  }
+  .sf-card__hint { color: var(--sf-fg-subtle); font-size: var(--sf-text-sm); }
+
+  /* ── price ───────────────────────────────────────────────── */
+  .sf-price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 10px;
+    font-family: var(--sf-font-text);
+    font-size: var(--sf-text-sm);
+    line-height: 1.4;
+    color: var(--sf-fg-muted);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--sf-tracking-wide);
+  }
+  .sf-price__compare { color: var(--sf-fg-subtle); text-decoration-thickness: 1px; }
+  .sf-price--sold-out .sf-price__current { color: var(--sf-fg-subtle); }
+
+  /* ── colour swatches (DESIGN §6.6) ───────────────────────── */
+  .sf-colorways {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+    margin: 2px 0 0 -9px;
+  }
+  .sf-swatch {
+    --_swatch-line: color-mix(in srgb, var(--sf-fg) 25%, transparent);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+  .sf-swatch__fill {
+    position: relative;
+    display: block;
+    width: 14px;
+    height: 14px;
+    background: var(--sf-swatch, var(--sf-washed-grey));
+    border: 1px solid var(--_swatch-line);
+  }
+  /* Selected: a 1 px steel ring offset 3 px. */
+  .sf-swatch[aria-pressed="true"] .sf-swatch__fill { outline: 1px solid var(--sf-accent); outline-offset: 3px; }
+  .sf-colorways__more {
+    padding-left: 6px;
+    color: var(--sf-fg-subtle);
+    font-family: var(--sf-font-label);
+    font-weight: 500;
+    font-size: var(--sf-text-2xs);
+    letter-spacing: var(--sf-tracking-label);
+  }
+
+  /* ── actions (quick view / add) ──────────────────────────── */
+  .sf-card__actions {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 var(--sf-space-5);
+    padding-top: 2px;
+  }
+  /* 32 px visual rows; a pseudo element keeps the 44 px touch target (ARCHITECTURE §7.12). */
+  .sf-card__actions .sf-btn--text { position: relative; min-height: 32px; }
+  .sf-card__actions .sf-btn--text::before { content: ""; position: absolute; inset: -6px -4px; }
+  .sf-quick-add__form { display: contents; }
+
+  /* Inline size cells (ARCHITECTURE §15 X1): one row, shared hairlines, 32 px visual, 44 px target. */
+  .sf-quick-add__sizes {
+    flex: 0 0 100%;
+    width: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+    max-width: calc(5 * 56px);
+    padding: 6px 1px 7px 0;
+  }
+  .sf-quick-add__size {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    height: 32px;
+    margin: 0 -1px -1px 0;
+    padding: 0 8px;
+    border: 1px solid var(--sf-line);
+    background: transparent;
+    color: var(--sf-fg);
+    font-family: var(--sf-font-label);
+    font-weight: 500;
+    font-size: var(--sf-text-2xs);
+    letter-spacing: var(--sf-tracking-label);
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    transition: background-color calc(var(--sf-dur-instant) * var(--sf-motion)) linear, color calc(var(--sf-dur-instant) * var(--sf-motion)) linear;
+  }
+  /* A 44 px tall hit area around the 32 px cell. */
+  .sf-quick-add__size::before { content: ""; position: absolute; inset: -6px 0; }
+  .sf-quick-add__size:focus-visible { z-index: 1; }
+  @media (hover: hover) and (pointer: fine) {
+    .sf-quick-add__size:not(:disabled):hover { background: var(--sf-fg); color: #000; border-color: var(--sf-fg); z-index: 1; }
+  }
+  .sf-quick-add__size.is-unavailable,
+  .sf-quick-add__size[aria-disabled="true"] {
+    opacity: .4;
+    cursor: not-allowed;
+    background: linear-gradient(to top right, transparent calc(50% - .5px), var(--sf-fg-muted) calc(50% - .5px), var(--sf-fg-muted) calc(50% + .5px), transparent calc(50% + .5px));
+  }
+  .sf-quick-add__size.is-loading { color: transparent; }
+  .sf-quick-add__size.is-loading::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 12px;
+    height: 1px;
+    margin-left: -6px;
+    background: var(--sf-fg);
+    animation: sf-card-busy 900ms var(--sf-ease-in-out) infinite alternate;
+  }
+  .sf-quick-add__size.is-added { background: var(--sf-fg); color: #000; border-color: var(--sf-fg); }
+  @keyframes sf-card-busy { from { transform: scaleX(.2); } to { transform: scaleX(1); } }
+
+  /* Touch / small screens: a text "Add to cart" toggles the size row (aria-expanded). */
+  .sf-quick-add__toggle { display: none; }
+  @media (hover: none), (pointer: coarse), (max-width: 989px) {
+    html.js .sf-quick-add__toggle { display: inline-flex; }
+    html.js .sf-quick-add__toggle[aria-expanded="true"] { text-decoration-color: currentColor; }
+    html.js .sf-quick-add__sizes { display: none; order: 3; }
+    html.js .sf-quick-add__toggle[aria-expanded="true"] ~ .sf-quick-add__sizes { display: grid; }
+  }
+
+  /* Desktop with a fine pointer: actions reveal on hover / focus-within (always in the DOM and tab order). */
+  @media (hover: hover) and (pointer: fine) and (min-width: 990px) {
+    .sf-card__actions {
+      opacity: 0;
+      transform: translateY(8px);
+      transition:
+        opacity calc(var(--sf-dur-fast) * var(--sf-motion)) var(--sf-ease-out),
+        transform calc(var(--sf-dur-fast) * var(--sf-motion)) var(--sf-ease-out);
+    }
+    .sf-card:hover .sf-card__actions,
+    .sf-card:focus-within .sf-card__actions { opacity: 1; transform: none; }
+  }
+
+  .sf-card__error {
+    position: relative;
+    z-index: 2;
+    margin-top: 6px;
+    color: var(--sf-error);
+    font-size: var(--sf-text-sm);
+    line-height: 1.4;
+  }
+  @media (min-width: 990px) { .sf-card__error { padding-inline: 12px; } }
+
+  /* Sold out: the image steps back a little; price and badge say why. */
+  .sf-card.is-sold-out .sf-card__img--primary { opacity: .72; }
+
+  /* Placeholder card (no product): same frame, no price, no actions. */
+  .sf-card--placeholder .sf-card__title { color: var(--sf-fg-muted); }
+}

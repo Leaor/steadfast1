@@ -1,0 +1,49 @@
+{%- doc -%}
+  Numbered pager (DESIGN §7.9) or a "Load more" button that falls back to the next-page link.
+
+  @param {object} paginate - The paginate object.
+  @param {string} [type] - 'pager' (default) | 'load_more'.
+  @param {string} [anchor] - Fragment appended to page links.
+
+  @example
+  {% render 'sf-pagination', paginate: paginate, type: section.settings.pagination_type %}
+{%- enddoc -%}
+{%- if paginate.pages > 1 -%}
+  {%- if type == 'load_more' -%}
+    {%- if paginate.next.is_link -%}
+      <div class="sf-pagination sf-pagination--more" data-sf-load-more-wrap>
+        <a class="sf-btn sf-btn--secondary" href="{{ paginate.next.url }}{{ anchor }}" data-sf-load-more><span class="sf-btn__label">{{ 'collections.load_more' | t }}</span></a>
+      </div>
+    {%- endif -%}
+  {%- else -%}
+    <nav class="sf-pagination" aria-label="{{ 'facets.pagination' | t | escape }}">
+      <ul class="sf-pagination__list" role="list">
+        <li>
+          {%- if paginate.previous.is_link -%}
+            <a class="sf-pagination__step" href="{{ paginate.previous.url }}{{ anchor }}" aria-label="{{ 'facets.previous' | t | escape }}">{% render 'sf-icon', name: 'chevron-left', size: 16 %}</a>
+          {%- else -%}
+            <span class="sf-pagination__step is-disabled" aria-hidden="true">{% render 'sf-icon', name: 'chevron-left', size: 16 %}</span>
+          {%- endif -%}
+        </li>
+        {%- for part in paginate.parts -%}
+          <li>
+            {%- if part.is_link -%}
+              <a class="sf-pagination__page sf-tabular" href="{{ part.url }}{{ anchor }}" aria-label="{{ 'facets.page' | t: page: part.title | escape }}">{{ part.title }}</a>
+            {%- elsif part.title != '…' -%}
+              <span class="sf-pagination__page sf-tabular is-current" aria-current="page" aria-label="{{ 'facets.current_page' | t: page: part.title | escape }}">{{ part.title }}</span>
+            {%- else -%}
+              <span class="sf-pagination__gap" aria-hidden="true">{{ part.title }}</span>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+        <li>
+          {%- if paginate.next.is_link -%}
+            <a class="sf-pagination__step" href="{{ paginate.next.url }}{{ anchor }}" aria-label="{{ 'facets.next' | t | escape }}">{% render 'sf-icon', name: 'chevron-right', size: 16 %}</a>
+          {%- else -%}
+            <span class="sf-pagination__step is-disabled" aria-hidden="true">{% render 'sf-icon', name: 'chevron-right', size: 16 %}</span>
+          {%- endif -%}
+        </li>
+      </ul>
+    </nav>
+  {%- endif -%}
+{%- endif -%}

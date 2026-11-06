@@ -1,0 +1,42 @@
+{%- comment -%}
+  Related products (DESIGN §7.8): Shopify recommendations (intent related), loaded with the
+  Section Rendering API when the section nears the viewport. Rail of sf-product-card.
+{%- endcomment -%}
+{%- liquid
+  assign rel_limit = section.settings.products_to_show
+  assign rec_url = routes.product_recommendations_url | append: '?product_id=' | append: product.id | append: '&limit=' | append: rel_limit | append: '&intent=related&section_id=' | append: section.id
+-%}
+<section class="sf-section sf-related-products sf-tone-{{ section.settings.tone }} sf-space-{{ section.settings.spacing }}" data-sf-related-root{% unless recommendations.performed and recommendations.products_count > 0 %} data-state="pending"{% endunless %} aria-labelledby="sf-related-title-{{ section.id }}">
+  {%- if recommendations.performed -%}{{ 'sf-product.css' | asset_url | stylesheet_tag }}{%- endif -%}
+  <sf-related-products class="sf-related-products__inner sf-container" data-url="{{ rec_url }}">
+    <div class="sf-heading">
+      <h2 class="sf-heading__title sf-related-products__title" id="sf-related-title-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+    </div>
+    <div class="sf-related-products__body" data-sf-related-body data-count="{{ recommendations.products_count | default: 0 }}">
+      {%- if recommendations.performed and recommendations.products_count > 0 -%}
+        <ul class="sf-related-products__rail sf-no-scrollbar" role="list">
+          {%- for rec in recommendations.products -%}
+            <li class="sf-related-products__item">
+              {%- render 'sf-product-card', product: rec, sizes: '(min-width: 990px) 24vw, (min-width: 750px) 40vw, 72vw' -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </div>
+  </sf-related-products>
+</section>
+
+{% schema %}
+{
+  "name": "Related products",
+  "class": "sf-shopify-section--related-products",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "You may also like" },
+    { "type": "range", "id": "products_to_show", "label": "Products to show", "min": 2, "max": 8, "step": 1, "default": 4 },
+    { "type": "select", "id": "tone", "label": "Tone", "default": "ink", "options": [ { "value": "ink", "label": "Ink" }, { "value": "charcoal", "label": "Charcoal" } ] },
+    { "type": "select", "id": "spacing", "label": "Spacing", "default": "standard",
+      "options": [ { "value": "none", "label": "None" }, { "value": "compact", "label": "Compact" }, { "value": "standard", "label": "Standard" }, { "value": "generous", "label": "Generous" } ] }
+  ],
+  "presets": [ { "name": "Related products" } ]
+}
+{% endschema %}

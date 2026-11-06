@@ -1,0 +1,6 @@
+{
+  "sections": {
+    "main": { "type": "sf-main-cart", "settings": { "show_recommendations": false } }
+  },
+  "order": ["main"]
+}

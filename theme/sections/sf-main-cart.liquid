@@ -1,0 +1,82 @@
+{%- comment -%}
+  Cart page (DESIGN §7.7, ARCHITECTURE §4.7). A real form (updates[], note, checkout), so it works
+  without JS; <sf-main-cart> updates lines live through Steadfast.cart with JS.
+{%- endcomment -%}
+{{ 'sf-cart.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign rec_product = cart.items.first.product
+  assign want_recs = false
+  if section.settings.show_recommendations and cart.item_count > 0
+    assign want_recs = true
+  endif
+-%}
+<section class="sf-section sf-main-cart sf-tone-ink sf-space-compact" data-sf-main-cart data-section-id="{{ section.id }}" aria-labelledby="sf-cart-title-{{ section.id }}">
+  <sf-main-cart class="sf-container"{% if want_recs %} data-recommendations{% endif %}>
+    <div class="sf-main-cart__body" data-sf-main-cart-body>
+      <header class="sf-main-cart__header">
+        <h1 class="sf-main-cart__title sf-display-lg" id="sf-cart-title-{{ section.id }}" tabindex="-1" data-sf-cart-title>{{ 'cart.title' | t }}</h1>
+        {%- if cart.item_count > 0 -%}
+          <p class="sf-main-cart__count sf-micro sf-tabular">{{ 'cart.count' | t: count: cart.item_count }}</p>
+        {%- endif -%}
+      </header>
+
+      {%- if cart.item_count > 0 -%}
+        <div class="sf-main-cart__layout">
+          <form action="{{ routes.cart_url }}" method="post" id="sf-cart-form" class="sf-main-cart__form" novalidate>
+            <div class="sf-main-cart__columns sf-micro" aria-hidden="true">
+              <span>{{ 'cart.product' | t }}</span><span>{{ 'cart.total' | t }}</span>
+            </div>
+            <ul class="sf-main-cart__lines" role="list" aria-label="{{ 'cart.title' | t }}">
+              {%- for item in cart.items -%}
+                {%- render 'sf-cart-line', item: item, index: forloop.index, context: 'page' -%}
+              {%- endfor -%}
+            </ul>
+            <div class="sf-main-cart__update">
+              <button type="submit" name="update" class="sf-btn sf-btn--secondary sf-btn--sm"><span class="sf-btn__label">{{ 'cart.update' | t }}</span></button>
+            </div>
+          </form>
+          <aside class="sf-main-cart__summary" aria-label="{{ 'cart.subtotal' | t }}">
+            {%- render 'sf-cart-totals', context: 'page' -%}
+          </aside>
+        </div>
+        {%- for item in cart.items -%}
+          <form action="{{ routes.cart_change_url }}" method="post" id="sf-cart-remove-{{ forloop.index }}" hidden>
+            <input type="hidden" name="line" value="{{ forloop.index }}">
+            <input type="hidden" name="quantity" value="0">
+          </form>
+        {%- endfor -%}
+      {%- else -%}
+        {%- render 'sf-cart-empty', context: 'page' -%}
+        {%- if settings.cart_empty_collection != blank and settings.cart_empty_collection.products.size > 0 -%}
+          <div class="sf-main-cart__suggest">
+            <h2 class="sf-main-cart__suggest-title sf-text-xl">{{ 'cart.explore_heading' | t }}</h2>
+            <ul class="sf-main-cart__grid" role="list">
+              {%- for product in settings.cart_empty_collection.products limit: 4 -%}
+                <li>{%- render 'sf-product-card', product: product, sizes: '(min-width: 990px) 24vw, 50vw' -%}</li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+  </sf-main-cart>
+</section>
+{%- if want_recs -%}
+  {{ 'sf-product.css' | asset_url | stylesheet_tag }}
+  <section class="sf-section sf-related-products sf-tone-ink sf-space-compact" data-sf-related-root data-state="pending" aria-labelledby="sf-cart-recs-{{ section.id }}">
+    <sf-related-products class="sf-related-products__inner sf-container" data-url="{{ routes.product_recommendations_url }}?product_id={{ rec_product.id }}&limit=4&intent=related&section_id=sf-related-products">
+      <div class="sf-heading"><h2 class="sf-heading__title sf-related-products__title" id="sf-cart-recs-{{ section.id }}">{{ 'products.related_heading' | t }}</h2></div>
+      <div class="sf-related-products__body" data-sf-related-body></div>
+    </sf-related-products>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Cart",
+  "class": "sf-shopify-section--main-cart",
+  "settings": [
+    { "type": "checkbox", "id": "show_recommendations", "label": "Show product recommendations", "default": false }
+  ]
+}
+{% endschema %}

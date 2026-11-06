@@ -1,0 +1,69 @@
+{%- doc -%}
+  One cart line (DESIGN §7.7): 88px 4:5 thumb, product name as entered, variant, price, quantity
+  stepper, remove control and an inline error slot. Shared by the drawer and the cart page.
+
+  @param {object} item - The line item.
+  @param {number} index - 1-based line index (forloop.index).
+  @param {string} context - 'drawer' | 'page'.
+
+  @example
+  {% render 'sf-cart-line', item: item, index: forloop.index, context: 'drawer' %}
+{%- enddoc -%}
+{%- liquid
+  assign line_id = 'sf-cart-' | append: context | append: '-' | append: index
+  assign qty_max = item.variant.quantity_rule.max
+  assign qty_min = item.variant.quantity_rule.min | default: 1
+  assign qty_step = item.variant.quantity_rule.increment | default: 1
+  assign line_title = item.product.title | default: item.title
+-%}
+<li class="sf-cart-line" data-key="{{ item.key }}" data-line="{{ index }}" data-title="{{ line_title | escape }}" style="--i: {{ index | minus: 1 | at_most: 7 }}">
+  <a class="sf-cart-line__media" href="{{ item.url }}" tabindex="-1" aria-hidden="true">
+    {%- if item.image != blank -%}
+      {%- render 'sf-image', image: item.image, widths: '120,240', sizes: '88px', alt: '', class: 'sf-cart-line__img' -%}
+    {%- else -%}
+      {{- 'product-apparel-1' | placeholder_svg_tag: 'sf-placeholder sf-cart-line__img' -}}
+    {%- endif -%}
+  </a>
+  <div class="sf-cart-line__info">
+    <div class="sf-cart-line__top">
+      <div class="sf-cart-line__name">
+        <a class="sf-cart-line__title" href="{{ item.url }}">{{ line_title | escape }}</a>
+        {%- unless item.product.has_only_default_variant -%}
+          <dl class="sf-cart-line__options">
+            {%- for option in item.options_with_values -%}
+              <div><dt>{{ option.name | escape }}:</dt> <dd>{{ option.value | escape }}</dd></div>
+            {%- endfor -%}
+          </dl>
+        {%- endunless -%}
+        {%- for prop in item.properties -%}
+          {%- assign prop_first = prop.first | slice: 0 -%}
+          {%- if prop.last != blank and prop_first != '_' -%}
+            <p class="sf-cart-line__prop">{{ prop.first | escape }}: {{ prop.last | escape }}</p>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+      <div class="sf-cart-line__price sf-tabular">
+        {%- if item.original_line_price > item.final_line_price -%}
+          <span class="sf-visually-hidden">{{ 'price.regular' | t }}</span>
+          <s class="sf-cart-line__compare">{{ item.original_line_price | money }}</s>
+          <span class="sf-visually-hidden">{{ 'price.sale' | t }}</span>
+        {%- endif -%}
+        <span>{{ item.final_line_price | money }}</span>
+      </div>
+    </div>
+    {%- for allocation in item.line_level_discount_allocations -%}
+      <p class="sf-cart-line__discount">{{ allocation.discount_application.title | escape }} (-{{ allocation.amount | money }})</p>
+    {%- endfor -%}
+    <div class="sf-cart-line__controls">
+      {%- render 'sf-quantity-input', id: line_id, name: 'updates[]', value: item.quantity, min: qty_min, max: qty_max, step: qty_step, key: item.key, product_title: line_title, allow_zero: true -%}
+      {%- if context == 'page' -%}
+        <button type="submit" class="sf-btn sf-btn--text sf-btn--sm sf-cart-line__remove" form="sf-cart-remove-{{ index }}" data-sf-cart-remove data-key="{{ item.key }}" aria-label="{{ 'cart.remove_label' | t: title: line_title | escape }}"><span class="sf-btn__label">{{ 'cart.remove' | t }}</span></button>
+      {%- else -%}
+        <button type="button" class="sf-btn sf-btn--text sf-btn--sm sf-cart-line__remove" data-sf-cart-remove data-key="{{ item.key }}" aria-label="{{ 'cart.remove_label' | t: title: line_title | escape }}"><span class="sf-btn__label">{{ 'cart.remove' | t }}</span></button>
+      {%- endif -%}
+    </div>
+    <p class="sf-cart-line__error sf-form-error" data-sf-line-error hidden>
+      {%- render 'sf-icon', name: 'error', size: 16 -%}<span data-sf-line-error-text></span>
+    </p>
+  </div>
+</li>

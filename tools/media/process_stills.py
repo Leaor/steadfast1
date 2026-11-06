@@ -18,7 +18,12 @@ Needs: Pillow, numpy, potracer (`import potrace`), ffmpeg with zscale. Optional:
 
 Rules applied (docs/BRIEF.md, docs/CONTEXT.md, docs/DESIGN.md §3.4/§5, docs/ARCHITECTURE.md §10):
 - Product imagery is colour-true: crop, canvas extension on the photo's own black, exposure
-  normalisation and export only. Editorial / lookbook / category-lifestyle imagery gets the DESIGN §5.4 grade.
+  normalisation and export only. Editorial / lookbook / category / lifestyle-product imagery gets the
+  DESIGN §5.4 grade, read from tools/media/grade.sh (the grade of record). Lifestyle crops burn third-party
+  vehicles out at the frame edge (DESIGN §5.2/§5.3).
+- Every still and product rendition is black-point clamped (luma <= 6 -> 0, smooth ramp to 12; DESIGN §5.3).
+- After a run, `python3 -I tools/media/gen_asset_snippet.py` regenerates theme/snippets/sf-asset-data.liquid
+  and copies the bundled files into theme/assets.
 - No upscaling beyond 1.25x (1.5x for detail crops, the stated allowance). Widths a source can't
   support are dropped and listed in manifest `dropped_widths`.
 - Nothing is invented: no generative fill. The only retouch is toning down a third-party logo on the
@@ -157,16 +162,76 @@ def ffmpeg_filter(im: Image.Image, vf: str) -> Image.Image:
     return Image.frombytes("RGB", (w, h), out)
 
 
-# DESIGN §5.4: the cold monochrome grade for editorial / lifestyle / category imagery.
-GRADE_CORE = ("eq=saturation=0.18,"
-              "colorbalance=rs=-0.05:bs=0.07:rm=-0.03:bm=0.05:rh=-0.02:bh=0.02,"
-              "curves=master='0/0 0.10/0.0 0.30/0.16 0.60/0.55 0.88/0.84 1/0.93'")
-PRE_FLASH = "eq=brightness=-0.08:gamma=0.72,"     # flash stills (black-tracksuit-night)
-PRE_DAYLIGHT = "eq=brightness=-0.06:gamma=0.78,"  # daylight footage (IMG_4913)
+# DESIGN §5.4: tools/media/grade.sh is the single grade of record. Its LOOK, mono mixer and per-clip pre
+# stages are read from the script itself (never copied), so film and stills can't drift apart.
+GRADE_SH = ROOT / "tools/media/grade.sh"
 
 
-def grade(im: Image.Image, pre="", vignette="PI/4.2") -> Image.Image:
-    return ffmpeg_filter(im, "format=yuv444p," + pre + GRADE_CORE + f",vignette=angle={vignette}")
+def _grade_sh(expr: str) -> str:
+    return subprocess.run(["bash", "-c", f'source "{GRADE_SH}"; {expr}'], capture_output=True, text=True,
+                          check=True).stdout.strip()
+
+
+_GRADE_CACHE: dict = {}
+
+
+def grade_part(key: str) -> str:
+    """'look', 'mono:<wr> <wg> <wb> <amount>', or 'pre:<clip id>' (the clip pre stage after its HLG tone-map,
+    i.e. what applies to an already tone-mapped RGB frame)."""
+    if key not in _GRADE_CACHE:
+        if key == "look":
+            v = _grade_sh('echo "$STEADFAST_LOOK"')
+        elif key.startswith("mono:"):
+            v = _grade_sh("steadfast_mono " + key[5:])
+        elif key.startswith("pre:"):
+            v = _grade_sh("steadfast_pre " + key[4:])
+            v = v.split("format=yuv420p,", 1)[1] if "format=yuv420p," in v else v
+        else:
+            raise KeyError(key)
+        _GRADE_CACHE[key] = v
+    return _GRADE_CACHE[key]
+
+
+# Still "pre" stages (DESIGN §5.4): flash stills get an exposure curve + mono mix and an extra vignette.
+def pre_flash() -> str:
+    return "curves=m='0/0 0.3/0.18 0.6/0.46 1/0.82'," + grade_part("mono:0.30 0.55 0.15 0.92")
+
+
+def grade(im: Image.Image, pre: str, extra: str = "") -> Image.Image:
+    """grade.sh chain on a single RGB frame: pre (gbrp) -> LOOK (yuv444p) [-> extra]. No grain on stills."""
+    return ffmpeg_filter(im, "format=gbrp," + pre + ",format=yuv444p," + grade_part("look") + extra)
+
+
+def grade_ops(name: str) -> list:
+    return [f"grade.sh pre ({name}) + STEADFAST_LOOK (no grain)"]
+
+
+def burn(im: Image.Image, f0: float, f1: float, side="right", floor=0.0) -> Image.Image:
+    """Edge burn: multiply towards black past f0 (fraction of the width/height) reaching `floor` at f1.
+    Used to remove third-party vehicles at the frame edge (DESIGN §5.2/§5.3, FILM S5's right burn)."""
+    a = np.asarray(im).astype(np.float32)
+    n = a.shape[1] if side in ("right", "left") else a.shape[0]
+    t = np.arange(n, dtype=np.float32) / n
+    if side in ("right", "bottom"):
+        f = 1 - (1 - floor) * smoothstep(f0, f1, t)
+    else:
+        f = 1 - (1 - floor) * (1 - smoothstep(f0, f1, t))
+    f = f[None, :, None] if side in ("right", "left") else f[:, None, None]
+    return Image.fromarray(np.clip(a * f + 0.5, 0, 255).astype(np.uint8))
+
+
+# DESIGN §5.3 binding black-point clamp: luma <= 6 -> 0 with a smooth ramp to luma 12. rgb *= w(Y) with
+# w = smoothstep(6, 12, Y): continuous, monotonic (t' = w + Y w' >= 0), slope 1 at 12, hue preserved.
+CLAMP_LO, CLAMP_HI = 6.0, 12.0
+CLAMP_OP = "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+
+
+def black_clamp(im: Image.Image) -> Image.Image:
+    if im.mode != "RGB":
+        return im
+    a = np.asarray(im).astype(np.float32)
+    w = smoothstep(CLAMP_LO, CLAMP_HI, luminance(a))
+    return Image.fromarray(np.clip(a * w[..., None] + 0.5, 0, 255).astype(np.uint8))
 
 
 def record(path: Path, *, group, base, purpose, source, crop=None, ops=(), notes="", theme_asset=False,
@@ -213,8 +278,12 @@ def plan_widths(native_w, widths, max_up, quality_cap=None, add_cap=False):
 
 def emit(img: Image.Image, folder: Path, base: str, widths, jpg_width, *, group, purpose, source, crop,
          ops=(), notes="", max_up=MAX_UP, quality_cap=None, add_cap=False, sharpen=False, theme_asset=False,
-         fixture=None):
-    """Write WebP at each allowed width plus one JPG. Returns {width: path}."""
+         fixture=None, clamp=True):
+    """Write WebP at each allowed width plus one JPG. Returns {width: path}.
+
+    `clamp` (default on): DESIGN §5.3's black-point clamp on every rendition (all stills and product images
+    here sit on the page's #000). `fixture` = (handle, view[, kind]) with kind 'studio' (default) or
+    'lifestyle' (DESIGN §5.3: graded, never the first gallery image)."""
     folder.mkdir(parents=True, exist_ok=True)
     ok, dropped, limit = plan_widths(img.width, widths, max_up, quality_cap, add_cap)
     for w in dropped:
@@ -232,6 +301,9 @@ def emit(img: Image.Image, folder: Path, base: str, widths, jpg_width, *, group,
         r = resize(img, w, sharpen)
         scale = round(w / img.width, 4)
         o = list(ops) + [f"resize lanczos x{scale}"] + (["unsharp 0.6/30"] if sharpen and scale < 0.7 else [])
+        if clamp and r.mode == "RGB":
+            r = black_clamp(r)
+            o.append(CLAMP_OP)
         p = folder / f"{base}-{w}.webp"
         r.save(p, "WEBP", quality=WEBP_Q, method=6)
         rec = record(p, group=group, base=base, purpose=purpose, source=source, crop=crop, ops=o, notes=notes,
@@ -245,11 +317,13 @@ def emit(img: Image.Image, folder: Path, base: str, widths, jpg_width, *, group,
             paths[f"jpg{w}"] = pj
         if fixture:
             FIXTURES.append({"file": rel(p), "handle": fixture[0], "view": fixture[1], "width": r.width,
-                             "height": r.height, "format": "webp", "source": source, "owner": SCRIPT})
+                             "height": r.height, "format": "webp", "source": source, "owner": SCRIPT,
+                             "kind": fixture[2] if len(fixture) > 2 else "studio"})
     if fixture:
         pj = paths[f"jpg{jw}"]
         FIXTURES.append({"file": rel(pj), "handle": fixture[0], "view": fixture[1], "width": jw,
-                         "height": Image.open(pj).height, "format": "jpg", "source": source, "owner": SCRIPT})
+                         "height": Image.open(pj).height, "format": "jpg", "source": source, "owner": SCRIPT,
+                         "kind": fixture[2] if len(fixture) > 2 else "studio"})
     return paths
 
 
@@ -428,7 +502,14 @@ def stage_logo():
     tex_ops = [f"alpha=clip((luma-{bp:.1f})/({Lc:.1f}-{bp:.1f}),0,1)", f"rgb=cream {'#%02X%02X%02X' % cream}",
                f"tight crop to alpha>0.04 + {pad}px pad"]
     tex_crop = crop_dict(tb, src.size)
-    for w in [400, 600, 800, 1200, 1600, 2000, 2400]:
+    # DESIGN §3.4: renditions above 1.5x the native box are dropped (2000/2400 were 1.65-2x upscales);
+    # 1800 (x1.49) is kept and recorded as upscaled. 1600 is not needed by any caller.
+    for w in (1600, 2000, 2400):
+        if w > TW * 1.5 or w == 1600:
+            DROPPED.append({"base": "sf-logo-textured", "width": w, "native_width": TW, "max_width_allowed": int(TW * 1.5),
+                            "owner": SCRIPT, "reason": ("over the 1.5x upscale limit (DESIGN §3.4)" if w > TW * 1.5
+                                                        else "not used: theme set is 600/1200/1800 (DESIGN §3.4)")})
+    for w in [400, 600, 800, 1200, 1800]:
         im = textured(w)
         scale = round(w / TW, 4)
         note = (f"upscaled x{scale} from the {TW}px source crop: the hatch texture softens; prefer <= 1200 for "
@@ -437,8 +518,8 @@ def stage_logo():
         im.save(p, "WEBP", quality=90, alpha_quality=75, method=4)
         record(p, group="logo", base="sf-logo-textured", purpose="Textured transparent wordmark (hero, brand story)",
                source=rel(srcp), crop=tex_crop, ops=tex_ops + [f"resize lanczos x{scale}"], notes=note,
-               theme_asset=w in (600, 1200, 2000), extra={"scale": scale, "upscaled": scale > 1})
-        if w in (400, 800, 1200, 1600, 2400):
+               theme_asset=w in (600, 1200, 1800), extra={"scale": scale, "upscaled": scale > 1})
+        if w in (400, 800, 1200):
             p = D_LOGO / f"sf-logo-textured-{w}.png"
             im.save(p, "PNG", optimize=True)
             record(p, group="logo", base="sf-logo-textured", purpose="Textured transparent wordmark, PNG fallback",
@@ -525,6 +606,29 @@ def stage_logo():
            notes="Trace of the artwork, not a redraw; streaks dropped.", theme_asset=True)
     RECORDS[-1].update({"width": VW, "height": VH, "format": "svg"})
 
+    # ---- (b2) streak-only raster for the Section F layered lockup (DESIGN §3.4): the textured alpha with the
+    # letters knocked out under the traced SVG letter mask dilated 1px, same 1210x411 box. The inline SVG
+    # letters sit on top at left 4.5% / top 32.48% / width 92.15% / height 37.47%.
+    loff = (lx0 - tb[0], ly0 - tb[1])
+    for w in (1200, 1800):
+        k = w / TW
+        h = int(round(w * TH / TW))
+        letters_a = rasterize_path(d, k, (w, h), offset=loff)
+        dil = Image.fromarray(np.clip(letters_a * 255 + 0.5, 0, 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(3))
+        knock = np.asarray(dil).astype(np.float32) / 255
+        base_im = textured(w)
+        A = np.asarray(base_im.getchannel("A")).astype(np.float32) * (1 - knock)
+        im = Image.new("RGBA", (w, h), cream + (0,))
+        im.putalpha(Image.fromarray(np.clip(A + 0.5, 0, 255).astype(np.uint8), "L"))
+        scale = round(w / TW, 4)
+        p = D_LOGO / f"sf-logo-streaks-{w}.webp"
+        im.save(p, "WEBP", quality=90, alpha_quality=75, method=4)
+        record(p, group="logo", base="sf-logo-streaks", purpose="Streak-only raster (Section F layered lockup, >= 990px)",
+               source=rel(srcp), crop=tex_crop,
+               ops=tex_ops + ["letters knocked out: traced SVG mask, dilated 1px (MaxFilter 3)", f"resize lanczos x{scale}"],
+               notes=("upscaled x%s from the %dpx source crop" % (scale, TW)) if scale > 1 else "",
+               theme_asset=True, extra={"scale": scale, "upscaled": scale > 1})
+
     # ---- (c) favicons from the first letter S (artwork pixels; the 512 from the trace to avoid upscaling)
     letter_alpha = np.clip((L - bp) / (Lc - bp), 0, 1)
     full_mask = np.zeros(L.shape, bool)
@@ -589,6 +693,8 @@ def stage_logo():
         "letter_box_within_textured_frac": [round((lx0 - tb[0]) / TW, 4), round((ly0 - tb[1]) / TH, 4),
                                             round((lx1 - tb[0]) / TW, 4), round((ly1 - tb[1]) / TH, 4)],
         "svg_viewbox": [0, 0, VW, VH], "svg_bytes": svgp.stat().st_size, "svg_subpaths": len(plist),
+        "theme_renditions": {"textured_webp": [600, 1200, 1800], "textured_png": [1200], "streaks_webp": [1200, 1800],
+                             "max_upscale": 1.5},
         "svg_check": {"iou_vs_trace_input_mask": round(iou_mask, 4),
                       "iou_vs_raw_source_half_level_near_letters": round(iou_raw, 4),
                       "chromium": chrome,
@@ -665,11 +771,7 @@ def stage_stills():
          purpose="Signature showcase stage, front (16:9)", source=rel(fp), crop=crop_dict(box_hero, F.size),
          ops=["16:9 crop"], sharpen=True, theme_asset=True)
 
-    box_new = (900, 160, 1860, 1360)              # 960x1200 4:5 closer crop
-    p_new = plate(F, box_new, fill=fbg)
-    emit(p_new, D_STILLS, "sf-category-new-arrivals", [540, 900, 1200], 900, group="category",
-         purpose="Category tile: New Arrivals (closer zip-hoodie crop)", source=rel(fp),
-         crop=crop_dict(box_new, F.size), ops=["4:5 crop"], sharpen=True, theme_asset=True)
+    # sf-category-new-arrivals is cut from the IMG_4913 embossed close-up in stage_footage (DESIGN §5.6).
 
     # ---------------- zip hoodie: front/back side-by-side
     fbp = SRC / "zip-hoodie-blue-grey-front-back.png"
@@ -689,12 +791,7 @@ def stage_stills():
         emit(pl, D_STILLS, f"sf-signature-{hv}", [600, 900, 1200], 900, group="signature",
              purpose=f"Signature showcase {hv} (4:5)", source=rel(fbp), crop=cdx, ops=["4:5 plate"], sharpen=True,
              theme_asset=True)
-    # Tops category: no clean brand-free crewneck frame exists (IMG_4913 end frames show a third-party
-    # monogram balaclava), so DESIGN's fallback is used: the zip hoodie back.
-    emit(p_b, D_STILLS, "sf-category-tops", [540, 720], 720, group="category",
-         purpose="Category tile: Tops (fallback: zip hoodie back; see notes)", source=rel(fbp),
-         crop=crop_dict(box_b, FB.size), ops=["4:5 plate"], sharpen=True, theme_asset=True,
-         notes="IMG_4913 crewneck frames rejected: third-party monogram balaclava + supercar in frame.")
+    # sf-category-tops is the reflective tracksuit front, top crop (DESIGN §5.6), see the reflective block.
 
     # back aligned to the front still for the showcase front->back crossfade (DESIGN §10)
     fw = 1867 - 900 + 1
@@ -767,6 +864,13 @@ def stage_stills():
         emit(pl, D_STILLS, f"sf-lookbook-reflective-{view}", [400, 560], 560, group="lookbook",
              purpose=f"Lookbook: reflective tracksuit {view}", source=rel(rp), crop=cdx, ops=ops, notes=note,
              quality_cap=900, theme_asset=True)
+    # Tops (DESIGN §5.6): the reflective tracksuit front, top crop = the hoodie top with its chest script,
+    # crown-of-head to hem, phone UI removed. Colour-true + black-point clamp. 480px crop -> 400/560 (x1.17).
+    box_tops = (90, 760, 570, 1360)
+    emit(plate(R, box_tops, fill=rfill), D_STILLS, "sf-category-tops", [400, 560], 560, group="category",
+         purpose="Category tile: Tops (reflective tracksuit front, top crop)", source=rel(rp),
+         crop=crop_dict(box_tops, R.size), ops=["Display P3 -> sRGB", "phone UI excluded", "4:5 top crop (hoodie + chest script)"],
+         notes="Low-resolution source (phone screenshot): served at <= 560px.", theme_asset=True)
 
     # ---------------- campaign still
     cp = SRC / "campaign-back-embossed-set.png"
@@ -799,37 +903,66 @@ def stage_stills():
     # ---------------- black tracksuit, night flash photo
     np_ = SRC / "black-tracksuit-night.jpg"
     N = load_srgb(np_)
+    NW, NH = N.size
     nops = ["Display P3 -> sRGB"]
-    # figure: x ~430-970, y ~660-2170; Circle-K-style sign sits at x >= 1392 (kept out of every crop)
-    box_outfit = (52, 600, 1348, 2220)           # 1296x1620 4:5, hood to shoes
-    raw_outfit = plate(N, box_outfit)
-    life = darken_surround(raw_outfit, cx=0.49, cy=0.50, rx=0.27, ry=0.53, strength=0.6)
+    # Third-party marks (FILM-STORYBOARD source table): SUV door at x > 0.61 (y 0.32-0.62), storefront sign at
+    # x >= 0.96, sneaker side marks at y 0.80-0.86. DESIGN §5.2: lifestyle crop (0.25, 0.22, 0.65, 0.80) -> 4:5,
+    # burn the right edge (car door) and keep the sneakers illegible. DESIGN §5.3: lifestyle views get the
+    # editorial grade (not colour-true) and the `lifestyle` kind.
+    flash_extra = ",vignette=angle=PI/3.4"
+    gops = ["grade.sh flash still pre (curves + mono 0.30/0.55/0.15 @0.92) + STEADFAST_LOOK + vignette PI/3.4"]
+
+    def night_plate(fx0, fy0, fx1, fy1, cxf, bottom_burn=None):
+        """4:5 box spanning fy0..fy1 centred at cxf, graded, car door burnt, left edge burnt."""
+        w = int(round((fy1 - fy0) * NH * 0.8 / 4)) * 4        # exact 4:5 in whole pixels
+        h = w * 5 // 4
+        y0 = round(fy0 * NH)
+        y1 = y0 + h
+        x0 = round(cxf * NW - w / 2)
+        bx = (x0, y0, x0 + w, y1)
+        im = grade(plate(N, bx), pre_flash(), flash_extra)
+        im = burn(im, (0.59 * NW - x0) / w, (0.70 * NW - x0) / w, "right")            # SUV door
+        im = burn(im, ((fx0 - 0.07) * NW - x0) / w, ((fx0 + 0.06) * NW - x0) / w, "left", floor=0.3)
+        ops = nops + [f"4:5 crop {int(w)}x{int(h)}"] + gops + ["right burn from x 0.59 (SUV door) to black at 0.70",
+                                                                "soft left edge burn (to 30%)"]
+        if bottom_burn:
+            im = burn(im, (bottom_burn[0] * NH - y0) / h, (bottom_burn[1] * NH - y0) / h, "bottom", floor=0.25)
+            ops.append("bottom burn (sneaker side marks kept illegible)")
+        return im, crop_dict(bx, N.size), ops
+
+    # 0.20-0.825 rather than 0.22-0.80 so the 4:5 box is 1288px wide (keeps the 1600 rendition <= 1.25x);
+    # the sneakers that enter at the bottom are burnt.
+    life, cdl, lops = night_plate(0.25, 0.20, 0.65, 0.825, 0.45, bottom_burn=(0.785, 0.825))
     emit(life, D_PROD, "heavyweight-zip-hoodie-black--lifestyle", PRODUCT_WIDTHS, "max", group="product",
-         purpose="Product lifestyle: black heavyweight zip hoodie + wide sweatpants (night)", source=rel(np_),
-         crop=crop_dict(box_outfit, N.size), ops=nops + ["4:5 crop hood-to-shoes", "surroundings darkened (soft ellipse), subject colour untouched"],
-         fixture=("heavyweight-zip-hoodie-black", "lifestyle"),
-         notes="Night phone flash photo: visible noise in shadows; third-party car door at right is darkened, no badge in frame.")
-    emit(grade(raw_outfit, PRE_FLASH, "PI/3.4"), D_STILLS, "sf-lookbook-black-tracksuit", [540, 900, 1200], 900,
-         group="lookbook", purpose="Lookbook: black tracksuit (graded)", source=rel(np_),
-         crop=crop_dict(box_outfit, N.size), ops=nops + ["4:5 crop", "DESIGN §5.4 grade, flash pre-stage"],
+         purpose="Product lifestyle: black heavyweight zip hoodie + wide sweatpants (night, graded)", source=rel(np_),
+         crop=cdl, ops=lops, fixture=("heavyweight-zip-hoodie-black", "lifestyle", "lifestyle"), add_cap=True,
+         notes="Lifestyle view (DESIGN §5.3): editorial grade, SUV door burnt out, sneakers cropped out.")
+    emit(life, D_STILLS, "sf-lookbook-black-tracksuit", [540, 900, 1200], 900, group="lookbook",
+         purpose="Lookbook: black tracksuit (graded, placeholder card 5)", source=rel(np_), crop=cdl, ops=lops,
          theme_asset=True)
-    box_pants = (220, 1170, 1180, 2370)          # 960x1200 4:5, waist to shoes
-    raw_pants = plate(N, box_pants)
-    emit(darken_surround(raw_pants, cx=0.47, cy=0.50, rx=0.30, ry=0.55, strength=0.6), D_PROD,
-         "wide-sweatpants-black--lifestyle", PRODUCT_WIDTHS, "max", group="product",
-         purpose="Product lifestyle: wide black sweatpants (night)", source=rel(np_),
-         crop=crop_dict(box_pants, N.size), ops=nops + ["4:5 crop waist-to-shoes", "surroundings darkened"],
-         fixture=("wide-sweatpants-black", "lifestyle"))
-    emit(grade(raw_pants, PRE_FLASH, "PI/3.4"), D_STILLS, "sf-category-bottoms", [540, 900, 1200], 900,
-         group="category", purpose="Category tile: Bottoms (graded)", source=rel(np_),
-         crop=crop_dict(box_pants, N.size), ops=nops + ["4:5 crop", "DESIGN §5.4 grade, flash pre-stage"],
-         theme_asset=True)
-    for base, bx in (("sf-editorial-black-tracksuit-4x5", (20, 560, 1380, 2260)),
-                     ("sf-editorial-black-tracksuit-2x3", (20, 380, 1380, 2420))):
-        emit(grade(plate(N, bx), PRE_FLASH, "PI/3.4"), D_STILLS, base, [800, 1200, 1600], 1200, group="editorial",
+    pants, cdp, pops = night_plate(0.25, 0.375, 0.65, 0.846, 0.45, bottom_burn=(0.795, 0.846))
+    emit(pants, D_PROD, "wide-sweatpants-black--lifestyle", PRODUCT_WIDTHS, "max", group="product",
+         purpose="Product lifestyle: wide black sweatpants (night, graded)", source=rel(np_), crop=cdp, ops=pops,
+         fixture=("wide-sweatpants-black", "lifestyle", "lifestyle"), add_cap=True,
+         notes="Lifestyle view (DESIGN §5.3): editorial grade, SUV door burnt out, sneakers darkened.")
+    emit(pants, D_STILLS, "sf-category-bottoms", [540, 900, 1200], 900, group="category",
+         purpose="Category tile: Bottoms (graded)", source=rel(np_), crop=cdp, ops=pops, theme_asset=True)
+    for base, fy0, fy1 in (("sf-editorial-black-tracksuit-4x5", 0.22, 0.86), ("sf-editorial-black-tracksuit-2x3", 0.15, 0.93)):
+        r_ = (4, 5) if base.endswith("4x5") else (2, 3)
+        w = int(round((fy1 - fy0) * NH * r_[0] / r_[1] / r_[0])) * r_[0]   # exact ratio in whole pixels
+        h = w * r_[1] // r_[0]
+        y0 = round(fy0 * NH)
+        y1 = y0 + h
+        x0 = round(0.45 * NW - w / 2)
+        bx = (x0, y0, x0 + w, y1)
+        im = grade(plate(N, bx), pre_flash(), flash_extra)
+        im = burn(im, (0.59 * NW - x0) / w, (0.70 * NW - x0) / w, "right")
+        im = burn(im, (0.16 * NW - x0) / w, (0.30 * NW - x0) / w, "left", floor=0.3)
+        im = burn(im, (0.795 * NH - y0) / h, (0.86 * NH - y0) / h, "bottom", floor=0.25)
+        emit(im, D_STILLS, base, [800, 1200, 1600], 1200, group="editorial",
              purpose="Editorial: black tracksuit at night (graded, %s)" % base.rsplit("-", 1)[1],
-             source=rel(np_), crop=crop_dict(bx, N.size), ops=nops + ["crop", "DESIGN §5.4 grade, flash pre-stage"],
-             theme_asset=True)
+             source=rel(np_), crop=crop_dict(bx, N.size),
+             ops=nops + ["crop"] + gops + ["right burn (SUV door), left burn, bottom burn (sneakers)"], theme_asset=True)
 
 
 # ----------------------------------------------------------------------------- 5. stills from footage
@@ -882,6 +1015,8 @@ def stage_footage():
         ("IMG_4913", "IMG_4913-day-embossed-closeup.MOV", (0.0, 4.0), (60, 300, 460, 900), (3.3, 3.8),
          (0, 230, 576, 950), ("embossed-gothic-hoodie", "back-charcoal"),
          "Embossed back close-up (washed charcoal): blackletter 'steadfast' + ornamental hood embossing"),
+        # back-grey is a lifestyle view: the SUV + tail light (x > 0.78 of the frame) are burnt to black at the
+        # right edge (crop kept at 640px so the published 400/800 renditions keep their names); graded with grade.sh.
         ("IMG_4376", "IMG_4376-night-back-grey-embossed-hoodie.MOV", (0.0, 5.4), (120, 250, 620, 900), (3.3, 5.3),
          (40, 262, 680, 1062), ("embossed-gothic-hoodie", "back-grey"),
          "Back view at night (washed grey): arched back panel, embossed lettering on the shoulders"),
@@ -913,16 +1048,32 @@ def stage_footage():
         note = (f"Video frame {n} at t={t:.3f}s (sharpest by Laplacian variance in the garment ROI within "
                 f"{window[0]}-{window[1]}s, where the full lettering faces camera). Source is 720x1280 phone video "
                 f"(HEVC): soft and noisy compared with the stills; max {int((bx[2]-bx[0])*MAX_UP)}px wide.")
+        kind = "studio"
+        if cid == "IMG_4376":
+            # lifestyle (DESIGN §5.3): grade.sh IMG_4376 pre + LOOK; burn the SUV / tail light at the right edge
+            pl = grade(plate(frame, bx), grade_part("pre:IMG_4376"))
+            bw_ = bx[2] - bx[0]
+            pl = burn(pl, (540 - bx[0]) / bw_, (600 - bx[0]) / bw_, "right")
+            ops = ["HLG -> SDR tone map", f"4:5 crop {bw_}x{bx[3]-bx[1]}"] + grade_ops("IMG_4376") + \
+                  ["right burn x 540-600 px (SUV + tail light)"]
+            kind = "lifestyle"
         emit(pl, D_PROD, f"{handle}--{view}", PRODUCT_WIDTHS, "max", group="product",
              purpose=f"Product still from footage: {purpose}", source=rel(clip),
              crop=dict(crop_dict(bx, (720, 1280)), frame=n, t=t), ops=ops, notes=note, add_cap=True,
-             fixture=(handle, view))
+             fixture=(handle, view, kind))
         if cid == "IMG_4913":
-            g = grade(plate(frame, bx), PRE_DAYLIGHT, "PI/4.2")
+            # graded close-up (grade.sh IMG_4913 pre + LOOK), the supercar edge (x > 0.80 of the crop) burnt
+            g = grade(plate(frame, bx), grade_part("pre:IMG_4913"))
+            g = burn(g, 0.80, 0.98, "right", floor=0.15)
+            gops = ["HLG -> SDR", "4:5 crop"] + grade_ops("IMG_4913") + ["right burn 0.80-0.98 (supercar)"]
+            cdg = dict(crop_dict(bx, (720, 1280)), frame=n, t=t)
             emit(g, D_STILLS, "sf-lookbook-embossed-hoodie", [400, 720], 720, group="lookbook",
                  purpose="Lookbook: embossed lettering, washed charcoal hoodie (graded)", source=rel(clip),
-                 crop=dict(crop_dict(bx, (720, 1280)), frame=n, t=t),
-                 ops=["HLG -> SDR", "4:5 crop", "DESIGN §5.4 grade, daylight pre-stage"], notes=note, theme_asset=True)
+                 crop=cdg, ops=gops, notes=note, theme_asset=True)
+            # DESIGN §5.6 New Arrivals: the embossed charcoal hoodie close-up, film grade, 540/720 (source-limited)
+            emit(g, D_STILLS, "sf-category-new-arrivals", [540, 720], 720, group="category",
+                 purpose="Category tile: New Arrivals (embossed charcoal hoodie close-up, graded)", source=rel(clip),
+                 crop=cdg, ops=gops, notes=note, theme_asset=True)
 
 
 # ----------------------------------------------------------------------------- grain tile
@@ -1049,11 +1200,20 @@ def write_manifest():
             "than the studio stills.",
             "black-tracksuit-night.jpg is a phone flash photo with shadow noise; product version keeps the subject's "
             "colour and only darkens the surroundings, the lookbook/category/editorial versions carry the §5.4 grade.",
-            "Logo textured renditions above 1200px (1600/2000/2400) are Lanczos upscales of the ~%spx source crop."
+            "Logo textured/streak renditions at 1800px are x1.49 Lanczos upscales of the ~%spx source crop "
+            "(2000/2400 dropped: over 1.5x, DESIGN §3.4)."
             % LOGO_INFO.get("textured_native_size", ["?"])[0],
             "Detail crops: the sleeve label is small and dark in both sources (exposure lift applied); 1200px detail "
             "widths are dropped where they would exceed the 1.5x allowance.",
-            "sf-category-tops uses the zip hoodie back: no brand-free crewneck frame exists in the footage.",
+            "sf-category-tops is the reflective tracksuit front, top crop (DESIGN §5.6); sf-category-new-arrivals is "
+            "the graded IMG_4913 embossed close-up (same plate as sf-lookbook-embossed-hoodie, DESIGN §5.6).",
+            "Every still and product image is black-point clamped (luma <= 6 -> 0, smooth ramp to 12; DESIGN §5.3). "
+            "This removes the lifted noise band at the bottom of the signature stills.",
+            "Lifestyle product views (heavyweight-zip-hoodie-black, wide-sweatpants-black, embossed-gothic-hoodie "
+            "back-grey) carry the grade.sh editorial grade and edge burns that remove the third-party SUV/supercar; "
+            "fixtures mark them kind=lifestyle (never the first gallery image).",
+            "sf-campaign-* keep the source grade (already graded at source) + the clamp; grade.sh's campaign mono "
+            "mix is the film's treatment of the still, not applied to the editorial stills.",
             "The campaign still had a small third-party logo on the balaclava; it was toned down by a diffusion fill "
             "(no other retouching).",
         ],

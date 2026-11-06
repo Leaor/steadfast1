@@ -133,6 +133,8 @@
   }
 
   .sf-signature-showcase__toggle[hidden] { display: none; }
+  /* JS-only control, but laid out from first paint so the lazy init never shifts content (anchors scrolling past). */
+  .no-js .sf-signature-showcase__toggle { display: none; }
 
   .sf-signature-showcase__face-btn {
     min-width: 72px;
@@ -166,6 +168,8 @@
     line-height: var(--sf-leading-snug);
     color: var(--sf-fg);
   }
+
+  .sf-signature-showcase__title--staged { display: none; }
 
   .sf-signature-showcase__price { font-size: var(--sf-text-base); color: var(--sf-fg); }
   .sf-signature-showcase__cta { width: 100%; margin-top: var(--sf-space-3); }
@@ -323,8 +327,12 @@
       width: calc((100% - 2 * var(--sf-gutter) - 11 * var(--sf-grid-gap)) / 12 * 4 + 3 * var(--sf-grid-gap));
       margin: 0;
       translate: 0 -50%;
+      align-items: center;
+      text-align: center;
       opacity: 0;
     }
+
+    html.js[data-sf-motion='full'] .sf-signature-showcase--pin:not(.is-static) .sf-signature-showcase__title--staged { display: block; }
 
     html.js[data-sf-motion='full'] .sf-signature-showcase--pin:not(.is-static) .sf-signature-showcase__buy:focus-within { opacity: 1; }
 

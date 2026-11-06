@@ -1,0 +1,55 @@
+{
+  "placeholder": true,
+  "_note": "Sample data derived only from the supplied client assets (CONTEXT.md). Every value is a placeholder for exercising the theme; nothing here is STEADFAST data.",
+  "customer": {
+    "id": 9001,
+    "first_name": "Sample",
+    "last_name": "Customer",
+    "email": "customer@example.com",
+    "has_account": true,
+    "addresses": [
+      {
+        "id": 9101,
+        "first_name": "Sample",
+        "last_name": "Customer",
+        "company": "",
+        "address1": "1 Example Street",
+        "address2": "",
+        "city": "Example City",
+        "province": "New York",
+        "province_code": "NY",
+        "country": "United States",
+        "country_code": "US",
+        "zip": "00000",
+        "phone": ""
+      }
+    ],
+    "orders": [
+      {
+        "id": 9201,
+        "name": "#1001",
+        "created_at": "2026-10-28T12:00:00Z",
+        "financial_status": "paid",
+        "financial_status_label": "Paid",
+        "fulfillment_status": "unfulfilled",
+        "fulfillment_status_label": "Unfulfilled",
+        "cancelled": false,
+        "cancelled_at": null,
+        "line_items": [
+          {
+            "variant_id": 2002,
+            "quantity": 1
+          },
+          {
+            "variant_id": 2024,
+            "quantity": 1
+          }
+        ],
+        "shipping_price": 0,
+        "total_tax": 0,
+        "shipping_address_id": 9101,
+        "billing_address_id": 9101
+      }
+    ]
+  }
+}

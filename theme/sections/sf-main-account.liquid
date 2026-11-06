@@ -1,0 +1,67 @@
+{%- comment -%} Account overview: orders table and default address. {%- endcomment -%}
+{{ 'sf-content.css' | asset_url | stylesheet_tag }}
+{{ 'sf-customer.css' | asset_url | stylesheet_tag }}
+{%- paginate customer.orders by 20 -%}
+<section class="sf-section sf-customer sf-account sf-tone-ink sf-space-compact" aria-labelledby="sf-account-title">
+  <div class="sf-container">
+    <header class="sf-account__header">
+      <h1 class="sf-customer__title sf-display-lg" id="sf-account-title">{{ 'customer.account_page.title' | t }}</h1>
+      <p class="sf-account__greeting">{{ 'customer.account_page.greeting' | t: name: customer.name }}</p>
+      {%- render 'sf-account-nav', current: 'account' -%}
+    </header>
+    <div class="sf-account__grid">
+      <div class="sf-account__orders">
+        <h2 class="sf-account__section-title sf-micro">{{ 'customer.account_page.orders' | t }}</h2>
+        {%- if customer.orders.size > 0 -%}
+          <div class="sf-table-wrap">
+            <table class="sf-table">
+              <caption class="sf-visually-hidden">{{ 'customer.account_page.orders' | t }}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">{{ 'customer.account_page.order_number' | t }}</th>
+                  <th scope="col">{{ 'customer.account_page.date' | t }}</th>
+                  <th scope="col">{{ 'customer.account_page.payment_status' | t }}</th>
+                  <th scope="col">{{ 'customer.account_page.fulfillment_status' | t }}</th>
+                  <th scope="col" class="sf-table__num">{{ 'customer.account_page.total' | t }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {%- for order in customer.orders -%}
+                  <tr>
+                    <th scope="row" data-label="{{ 'customer.account_page.order_number' | t | escape }}"><a href="{{ order.customer_url }}" aria-label="{{ 'customer.account_page.view_order' | t: name: order.name | escape }}">{{ order.name }}</a></th>
+                    <td data-label="{{ 'customer.account_page.date' | t | escape }}">{{ order.created_at | time_tag: '%B %-d, %Y' }}</td>
+                    <td data-label="{{ 'customer.account_page.payment_status' | t | escape }}">{{ order.financial_status_label }}</td>
+                    <td data-label="{{ 'customer.account_page.fulfillment_status' | t | escape }}">{{ order.fulfillment_status_label }}</td>
+                    <td data-label="{{ 'customer.account_page.total' | t | escape }}" class="sf-table__num sf-tabular">{{ order.total_price | money }}</td>
+                  </tr>
+                {%- endfor -%}
+              </tbody>
+            </table>
+          </div>
+          {%- render 'sf-pagination', paginate: paginate, type: 'pager' -%}
+        {%- else -%}
+          <p class="sf-account__empty">{{ 'customer.account_page.no_orders' | t }}</p>
+          <a class="sf-btn sf-btn--secondary" href="{{ routes.all_products_collection_url }}"><span class="sf-btn__label">{{ 'cart.explore' | t }}</span></a>
+        {%- endif -%}
+      </div>
+      <aside class="sf-account__details" aria-labelledby="sf-account-details-title">
+        <h2 class="sf-account__section-title sf-micro" id="sf-account-details-title">{{ 'customer.account_page.details' | t }}</h2>
+        <div class="sf-account__address">
+          <p class="sf-account__name">{{ customer.name | escape }}</p>
+          <p class="sf-account__email">{{ customer.email | escape }}</p>
+          {%- if customer.default_address != blank -%}
+            {{ customer.default_address | format_address }}
+          {%- else -%}
+            <p class="sf-account__muted">{{ 'customer.account_page.no_address' | t }}</p>
+          {%- endif -%}
+        </div>
+        <a class="sf-btn sf-btn--text sf-btn--sm" href="{{ routes.account_addresses_url }}"><span class="sf-btn__label">{{ 'customer.account_page.view_addresses' | t: count: customer.addresses_count }}</span></a>
+      </aside>
+    </div>
+  </div>
+</section>
+{%- endpaginate -%}
+
+{% schema %}
+{ "name": "Account", "class": "sf-shopify-section--main-account" }
+{% endschema %}

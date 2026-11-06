@@ -1,0 +1,24 @@
+{
+  "sections": {
+    "main": {
+      "type": "sf-main-product",
+      "settings": { "gallery_layout": "stacked", "enable_zoom": true, "sticky_info": true, "enable_video_loop": false, "hide_single_value_options": true },
+      "blocks": {
+        "title": { "type": "title", "settings": {} },
+        "price": { "type": "price", "settings": {} },
+        "variant_picker": { "type": "variant_picker", "settings": { "picker_type": "buttons", "color_as_swatches": true, "show_size_guide_link": true } },
+        "buy_buttons": { "type": "buy_buttons", "settings": { "show_dynamic_checkout": false } },
+        "details": { "type": "collapsible", "settings": { "heading": "Details", "source": "description" } },
+        "size_fit": { "type": "collapsible", "settings": { "heading": "Size & fit", "source": "custom" } },
+        "shipping": { "type": "collapsible", "settings": { "heading": "Shipping & returns", "source": "shipping_returns" } },
+        "care": { "type": "collapsible", "settings": { "heading": "Care", "source": "custom" } }
+      },
+      "block_order": ["title", "price", "variant_picker", "buy_buttons", "details", "size_fit", "shipping", "care"]
+    },
+    "related": {
+      "type": "sf-related-products",
+      "settings": { "heading": "You may also like", "products_to_show": 4, "tone": "ink", "spacing": "standard" }
+    }
+  },
+  "order": ["main", "related"]
+}

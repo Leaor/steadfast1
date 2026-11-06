@@ -1,0 +1,29 @@
+{%- comment -%} Activate account (invitation): set a password, or decline. {%- endcomment -%}
+{{ 'sf-content.css' | asset_url | stylesheet_tag }}
+{{ 'sf-customer.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'sf-customer.js' | asset_url }}" defer></script>
+<section class="sf-section sf-customer sf-customer--narrow sf-tone-ink sf-space-compact" aria-labelledby="sf-activate-title">
+  <div class="sf-container sf-customer__inner">
+    <h1 class="sf-customer__title sf-display-md" id="sf-activate-title">{{ 'customer.activate.title' | t }}</h1>
+    <p class="sf-customer__lead">{{ 'customer.activate.text' | t }}</p>
+    {%- form 'activate_customer_password', class: 'sf-form', novalidate: 'novalidate' -%}
+      {%- if form.errors -%}<div class="sf-form__errors" role="alert" tabindex="-1" data-sf-error-summary>{{ form.errors | default_errors }}</div>{%- endif -%}
+      <div class="sf-field">
+        <label class="sf-field__label" for="ActivatePassword">{{ 'customer.activate.password' | t }}</label>
+        <input class="sf-input" type="password" id="ActivatePassword" name="customer[password]" autocomplete="new-password" required aria-required="true"{% if form.errors contains 'password' %} aria-invalid="true"{% endif %}>
+      </div>
+      <div class="sf-field">
+        <label class="sf-field__label" for="ActivatePasswordConfirm">{{ 'customer.activate.password_confirm' | t }}</label>
+        <input class="sf-input" type="password" id="ActivatePasswordConfirm" name="customer[password_confirmation]" autocomplete="new-password" required aria-required="true"{% if form.errors contains 'password_confirmation' %} aria-invalid="true"{% endif %}>
+      </div>
+      <div class="sf-form__actions">
+        <button type="submit" class="sf-btn sf-btn--primary sf-btn--full"><span class="sf-btn__label">{{ 'customer.activate.submit' | t }}</span></button>
+        <button type="submit" name="decline" value="true" class="sf-btn sf-btn--text sf-btn--sm"><span class="sf-btn__label">{{ 'customer.activate.decline' | t }}</span></button>
+      </div>
+    {%- endform -%}
+  </div>
+</section>
+
+{% schema %}
+{ "name": "Activate account", "class": "sf-shopify-section--main-activate-account" }
+{% endschema %}

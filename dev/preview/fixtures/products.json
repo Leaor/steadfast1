@@ -1,0 +1,1183 @@
+{
+  "placeholder": true,
+  "_note": "Sample data derived only from the garments visible in the supplied client assets (CONTEXT.md). Prices, sizes, inventory, SKUs and dates are placeholders, not STEADFAST data.",
+  "products": [
+    {
+      "id": 1001,
+      "handle": "zip-hoodie-washed-blue-grey",
+      "title": "Zip hoodie, washed blue-grey",
+      "product_type": "Hoodies",
+      "vendor": "STEADFAST",
+      "description_html": "<p>Placeholder description. Product details to be confirmed by STEADFAST.</p>",
+      "tags": [
+        "hoodie",
+        "zip-up"
+      ],
+      "created_at": "2026-10-20T10:00:00Z",
+      "published_at": "2026-10-20T10:00:00Z",
+      "best_selling_rank": 1,
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            {
+              "id": 5001,
+              "name": "S"
+            },
+            {
+              "id": 5002,
+              "name": "M"
+            },
+            {
+              "id": 5003,
+              "name": "L"
+            },
+            {
+              "id": 5004,
+              "name": "XL"
+            }
+          ]
+        },
+        {
+          "name": "Color",
+          "values": [
+            {
+              "id": 5005,
+              "name": "Washed blue-grey",
+              "swatch": {
+                "color": "#6f7e8c"
+              }
+            }
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": 2001,
+          "options": [
+            "S",
+            "Washed blue-grey"
+          ],
+          "price": 18000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": true,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 6,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3001
+        },
+        {
+          "id": 2002,
+          "options": [
+            "M",
+            "Washed blue-grey"
+          ],
+          "price": 18000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": true,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 2,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3001
+        },
+        {
+          "id": 2003,
+          "options": [
+            "L",
+            "Washed blue-grey"
+          ],
+          "price": 18000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": true,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 6,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3001
+        },
+        {
+          "id": 2004,
+          "options": [
+            "XL",
+            "Washed blue-grey"
+          ],
+          "price": 18000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": false,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 0,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3001
+        }
+      ],
+      "media": [
+        {
+          "id": 3001,
+          "media_type": "image",
+          "position": 1,
+          "alt": "Zip hoodie, washed blue-grey, front",
+          "image": {
+            "base": "products/zip-hoodie-washed-blue-grey--front",
+            "ext": "webp",
+            "widths": [
+              400,
+              800,
+              1200,
+              1600
+            ],
+            "width": 1600,
+            "height": 2000,
+            "alt": "Zip hoodie, washed blue-grey, front"
+          }
+        },
+        {
+          "id": 3002,
+          "media_type": "image",
+          "position": 2,
+          "alt": "Zip hoodie, washed blue-grey, back",
+          "image": {
+            "base": "products/zip-hoodie-washed-blue-grey--back",
+            "ext": "webp",
+            "widths": [
+              400,
+              800,
+              1200,
+              1600
+            ],
+            "width": 1600,
+            "height": 2000,
+            "alt": "Zip hoodie, washed blue-grey, back"
+          }
+        },
+        {
+          "id": 3003,
+          "media_type": "image",
+          "position": 3,
+          "alt": "Zip hoodie, washed blue-grey, front, on black",
+          "image": {
+            "base": "products/zip-hoodie-washed-blue-grey--front-alt",
+            "ext": "webp",
+            "widths": [
+              400,
+              800,
+              1200,
+              1600
+            ],
+            "width": 1600,
+            "height": 2000,
+            "alt": "Zip hoodie, washed blue-grey, front, on black"
+          }
+        },
+        {
+          "id": 3004,
+          "media_type": "image",
+          "position": 4,
+          "alt": "Zip hoodie, washed blue-grey, detail, chest logo",
+          "image": {
+            "base": "products/zip-hoodie-washed-blue-grey--detail-chest-logo",
+            "ext": "webp",
+            "widths": [
+              400,
+              800
+            ],
+            "width": 800,
+            "height": 800,
+            "alt": "Zip hoodie, washed blue-grey, detail, chest logo"
+          }
+        },
+        {
+          "id": 3005,
+          "media_type": "image",
+          "position": 5,
+          "alt": "Zip hoodie, washed blue-grey, detail, zip",
+          "image": {
+            "base": "products/zip-hoodie-washed-blue-grey--detail-zip",
+            "ext": "webp",
+            "widths": [
+              400,
+              800
+            ],
+            "width": 800,
+            "height": 800,
+            "alt": "Zip hoodie, washed blue-grey, detail, zip"
+          }
+        },
+        {
+          "id": 3006,
+          "media_type": "image",
+          "position": 6,
+          "alt": "Zip hoodie, washed blue-grey, detail, neck label",
+          "image": {
+            "base": "products/zip-hoodie-washed-blue-grey--detail-neck-label",
+            "ext": "webp",
+            "widths": [
+              400
+            ],
+            "width": 400,
+            "height": 400,
+            "alt": "Zip hoodie, washed blue-grey, detail, neck label"
+          }
+        },
+        {
+          "id": 3007,
+          "media_type": "image",
+          "position": 7,
+          "alt": "Zip hoodie, washed blue-grey, detail, shoulder",
+          "image": {
+            "base": "products/zip-hoodie-washed-blue-grey--detail-shoulder",
+            "ext": "webp",
+            "widths": [
+              400
+            ],
+            "width": 400,
+            "height": 400,
+            "alt": "Zip hoodie, washed blue-grey, detail, shoulder"
+          }
+        },
+        {
+          "id": 3008,
+          "media_type": "image",
+          "position": 8,
+          "alt": "Zip hoodie, washed blue-grey, detail, sleeve label",
+          "image": {
+            "base": "products/zip-hoodie-washed-blue-grey--detail-cuff-label",
+            "ext": "webp",
+            "widths": [
+              400
+            ],
+            "width": 400,
+            "height": 400,
+            "alt": "Zip hoodie, washed blue-grey, detail, sleeve label"
+          }
+        },
+        {
+          "id": 3009,
+          "media_type": "image",
+          "position": 9,
+          "alt": "Zip hoodie, washed blue-grey, detail, hem",
+          "image": {
+            "base": "products/zip-hoodie-washed-blue-grey--detail-hem",
+            "ext": "webp",
+            "widths": [
+              400,
+              800
+            ],
+            "width": 800,
+            "height": 800,
+            "alt": "Zip hoodie, washed blue-grey, detail, hem"
+          }
+        }
+      ],
+      "placeholder": true,
+      "placeholder_fields": [
+        "price",
+        "variants",
+        "inventory",
+        "description",
+        "created_at",
+        "sku"
+      ]
+    },
+    {
+      "id": 1002,
+      "handle": "reflective-piping-tracksuit-black-speckle",
+      "title": "Piped tracksuit, black speckle",
+      "product_type": "Tracksuits",
+      "vendor": "STEADFAST",
+      "description_html": "<p>Placeholder description. Product details to be confirmed by STEADFAST.</p>",
+      "tags": [
+        "tracksuit"
+      ],
+      "created_at": "2026-10-14T10:00:00Z",
+      "published_at": "2026-10-14T10:00:00Z",
+      "best_selling_rank": 3,
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            {
+              "id": 5006,
+              "name": "S"
+            },
+            {
+              "id": 5007,
+              "name": "M"
+            },
+            {
+              "id": 5008,
+              "name": "L"
+            },
+            {
+              "id": 5009,
+              "name": "XL"
+            }
+          ]
+        },
+        {
+          "name": "Color",
+          "values": [
+            {
+              "id": 5010,
+              "name": "Black speckle",
+              "swatch": {
+                "color": "#141619"
+              }
+            }
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": 2005,
+          "options": [
+            "S",
+            "Black speckle"
+          ],
+          "price": 26000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": false,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 0,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3010
+        },
+        {
+          "id": 2006,
+          "options": [
+            "M",
+            "Black speckle"
+          ],
+          "price": 26000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": true,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 6,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3010
+        },
+        {
+          "id": 2007,
+          "options": [
+            "L",
+            "Black speckle"
+          ],
+          "price": 26000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": true,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 6,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3010
+        },
+        {
+          "id": 2008,
+          "options": [
+            "XL",
+            "Black speckle"
+          ],
+          "price": 26000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": true,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 6,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3010
+        }
+      ],
+      "media": [
+        {
+          "id": 3010,
+          "media_type": "image",
+          "position": 1,
+          "alt": "Piped tracksuit, black speckle, front",
+          "image": {
+            "base": "products/reflective-piping-tracksuit-black-speckle--front",
+            "ext": "webp",
+            "widths": [
+              400,
+              800
+            ],
+            "width": 800,
+            "height": 1000,
+            "alt": "Piped tracksuit, black speckle, front"
+          }
+        },
+        {
+          "id": 3011,
+          "media_type": "image",
+          "position": 2,
+          "alt": "Piped tracksuit, black speckle, back",
+          "image": {
+            "base": "products/reflective-piping-tracksuit-black-speckle--back",
+            "ext": "webp",
+            "widths": [
+              400,
+              800
+            ],
+            "width": 800,
+            "height": 1000,
+            "alt": "Piped tracksuit, black speckle, back"
+          }
+        }
+      ],
+      "placeholder": true,
+      "placeholder_fields": [
+        "price",
+        "variants",
+        "inventory",
+        "description",
+        "created_at",
+        "sku"
+      ]
+    },
+    {
+      "id": 1003,
+      "handle": "embossed-gothic-tracksuit-stone",
+      "title": "Gothic-arch tracksuit, stone",
+      "product_type": "Tracksuits",
+      "vendor": "STEADFAST",
+      "description_html": "<p>Placeholder description. Product details to be confirmed by STEADFAST.</p>",
+      "tags": [
+        "tracksuit"
+      ],
+      "created_at": "2026-10-08T10:00:00Z",
+      "published_at": "2026-10-08T10:00:00Z",
+      "best_selling_rank": 2,
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            {
+              "id": 5011,
+              "name": "S"
+            },
+            {
+              "id": 5012,
+              "name": "M"
+            },
+            {
+              "id": 5013,
+              "name": "L"
+            },
+            {
+              "id": 5014,
+              "name": "XL"
+            }
+          ]
+        },
+        {
+          "name": "Color",
+          "values": [
+            {
+              "id": 5015,
+              "name": "Stone",
+              "swatch": {
+                "color": "#cfc6b4"
+              }
+            }
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": 2009,
+          "options": [
+            "S",
+            "Stone"
+          ],
+          "price": 28000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": true,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 6,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3012
+        },
+        {
+          "id": 2010,
+          "options": [
+            "M",
+            "Stone"
+          ],
+          "price": 28000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": true,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 6,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3012
+        },
+        {
+          "id": 2011,
+          "options": [
+            "L",
+            "Stone"
+          ],
+          "price": 28000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": true,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 6,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3012
+        },
+        {
+          "id": 2012,
+          "options": [
+            "XL",
+            "Stone"
+          ],
+          "price": 28000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": false,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 0,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3012
+        }
+      ],
+      "media": [
+        {
+          "id": 3012,
+          "media_type": "image",
+          "position": 1,
+          "alt": "Gothic-arch tracksuit, stone, back",
+          "image": {
+            "base": "products/embossed-gothic-tracksuit-stone--back",
+            "ext": "webp",
+            "widths": [
+              400,
+              800,
+              1200,
+              1600
+            ],
+            "width": 1600,
+            "height": 2000,
+            "alt": "Gothic-arch tracksuit, stone, back"
+          }
+        }
+      ],
+      "placeholder": true,
+      "placeholder_fields": [
+        "price",
+        "variants",
+        "inventory",
+        "description",
+        "created_at",
+        "sku"
+      ]
+    },
+    {
+      "id": 1004,
+      "handle": "embossed-gothic-hoodie",
+      "title": "Gothic hoodie",
+      "product_type": "Hoodies",
+      "vendor": "STEADFAST",
+      "description_html": "<p>Placeholder description. Product details to be confirmed by STEADFAST.</p>",
+      "tags": [
+        "hoodie"
+      ],
+      "created_at": "2026-10-26T10:00:00Z",
+      "published_at": "2026-10-26T10:00:00Z",
+      "best_selling_rank": 4,
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            {
+              "id": 5016,
+              "name": "S"
+            },
+            {
+              "id": 5017,
+              "name": "M"
+            },
+            {
+              "id": 5018,
+              "name": "L"
+            }
+          ]
+        },
+        {
+          "name": "Color",
+          "values": [
+            {
+              "id": 5019,
+              "name": "Washed charcoal",
+              "swatch": {
+                "color": "#3a3c40"
+              }
+            },
+            {
+              "id": 5020,
+              "name": "Washed grey",
+              "swatch": {
+                "color": "#8b9096"
+              }
+            }
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": 2013,
+          "options": [
+            "S",
+            "Washed charcoal"
+          ],
+          "price": 17000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": true,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 6,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3013
+        },
+        {
+          "id": 2014,
+          "options": [
+            "M",
+            "Washed charcoal"
+          ],
+          "price": 17000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": true,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 6,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3013
+        },
+        {
+          "id": 2015,
+          "options": [
+            "L",
+            "Washed charcoal"
+          ],
+          "price": 17000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": true,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 6,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3013
+        },
+        {
+          "id": 2016,
+          "options": [
+            "S",
+            "Washed grey"
+          ],
+          "price": 17000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": true,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 6,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3014
+        },
+        {
+          "id": 2017,
+          "options": [
+            "M",
+            "Washed grey"
+          ],
+          "price": 17000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": true,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 6,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3014
+        },
+        {
+          "id": 2018,
+          "options": [
+            "L",
+            "Washed grey"
+          ],
+          "price": 17000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": false,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 0,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3014
+        }
+      ],
+      "media": [
+        {
+          "id": 3013,
+          "media_type": "image",
+          "position": 1,
+          "alt": "Gothic hoodie, back, washed charcoal",
+          "image": {
+            "base": "products/embossed-gothic-hoodie--back-charcoal",
+            "ext": "webp",
+            "widths": [
+              400,
+              720
+            ],
+            "width": 720,
+            "height": 900,
+            "alt": "Gothic hoodie, back, washed charcoal"
+          }
+        },
+        {
+          "id": 3014,
+          "media_type": "image",
+          "position": 2,
+          "alt": "Gothic hoodie, back, washed grey",
+          "image": {
+            "base": "products/embossed-gothic-hoodie--back-grey",
+            "ext": "webp",
+            "widths": [
+              400,
+              800
+            ],
+            "width": 800,
+            "height": 1000,
+            "alt": "Gothic hoodie, back, washed grey"
+          }
+        }
+      ],
+      "placeholder": true,
+      "placeholder_fields": [
+        "price",
+        "variants",
+        "inventory",
+        "description",
+        "created_at",
+        "sku"
+      ]
+    },
+    {
+      "id": 1005,
+      "handle": "heavyweight-zip-hoodie-black",
+      "title": "Zip hoodie, black",
+      "product_type": "Hoodies",
+      "vendor": "STEADFAST",
+      "description_html": "<p>Placeholder description. Product details to be confirmed by STEADFAST.</p>",
+      "tags": [
+        "hoodie",
+        "zip-up"
+      ],
+      "created_at": "2026-09-30T10:00:00Z",
+      "published_at": "2026-09-30T10:00:00Z",
+      "best_selling_rank": 5,
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            {
+              "id": 5021,
+              "name": "S"
+            },
+            {
+              "id": 5022,
+              "name": "M"
+            },
+            {
+              "id": 5023,
+              "name": "L"
+            },
+            {
+              "id": 5024,
+              "name": "XL"
+            }
+          ]
+        },
+        {
+          "name": "Color",
+          "values": [
+            {
+              "id": 5025,
+              "name": "Black",
+              "swatch": {
+                "color": "#000000"
+              }
+            }
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": 2019,
+          "options": [
+            "S",
+            "Black"
+          ],
+          "price": 16000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": false,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 0,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3015
+        },
+        {
+          "id": 2020,
+          "options": [
+            "M",
+            "Black"
+          ],
+          "price": 16000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": true,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 6,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3015
+        },
+        {
+          "id": 2021,
+          "options": [
+            "L",
+            "Black"
+          ],
+          "price": 16000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": true,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 6,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3015
+        },
+        {
+          "id": 2022,
+          "options": [
+            "XL",
+            "Black"
+          ],
+          "price": 16000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": true,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 6,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3015
+        }
+      ],
+      "media": [
+        {
+          "id": 3015,
+          "media_type": "image",
+          "position": 1,
+          "alt": "Zip hoodie, black, worn, night photograph",
+          "image": {
+            "base": "products/heavyweight-zip-hoodie-black--lifestyle",
+            "ext": "webp",
+            "widths": [
+              400,
+              800,
+              1200,
+              1600
+            ],
+            "width": 1600,
+            "height": 2000,
+            "alt": "Zip hoodie, black, worn, night photograph"
+          }
+        }
+      ],
+      "placeholder": true,
+      "placeholder_fields": [
+        "price",
+        "variants",
+        "inventory",
+        "description",
+        "created_at",
+        "sku"
+      ]
+    },
+    {
+      "id": 1006,
+      "handle": "wide-sweatpants-black",
+      "title": "Wide sweatpants, black",
+      "product_type": "Bottoms",
+      "vendor": "STEADFAST",
+      "description_html": "<p>Placeholder description. Product details to be confirmed by STEADFAST.</p>",
+      "tags": [
+        "sweatpants"
+      ],
+      "created_at": "2026-09-24T10:00:00Z",
+      "published_at": "2026-09-24T10:00:00Z",
+      "best_selling_rank": 6,
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            {
+              "id": 5026,
+              "name": "S"
+            },
+            {
+              "id": 5027,
+              "name": "M"
+            },
+            {
+              "id": 5028,
+              "name": "L"
+            },
+            {
+              "id": 5029,
+              "name": "XL"
+            }
+          ]
+        },
+        {
+          "name": "Color",
+          "values": [
+            {
+              "id": 5030,
+              "name": "Black",
+              "swatch": {
+                "color": "#000000"
+              }
+            }
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": 2023,
+          "options": [
+            "S",
+            "Black"
+          ],
+          "price": 12000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": true,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 6,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3016
+        },
+        {
+          "id": 2024,
+          "options": [
+            "M",
+            "Black"
+          ],
+          "price": 12000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": true,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 6,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3016
+        },
+        {
+          "id": 2025,
+          "options": [
+            "L",
+            "Black"
+          ],
+          "price": 12000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": true,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 6,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3016
+        },
+        {
+          "id": 2026,
+          "options": [
+            "XL",
+            "Black"
+          ],
+          "price": 12000,
+          "compare_at_price": null,
+          "sku": null,
+          "available": false,
+          "inventory_management": "shopify",
+          "inventory_policy": "deny",
+          "inventory_quantity": 0,
+          "quantity_rule": {
+            "min": 1,
+            "max": null,
+            "increment": 1
+          },
+          "featured_media_id": 3016
+        }
+      ],
+      "media": [
+        {
+          "id": 3016,
+          "media_type": "image",
+          "position": 1,
+          "alt": "Wide sweatpants, black, worn, night photograph",
+          "image": {
+            "base": "products/wide-sweatpants-black--lifestyle",
+            "ext": "webp",
+            "widths": [
+              400,
+              800,
+              1200
+            ],
+            "width": 1200,
+            "height": 1500,
+            "alt": "Wide sweatpants, black, worn, night photograph"
+          }
+        }
+      ],
+      "placeholder": true,
+      "placeholder_fields": [
+        "price",
+        "variants",
+        "inventory",
+        "description",
+        "created_at",
+        "sku"
+      ]
+    }
+  ]
+}

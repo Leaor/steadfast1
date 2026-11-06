@@ -1,0 +1,67 @@
+{%- doc -%}
+  One gallery media item (DESIGN §7.8): image | video | external_video | model, always in a 4:5
+  well. Images open the zoom viewer (a link to the full image without JS). Hosted and external
+  videos start only on click; 3D models load model-viewer only on click.
+
+  @param {object} media - The product media.
+  @param {object} product - The product (alt fallback).
+  @param {number} index - 1-based position.
+  @param {string} [loading] - 'eager' for the first item, else 'lazy'.
+  @param {string} [fetchpriority] - 'high' for the LCP item.
+  @param {boolean} [zoom] - Render the zoom trigger on images.
+  @param {boolean} [video_loop] - Loop hosted video.
+  @param {string} [sizes] - sizes attribute. Default '(min-width: 990px) 58vw, 100vw'.
+
+  @example
+  {% render 'sf-product-media', media: media, product: product, index: forloop.index, zoom: true %}
+{%- enddoc -%}
+{%- liquid
+  assign m_sizes = sizes | default: '(min-width: 990px) 58vw, 100vw'
+  assign m_loading = loading | default: 'lazy'
+  assign m_widths = '600,900,1200,1600,2000'
+  assign fallback_alt = 'products.image_alt' | t: title: product.title, index: index
+  assign m_alt = media.alt | default: fallback_alt
+  assign poster = media.preview_image
+-%}
+<div class="sf-media sf-media--{{ media.media_type }}" data-media-type="{{ media.media_type }}">
+  {%- case media.media_type -%}
+    {%- when 'image' -%}
+      {%- if zoom -%}
+        {%- assign zoom_w = media.width | default: 2400 | at_most: 2400 -%}
+        <a class="sf-media__zoom" href="{{ media | image_url: width: zoom_w }}" data-sf-zoom data-media-id="{{ media.id }}" aria-label="{{ 'products.zoom' | t: index: index | escape }}" aria-haspopup="dialog">
+          {%- render 'sf-image', image: media, sizes: m_sizes, widths: m_widths, loading: m_loading, fetchpriority: fetchpriority, alt: m_alt, class: 'sf-media__img' -%}
+          <span class="sf-media__zoom-icon" aria-hidden="true">{%- render 'sf-icon', name: 'zoom', size: 20 -%}</span>
+        </a>
+      {%- else -%}
+        {%- render 'sf-image', image: media, sizes: m_sizes, widths: m_widths, loading: m_loading, fetchpriority: fetchpriority, alt: m_alt, class: 'sf-media__img' -%}
+      {%- endif -%}
+    {%- when 'video', 'external_video' -%}
+      <div class="sf-media__deferred" data-sf-deferred-media>
+        <button type="button" class="sf-media__poster" data-sf-media-play aria-label="{{ 'products.play_video' | t | escape }}: {{ m_alt | escape }}">
+          {%- if poster != blank -%}
+            {%- render 'sf-image', image: poster, sizes: m_sizes, widths: m_widths, loading: m_loading, fetchpriority: fetchpriority, alt: '', class: 'sf-media__img' -%}
+          {%- endif -%}
+          <span class="sf-media__play" aria-hidden="true">{%- render 'sf-icon', name: 'play', size: 20 -%}</span>
+        </button>
+        <template>
+          {%- if media.media_type == 'video' -%}
+            {{ media | video_tag: controls: true, playsinline: true, autoplay: true, muted: false, loop: video_loop, image_size: '1200x', class: 'sf-media__video' }}
+          {%- else -%}
+            {{ media | external_video_url: autoplay: true, loop: video_loop, playsinline: true | external_video_tag: class: 'sf-media__iframe', title: m_alt }}
+          {%- endif -%}
+        </template>
+      </div>
+    {%- when 'model' -%}
+      <div class="sf-media__deferred" data-sf-deferred-media data-model>
+        <button type="button" class="sf-media__poster" data-sf-media-play aria-label="{{ 'products.model_label' | t: title: product.title | escape }}">
+          {%- if poster != blank -%}
+            {%- render 'sf-image', image: poster, sizes: m_sizes, widths: m_widths, loading: m_loading, alt: '', class: 'sf-media__img' -%}
+          {%- endif -%}
+          <span class="sf-media__play sf-media__play--model sf-micro" aria-hidden="true">{{ 'products.view_in_space' | t }}</span>
+        </button>
+        <template>
+          {{ media | model_viewer_tag: image_size: '1200x', reveal: 'interaction', toggleable: true, class: 'sf-media__model' }}
+        </template>
+      </div>
+  {%- endcase -%}
+</div>

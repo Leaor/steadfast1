@@ -1,0 +1,23 @@
+{%- doc -%}
+  Quick view shell (DESIGN §7.6, ARCHITECTURE §4.7): an empty modal dialog rendered once by the
+  layout. sf-quick-view.js fills [data-sf-quick-view-body] from the sf-quick-view section.
+  Desktop: centred dialog; mobile: bottom sheet. Its CSS (quick view + product) loads on intent or on open (data-sf-css, sf-core).
+
+  @example
+  {% render 'sf-quick-view-shell' %}
+{%- enddoc -%}
+{%- if settings.card_show_quick_view or settings.card_show_quick_add -%}
+<sf-dialog id="sf-quick-view" data-sf-dialog-type="modal" class="sf-quick-view-dialog" data-sf-css="{{ 'sf-quick-view.css' | asset_url }} {{ 'sf-product.css' | asset_url }}">
+  <dialog class="sf-quick-view" aria-labelledby="sf-quick-view-title">
+    <sf-quick-view class="sf-quick-view__inner">
+      <span class="sf-quick-view__handle" aria-hidden="true"></span>
+      <button type="button" class="sf-btn sf-btn--icon sf-quick-view__close" data-sf-close aria-label="{{ 'general.close' | t | escape }}">
+        {%- render 'sf-icon', name: 'close', size: 20 -%}
+      </button>
+      <div class="sf-quick-view__body" data-sf-quick-view-body>
+        <p class="sf-visually-hidden" id="sf-quick-view-title" tabindex="-1">{{ 'quick_view.title' | t }}</p>
+      </div>
+    </sf-quick-view>
+  </dialog>
+</sf-dialog>
+{%- endif -%}

@@ -1,0 +1,42 @@
+{%- doc -%}
+  Active filters as removable chips (DESIGN §7.9) plus CLEAR ALL. Each chip is a real link to
+  the filter's url_to_remove; sf-facets.js intercepts them.
+
+  @param {object} results - collection or search.
+  @param {string} clear_url - URL with every filter removed.
+  @param {string} [class] - Extra classes.
+
+  @example
+  {% render 'sf-active-facets', results: collection, clear_url: collection.url %}
+{%- enddoc -%}
+{%- liquid
+  assign active_count = 0
+  for filter in results.filters
+    if filter.type == 'price_range'
+      if filter.min_value.value != blank or filter.max_value.value != blank
+        assign active_count = active_count | plus: 1
+      endif
+    else
+      assign active_count = active_count | plus: filter.active_values.size
+    endif
+  endfor
+-%}
+<div class="sf-active-facets{% if class != blank %} {{ class }}{% endif %}" data-sf-active-facets data-count="{{ active_count }}">
+  {%- if active_count > 0 -%}
+    <ul class="sf-active-facets__list" role="list" aria-label="{{ 'facets.active_filters' | t | escape }}">
+      {%- for filter in results.filters -%}
+        {%- if filter.type == 'price_range' -%}
+          {%- if filter.min_value.value != blank or filter.max_value.value != blank -%}
+            {%- capture price_label -%}{{ filter.min_value.value | default: 0 | money }}–{% if filter.max_value.value != blank %}{{ filter.max_value.value | money }}{% else %}{{ filter.range_max | money }}{% endif %}{%- endcapture -%}
+            <li><a class="sf-chip" href="{{ filter.url_to_remove }}" data-sf-facet-link aria-label="{{ 'facets.remove_filter' | t: label: price_label | escape }}"><span>{{ price_label }}</span>{% render 'sf-icon', name: 'close', size: 12 %}</a></li>
+          {%- endif -%}
+        {%- else -%}
+          {%- for value in filter.active_values -%}
+            <li><a class="sf-chip" href="{{ value.url_to_remove }}" data-sf-facet-link aria-label="{{ 'facets.remove_filter' | t: label: value.label | escape }}"><span>{{ value.label | escape }}</span>{% render 'sf-icon', name: 'close', size: 12 %}</a></li>
+          {%- endfor -%}
+        {%- endif -%}
+      {%- endfor -%}
+      <li><a class="sf-btn sf-btn--text sf-btn--sm sf-active-facets__clear" href="{{ clear_url }}" data-sf-facet-link><span class="sf-btn__label">{{ 'facets.clear_all' | t }}</span></a></li>
+    </ul>
+  {%- endif -%}
+</div>

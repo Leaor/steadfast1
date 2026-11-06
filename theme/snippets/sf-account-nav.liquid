@@ -1,0 +1,15 @@
+{%- doc -%}
+  Account sub-navigation: Overview, Addresses, Log out.
+
+  @param {string} current - 'account' | 'addresses' | 'order'.
+
+  @example
+  {% render 'sf-account-nav', current: 'addresses' %}
+{%- enddoc -%}
+<nav class="sf-account-nav" aria-label="{{ 'customer.nav.label' | t | escape }}">
+  <ul class="sf-account-nav__list" role="list">
+    <li><a class="sf-navlink" href="{{ routes.account_url }}"{% if current == 'account' %} aria-current="page"{% endif %}>{{ 'customer.nav.overview' | t }}</a></li>
+    <li><a class="sf-navlink" href="{{ routes.account_addresses_url }}"{% if current == 'addresses' %} aria-current="page"{% endif %}>{{ 'customer.nav.addresses' | t }}</a></li>
+    <li><a class="sf-navlink" href="{{ routes.account_logout_url }}">{{ 'customer.nav.logout' | t }}</a></li>
+  </ul>
+</nav>

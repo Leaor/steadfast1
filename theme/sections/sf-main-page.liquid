@@ -1,0 +1,23 @@
+{%- comment -%} Page (DESIGN §3.3): Spectral title, body at the measure, generous black space. {%- endcomment -%}
+{{ 'sf-content.css' | asset_url | stylesheet_tag }}
+<section class="sf-section sf-content sf-main-page sf-tone-ink sf-space-{{ section.settings.spacing }}" aria-labelledby="sf-page-title-{{ section.id }}">
+  <div class="sf-container sf-content__grid">
+    <header class="sf-content__header">
+      <h1 class="sf-content__title sf-display-lg" id="sf-page-title-{{ section.id }}">{{ page.title | escape }}</h1>
+    </header>
+    {%- if page.content != blank -%}
+      <div class="sf-content__body sf-rte">{{ page.content }}</div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Page",
+  "class": "sf-shopify-section--main-page",
+  "settings": [
+    { "type": "select", "id": "spacing", "label": "Spacing", "default": "compact",
+      "options": [ { "value": "compact", "label": "Compact" }, { "value": "standard", "label": "Standard" }, { "value": "generous", "label": "Generous" } ] }
+  ]
+}
+{% endschema %}

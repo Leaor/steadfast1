@@ -60,7 +60,8 @@
   }
 
   .sf-hero__end { z-index: 0; }
-  .sf-hero__end img { border: 0; }
+  /* 1px short of the stage: Chromium ignores an image that exactly fills the viewport as an LCP candidate. */
+  .sf-hero__end img { border: 0; height: calc(100% - 1px); }
 
   .sf-hero__loop {
     z-index: 1;
@@ -90,7 +91,11 @@
     inset: 0;
     z-index: 3;
     background: linear-gradient(to top, rgb(0 0 0 / 0.75) 0%, rgb(0 0 0 / 0) 45%);
+    transition: opacity var(--_d-film) var(--sf-ease-in-out);
   }
+
+  /* The film plays clean; the scrim arrives with the UI at beat 9. */
+  html[data-sf-intro='play'] .sf-hero:not(.is-beat-9) .sf-hero__scrim { opacity: 0; }
 
   /* ---------- Content ---------- */
   .sf-hero__content {

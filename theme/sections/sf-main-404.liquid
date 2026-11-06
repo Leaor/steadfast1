@@ -1,0 +1,22 @@
+{%- comment -%} 404 (DESIGN voice: plain, says what happened and what to do). {%- endcomment -%}
+{{ 'sf-content.css' | asset_url | stylesheet_tag }}
+<section class="sf-section sf-content sf-not-found sf-tone-ink sf-space-generous" aria-labelledby="sf-404-title-{{ section.id }}">
+  <div class="sf-container sf-not-found__inner">
+    <h1 class="sf-not-found__title sf-display-lg" id="sf-404-title-{{ section.id }}">{{ 'pages.not_found' | t }}</h1>
+    <p class="sf-not-found__text">{{ 'pages.not_found_text' | t }}</p>
+    <form class="sf-not-found__search" action="{{ routes.search_url }}" method="get" role="search">
+      <label class="sf-visually-hidden" for="sf-404-search-{{ section.id }}">{{ 'pages.search_label' | t }}</label>
+      <input class="sf-not-found__input" type="search" id="sf-404-search-{{ section.id }}" name="q" placeholder="{{ 'search.placeholder' | t | escape }}" autocomplete="off">
+      <input type="hidden" name="options[prefix]" value="last">
+      <button type="submit" class="sf-btn sf-btn--icon" aria-label="{{ 'search.submit' | t | escape }}">{%- render 'sf-icon', name: 'search', size: 20 -%}</button>
+    </form>
+    <div class="sf-not-found__actions">
+      <a class="sf-btn sf-btn--primary" href="{{ routes.all_products_collection_url }}"><span class="sf-btn__label">{{ 'pages.continue_shopping' | t }}</span></a>
+      <a class="sf-btn sf-btn--text" href="{{ routes.root_url }}"><span class="sf-btn__label">{{ 'pages.back_home' | t }}</span></a>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{ "name": "404 page", "class": "sf-shopify-section--main-404" }
+{% endschema %}

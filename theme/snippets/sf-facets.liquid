@@ -1,0 +1,140 @@
+{%- doc -%}
+  Collection / search toolbar and filter drawer (DESIGN §7.9; ARCHITECTURE §4.7). A real GET form
+  with Shopify's native filter params, so filtering and sorting work without JS (the drawer then
+  renders inline with a visible submit). sf-facets.js applies changes live on desktop.
+
+  @param {object} results - collection or search.
+  @param {string} section_id - Owning section id.
+  @param {string} action_url - Form action (collection.url or routes.search_url).
+  @param {string} clear_url - URL with every filter removed.
+  @param {number} count - Number of matching products.
+  @param {boolean} [enable_filtering] - Default true.
+  @param {boolean} [enable_sorting] - Default true.
+  @param {boolean} [show_density] - Render the density toggle.
+  @param {string} [terms] - Search terms (search page): kept as a hidden q.
+
+  @example
+  {% render 'sf-facets', results: collection, section_id: section.id, action_url: collection.url, clear_url: collection.url, count: paginate.items %}
+{%- enddoc -%}
+{%- liquid
+  assign form_id = 'sf-facets-form-' | append: section_id
+  assign drawer_key = 'facets-drawer-' | append: section_id
+  assign filtering = true
+  if enable_filtering == false or results.filters.size == 0
+    assign filtering = false
+  endif
+  assign sorting = true
+  if enable_sorting == false
+    assign sorting = false
+  endif
+  assign active_count = 0
+  for filter in results.filters
+    if filter.type == 'price_range'
+      if filter.min_value.value != blank or filter.max_value.value != blank
+        assign active_count = active_count | plus: 1
+      endif
+    else
+      assign active_count = active_count | plus: filter.active_values.size
+    endif
+  endfor
+-%}
+<div class="sf-facets__toolbar" data-sf-facets-toolbar>
+  <div class="sf-facets__toolbar-inner sf-container">
+    <div class="sf-facets__start">
+      {%- if filtering -%}
+        <button type="button" class="sf-facets__trigger" data-sf-open="{{ drawer_key }}" aria-haspopup="dialog" aria-expanded="false" aria-controls="sf-{{ drawer_key }}">
+          {%- render 'sf-icon', name: 'filter', size: 16, class: 'sf-facets__trigger-icon' -%}
+          <span data-sf-facets-filter-label>{% if active_count > 0 %}{{ 'facets.filter_count' | t: count: active_count }}{% else %}{{ 'facets.filter' | t }}{% endif %}</span>
+        </button>
+      {%- endif -%}
+      <p class="sf-facets__count sf-tabular" data-sf-facets-count>{{ 'facets.results_count' | t: count: count }}</p>
+    </div>
+    <div class="sf-facets__end">
+      {%- if sorting and results.sort_options.size > 0 -%}
+        {%- assign sort_id = 'sf-sort-' | append: section_id -%}
+        {%- render 'sf-sort', results: results, form_id: form_id, id_prefix: sort_id -%}
+      {%- endif -%}
+      {%- if show_density -%}
+        <sf-grid-density class="sf-density" role="group" aria-label="{{ 'collections.density' | t | escape }}" data-section-id="{{ section_id }}">
+          <button type="button" class="sf-density__btn" data-density="large" aria-pressed="false" aria-label="{{ 'collections.density_large' | t | escape }}"><span class="sf-density__icon sf-density__icon--large" aria-hidden="true"><i></i><i></i></span></button>
+          <button type="button" class="sf-density__btn" data-density="small" aria-pressed="false" aria-label="{{ 'collections.density_small' | t | escape }}"><span class="sf-density__icon sf-density__icon--small" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>
+        </sf-grid-density>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+{%- if filtering -%}
+  <div class="sf-facets__active-row sf-container">
+    {%- render 'sf-active-facets', results: results, clear_url: clear_url -%}
+  </div>
+{%- endif -%}
+
+<sf-dialog id="sf-{{ drawer_key }}" data-sf-dialog-type="drawer-left" class="sf-facets-drawer">
+  <dialog class="sf-facets-drawer__dialog" aria-labelledby="sf-facets-title-{{ section_id }}">
+    <form id="{{ form_id }}" class="sf-facets__form" action="{{ action_url }}" method="get" data-sf-facets-form>
+      <div class="sf-dialog__head">
+        <h2 class="sf-dialog__title" id="sf-facets-title-{{ section_id }}" tabindex="-1" data-sf-initial-focus>{{ 'facets.filters' | t }}</h2>
+        <button type="button" class="sf-btn sf-btn--text sf-btn--sm sf-facets__close" data-sf-close><span class="sf-btn__label">{{ 'general.close' | t }}</span></button>
+      </div>
+      {%- if terms != blank -%}
+        <input type="hidden" name="q" value="{{ terms | escape }}">
+        <input type="hidden" name="options[prefix]" value="last">
+      {%- endif -%}
+      <div class="sf-facets__scroll">
+        {%- if filtering -%}
+          {%- render 'sf-active-facets', results: results, clear_url: clear_url, class: 'sf-active-facets--drawer' -%}
+        {%- endif -%}
+        <div class="sf-facets__groups" data-sf-facets-groups>
+          {%- if filtering -%}
+            {%- for filter in results.filters -%}
+              {%- liquid
+                assign f_id = 'sf-facet-' | append: section_id | append: '-' | append: forloop.index
+                assign f_selected = filter.active_values.size
+                if filter.type == 'price_range'
+                  assign f_selected = 0
+                  if filter.min_value.value != blank or filter.max_value.value != blank
+                    assign f_selected = 1
+                  endif
+                endif
+              -%}
+              <details class="sf-facet" data-sf-facet="{{ filter.param_name | default: filter.label | escape }}" open{% unless f_selected > 0 or forloop.index <= 2 %} data-sf-facet-collapse{% endunless %}>
+                <summary class="sf-facet__summary">
+                  <span class="sf-facet__name">{{ filter.label | escape }}</span>
+                  {%- if f_selected > 0 and filter.type != 'price_range' -%}<span class="sf-facet__selected sf-tabular">{{ 'facets.selected_count' | t: count: f_selected }}</span>{%- endif -%}
+                  {%- render 'sf-icon', name: 'plus', size: 16, class: 'sf-facet__icon' -%}{%- render 'sf-icon', name: 'minus', size: 16, class: 'sf-facet__icon' -%}
+                </summary>
+                <div class="sf-facet__body">
+                  {%- if filter.type == 'price_range' -%}
+                    {%- render 'sf-facet-price', filter: filter, id_prefix: f_id -%}
+                  {%- else -%}
+                    <fieldset class="sf-facet__values{% if filter.presentation == 'swatch' %} sf-facet__values--swatch{% endif %}">
+                      <legend class="sf-visually-hidden">{{ filter.label | escape }}</legend>
+                      {%- for value in filter.values -%}
+                        {%- assign v_id = f_id | append: '-' | append: forloop.index -%}
+                        {%- assign v_disabled = false -%}
+                        {%- if value.count == 0 and value.active == false -%}{%- assign v_disabled = true -%}{%- endif -%}
+                        <div class="sf-facet__value{% if v_disabled %} is-disabled{% endif %}">
+                          <input class="sf-checkbox" type="checkbox" id="{{ v_id }}" name="{{ value.param_name }}" value="{{ value.value | escape }}"{% if value.active %} checked{% endif %}{% if v_disabled %} disabled{% endif %}>
+                          <label class="sf-facet__label" for="{{ v_id }}">
+                            {%- if filter.presentation == 'swatch' and value.swatch.color != blank -%}<span class="sf-facet__swatch" style="--sf-swatch: {{ value.swatch.color }}" aria-hidden="true"></span>{%- endif -%}
+                            <span class="sf-facet__text">{{ value.label | escape }}</span>
+                            <span class="sf-facet__count sf-tabular" aria-hidden="true">{{ value.count }}</span>
+                            <span class="sf-visually-hidden">({{ 'facets.results_count' | t: count: value.count }})</span>
+                          </label>
+                        </div>
+                      {%- endfor -%}
+                    </fieldset>
+                  {%- endif -%}
+                </div>
+              </details>
+            {%- endfor -%}
+          {%- endif -%}
+        </div>
+      </div>
+      <div class="sf-facets__foot">
+        <a class="sf-btn sf-btn--secondary sf-facets__clear" href="{{ clear_url }}" data-sf-facet-link data-sf-facets-clear><span class="sf-btn__label">{{ 'facets.clear_all' | t }}</span></a>
+        <button type="submit" class="sf-btn sf-btn--primary sf-facets__submit"><span class="sf-btn__label" data-sf-facets-submit-label>{{ 'facets.show_results' | t: count: count }}</span></button>
+      </div>
+    </form>
+  </dialog>
+</sf-dialog>

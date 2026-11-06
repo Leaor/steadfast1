@@ -1615,8 +1615,8 @@ The v1 names `sf-font-display-400` and `sf-font-display-400-italic` are retired.
 | File | Spec |
 |---|---|
 | `sf-logo-wordmark.svg` | Traced letterforms, **viewBox 0 0 1115 154 (7.24:1)**, `fill="currentColor"`, no `width`/`height`, 10.4 KB (< 15 KB, required for `inline_asset_content`). |
-| `sf-logo-textured-{600,1200,1800}.webp`, `sf-logo-textured-1200.png` | Alpha-transparent cream wordmark with streaks, **1210×411 native box (2.944:1)**; letters at x 4.50–96.65 %, y 32.48–69.95 %. Manifest today: 600/1200/**2000** + png 1200; **MEDIA: replace 2000 with 1800** (≤ 1.5× upscale, DESIGN §3.4). |
-| `sf-logo-streaks-{1200,1800}.webp` | **New (MEDIA):** the streak-only raster for the F lockup (letters knocked out under the SVG letter mask dilated 1 px), same 1210×411 box. Until it exists, `lockup` falls back to the textured raster at every width (capped at 900 CSS px). |
+| `sf-logo-textured-{600,1200,1800}.webp`, `sf-logo-textured-1200.png` | Alpha-transparent cream wordmark with streaks, **1210×411 native box (2.944:1)**; letters at x 4.50–96.65 %, y 32.48–69.95 %. Delivered: 600/1200/1800 + png 1200 (the 1800 is a 1.49× upscale, DESIGN §3.4). |
+| `sf-logo-streaks-{1200,1800}.webp` | Delivered (MEDIA): the streak-only raster for the F lockup (letters knocked out under the SVG letter mask dilated 1 px), same 1210×411 box. |
 | `sf-favicon-32.png`, `sf-apple-touch-icon-180.png` | First-letter crops. (`sf-favicon-180.png`, `sf-favicon-512.png` are bundled but unreferenced.) |
 | `sf-og-default.jpg` | 1200×630 |
 
@@ -1641,7 +1641,7 @@ These four names are final (FILM A8's "name pending ARCH" is resolved). Any camp
 **Stills** (generated from `manifest.json` `theme_assets`; files are `{base}-{width}.webp` plus the listed fallback):
 | Base | WebP widths | Fallback file | Intrinsic w×h (fallback) | Default alt | Used by |
 |---|---|---|---|---|---|
-| `sf-logo-textured` | 600, 1200, 2000 | `sf-logo-textured-1200.png` | 1200×408 | (logo; `sf-logo` sets the alt) | hero `h1`, brand story (< 990 px), password page. **MEDIA: replace 2000 with 1800** (DESIGN §3.4) |
+| `sf-logo-textured` | 600, 1200, 1800 | `sf-logo-textured-1200.png` | 1200×408 | (logo; `sf-logo` sets the alt) | hero `h1`, brand story (< 990 px), password page. |
 | `sf-logo-wordmark` | — | `sf-logo-wordmark.svg` | 1115×154 | (logo; `sf-logo` sets the label) | header, footer, next-drop tile, menu header row, letters of the F lockup |
 | `sf-favicon-32` | — | `sf-favicon-32.png` | 32×32 | n/a | favicon fallback |
 | `sf-favicon-180` | — | `sf-favicon-180.png` | 180×180 | n/a | spare (not referenced) |
@@ -1650,10 +1650,10 @@ These four names are final (FILM A8's "name pending ARCH" is resolved). Any camp
 | `sf-og-default` | — | `sf-og-default.jpg` | 1200×630 | n/a | `og:image` fallback |
 | `sf-category-hoodies` | 540, 900, 1200 | `sf-category-hoodies-900.jpg` | 900×1125 | Hoodies | E default |
 | `sf-signature-hero` | 960, 1600, 2400, 2730 | `sf-signature-hero-1600.jpg` | 1600×900 | STEADFAST zip hoodie in washed blue-grey on black, front | C desktop stage, front |
-| `sf-category-new-arrivals` | 540, 900, 1200 | `sf-category-new-arrivals-900.jpg` | 900×1125 | New arrivals | E default. **MEDIA: regenerate** from the embossed charcoal hoodie close-up, widths 540, 720 (DESIGN §5.6) |
+| `sf-category-new-arrivals` | 540, 720 | `sf-category-new-arrivals-720.jpg` | 720×900 | New arrivals | E default. from the graded IMG_4913 embossed charcoal close-up (DESIGN §5.6) |
 | `sf-signature-front` | 600, 900, 1200 | `sf-signature-front-900.jpg` | 900×1125 | Front of the washed blue-grey STEADFAST zip hoodie | C mobile/reduced front; placeholder card 1 |
 | `sf-signature-back` | 600, 900, 1200 | `sf-signature-back-900.jpg` | 900×1125 | Back of the washed blue-grey STEADFAST zip hoodie | C mobile/reduced back |
-| `sf-category-tops` | 540, 720 | `sf-category-tops-720.jpg` | 720×900 | Tops | E default. **MEDIA: regenerate** from the reflective tracksuit front, top crop, widths 400, 560 (DESIGN §5.6) |
+| `sf-category-tops` | 400, 560 | `sf-category-tops-560.jpg` | 560×700 | Tops | E default. from the reflective tracksuit front, top crop (DESIGN §5.6) |
 | `sf-signature-hero-back` | 960, 1600, 2400, 2730 | `sf-signature-hero-back-1600.jpg` | 1600×900 | Back of the washed blue-grey STEADFAST zip hoodie on black | C desktop stage, back (front→back crossfade) |
 | `sf-signature-detail-zip` | 400, 720, 800 | `sf-signature-detail-zip-720.jpg` | 720×720 | Detail: zip and neck label | C detail 1 (stacked layout) |
 | `sf-signature-detail-neck-label` | 400, 720 | `sf-signature-detail-neck-label-720.jpg` | 720×720 | Detail: neck label | C optional 5th block |
@@ -1672,7 +1672,7 @@ These four names are final (FILM A8's "name pending ARCH" is resolved). Any camp
 | `sf-editorial-black-tracksuit-4x5` | 800, 1200, 1600 | `sf-editorial-black-tracksuit-4x5-1200.jpg` | 1200×1500 | Black STEADFAST zip hoodie and wide sweatpants, photographed at night | spare |
 | `sf-editorial-black-tracksuit-2x3` | 800, 1200, 1600 | `sf-editorial-black-tracksuit-2x3-1200.jpg` | 1200×1800 | Black STEADFAST zip hoodie and wide sweatpants, photographed at night | spare |
 | `sf-lookbook-embossed-hoodie` | 400, 720 | `sf-lookbook-embossed-hoodie-720.jpg` | 720×900 | STEADFAST lettering on the back of a washed charcoal hoodie | placeholder card 4 |
-| `sf-grain` | 256 | `sf-grain.webp` | 256×256 | n/a (CSS background) | optional static ≤ 4% tile over the hero poster only (DESIGN §5.3) |
+| `sf-grain` | 256 | `sf-grain-256.webp` (`sf-grain.webp` also shipped) | 256×256 | n/a (CSS background) | optional static ≤ 4% tile over the hero poster only (DESIGN §5.3) |
 
 Dropped widths (manifest `dropped_widths`, 1.5× upscale limit): `sf-signature-detail-zip` 1200; `-chest-logo` 1200; `-hem` 1200; `-neck-label`, `-shoulder`, `-cuff-label` 800 and 1200. Callers take the widths from `sf-asset-data`; nothing is added by hand.
 

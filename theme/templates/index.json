@@ -76,11 +76,11 @@
     "categories": {
       "type": "sf-category-grid",
       "blocks": {
-        "hoodies": { "type": "category", "settings": { "title": "Hoodies", "asset": "hoodies" } },
-        "tracksuits": { "type": "category", "settings": { "title": "Tracksuits", "asset": "tracksuits" } },
-        "tops": { "type": "category", "settings": { "title": "Tops", "asset": "tops" } },
-        "bottoms": { "type": "category", "settings": { "title": "Bottoms", "asset": "bottoms" } },
-        "new_arrivals": { "type": "category", "settings": { "title": "New arrivals", "asset": "new-arrivals" } }
+        "hoodies": { "type": "category", "settings": { "title": "Hoodies", "asset": "hoodies", "collection": "hoodies" } },
+        "tracksuits": { "type": "category", "settings": { "title": "Tracksuits", "asset": "tracksuits", "collection": "tracksuits" } },
+        "tops": { "type": "category", "settings": { "title": "Tops", "asset": "tops", "collection": "tops" } },
+        "bottoms": { "type": "category", "settings": { "title": "Bottoms", "asset": "bottoms", "collection": "bottoms" } },
+        "new_arrivals": { "type": "category", "settings": { "title": "New arrivals", "asset": "new-arrivals", "collection": "new-arrivals" } }
       },
       "block_order": ["hoodies", "tracksuits", "tops", "bottoms", "new_arrivals"],
       "settings": {

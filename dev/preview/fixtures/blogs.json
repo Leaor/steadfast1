@@ -1,0 +1,29 @@
+{
+  "placeholder": true,
+  "_note": "Sample data derived only from the supplied client assets (CONTEXT.md). Every value is a placeholder for exercising the theme; nothing here is STEADFAST data.",
+  "blogs": [
+    {
+      "id": 7001,
+      "handle": "journal",
+      "title": "Journal",
+      "comments_enabled": false,
+      "articles": [
+        {
+          "id": 8001,
+          "handle": "journal-entry-placeholder",
+          "title": "Journal entry (placeholder)",
+          "author": "STEADFAST",
+          "published_at": "2026-10-01T09:00:00Z",
+          "tags": [],
+          "placeholder": true,
+          "content": "<p>Article content to be written.</p>",
+          "excerpt": "",
+          "image": {
+            "still": "sf-campaign-back",
+            "alt": "Figure from behind under a single overhead light, on black"
+          }
+        }
+      ]
+    }
+  ]
+}

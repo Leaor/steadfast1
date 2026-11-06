@@ -3,8 +3,7 @@
     "hero": {
       "skip": "Skip intro",
       "pause": "Pause",
-      "play": "Play",
-      "campaign_film": "Campaign film"
+      "play": "Play"
     },
     "featured": {
       "rail_label": "{{ heading }}, scrollable list",

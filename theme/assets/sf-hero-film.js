@@ -1,25 +1,22 @@
-/* STEADFAST · Section A · <sf-hero-film> (HOME). ARCHITECTURE §5; DESIGN §8.3 A.
-   Video + CSS + Web Animations API, no GSAP. Header, scroll, keys and focus work from t = 0;
-   any of them ends the intro at once. */
+/* STEADFAST · Section A · <sf-hero-film> (HOME). ARCHITECTURE §5, DESIGN §8.3 A.
+   Video + CSS + WAAPI, no GSAP. Scroll, keys and focus work from t = 0 and end the intro. */
 (() => {
   const S = (window.Steadfast = window.Steadfast || {});
   S.modules = S.modules || {};
   if (S.modules['hero-film']) return;
   S.modules['hero-film'] = true;
-
   const html = document.documentElement;
   const SEEN = 'sf:intro-seen';
-  const CAP = 14; // FILM B7 hard cap
+  const CAP = 14;
   const WATCH = 4000;
-  const debug = (...a) => { if (typeof S.debug === 'function') S.debug('[hero]', ...a); };
   const emit = (name, detail) => {
     if (S.bus && S.bus.emit) S.bus.emit(name, detail);
     else document.dispatchEvent(new CustomEvent(name, { detail }));
   };
-  const design = () => Boolean((window.Shopify && window.Shopify.designMode) || (S.settings && S.settings.designMode));
+  const design = () => Boolean((window.Shopify || {}).designMode || (S.settings || {}).designMode);
   const play = (v, onErr) => { const p = v.play(); if (p && p.catch) p.catch(onErr || (() => {})); };
-  const focus = (el) => { if (!el) return; try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } };
-
+  const focus = (el) => { if (el) try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } };
+  const noData = () => 'sfSaveData' in html.dataset;
   class SfHeroFilm extends HTMLElement {
     connectedCallback() {
       if (this._ac) return;
@@ -33,56 +30,42 @@
       this.$mark = $('[data-sf-hero-mark]');
       this.$primary = $('[data-sf-hero-primary]');
       this.$secondary = $('[data-sf-hero-secondary]');
-      this.mq = window.matchMedia(this.dataset.mqMobile || '(max-width: 749px)');
+      this.mq = matchMedia(this.dataset.mqMobile || '(max-width: 749px)');
       this.timers = new Set();
-      this.mode = 'idle'; // idle | intro | done
+      this.mode = 'idle';
       this.visible = true;
       this.baseState = 'static';
-      for (const v of [this.$intro, this.$loop]) {
-        if (v) { v.muted = true; v.defaultMuted = true; v.playsInline = true; } // iOS needs the properties
-      }
+      for (const v of [this.$intro, this.$loop]) if (v) { v.muted = true; v.defaultMuted = true; v.playsInline = true; }
       this.bind(this._ac.signal);
       this.start();
     }
-
     disconnectedCallback() {
       if (!this._ac) return;
       this._ac.abort();
       this._ac = null;
       this.disarm();
       this.clear();
-      cancelAnimationFrame(this._raf);
+      this._w = (this._w || 0) + 1;
       if (this._io) this._io.disconnect();
       if (this._sweep) this._sweep.cancel();
       for (const v of [this.$intro, this.$loop]) if (v) v.pause();
       this.mode = 'idle';
     }
-
     later(fn, ms) {
       const id = setTimeout(() => { this.timers.delete(id); fn(); }, ms);
       this.timers.add(id);
       return id;
     }
-
     clear() { this.timers.forEach(clearTimeout); this.timers.clear(); }
-
-    setState(s) { this.dataset.state = s; html.dataset.sfHero = s; debug(s); }
-
+    setState(s) { this.dataset.state = s; html.dataset.sfHero = s; }
     variant() { return this.mq.matches ? 'mobile' : 'desktop'; }
-
     pick(kind, variant = this.variant()) { return this.dataset[kind + (variant === 'mobile' ? 'Mobile' : 'Desktop')] || ''; }
-
     seen() {
       if (design()) return false;
       if ('sfIntroSeen' in html.dataset) return true;
       try { return sessionStorage.getItem(SEEN) === '1'; } catch (e) { return false; }
     }
-
-    markSeen() {
-      if (design()) return;
-      try { sessionStorage.setItem(SEEN, '1'); } catch (e) { /* blocked */ }
-    }
-
+    markSeen() { if (!design()) try { sessionStorage.setItem(SEEN, '1'); } catch (e) {} }
     setControl(mode) {
       const c = this.$ctl;
       if (!c) return;
@@ -93,19 +76,16 @@
       if (mode === 'skip') c.removeAttribute('aria-pressed');
       else c.setAttribute('aria-pressed', String(mode === 'play'));
     }
-
-    /* Eligibility (ARCHITECTURE §5.3): first match wins. */
     start() {
       const d = html.dataset;
       if (d.sfMotion === 'reduced') return this.toStatic('reduced', false, 'play');
-      if ('sfSaveData' in d) return this.toStatic('save-data', false, false);
+      if (noData()) return this.toStatic('save-data', false, false);
       if (this.dataset.introEnabled === 'false') return this.toStatic('disabled');
       if (this.dataset.frequency !== 'every_visit' && this.seen()) return this.toStatic('seen');
       const src = this.pick('intro');
       if (!src) return this.toStatic('no-film');
       this.playIntro(src);
     }
-
     toStatic(reason, loop = true, control = 'pause') {
       this.mode = 'done';
       this.baseState = 'static';
@@ -118,12 +98,9 @@
       if (loop) this.startLoop();
       emit('hero:intro-end', { reason });
     }
-
-    /* ---------- intro: beats 1–7 in the file, 8–9 in the DOM ---------- */
     playIntro(src) {
       this.mode = 'intro';
-      this.beat8 = false;
-      this.ending = false;
+      this.beat8 = this.ending = false;
       this.introVariant = this.variant();
       this.classList.remove('is-beat-8', 'is-beat-9', 'is-cut', 'is-instant');
       html.dataset.sfIntro = 'play';
@@ -131,21 +108,18 @@
       this.setControl('skip');
       this.arm();
       this.load(src);
-      this.later(() => { if (this.mode === 'intro' && this.dataset.state !== 'playing') this.cut('error'); }, WATCH);
+      this.later(() => { if (this.inIntro && this.dataset.state !== 'playing') this.cut('error'); }, WATCH);
     }
-
     load(src) {
       const v = this.$intro;
       const token = (this._token = (this._token || 0) + 1);
       v.preload = 'auto';
       if (v.getAttribute('src') !== src) v.src = src;
-      try { v.currentTime = 0; } catch (e) { /* not seekable yet */ }
-      // AbortError = our own src swap. Anything else (autoplay policy, Low Power Mode) ends the intro.
+      try { v.currentTime = 0; } catch (e) {}
       play(v, (err) => {
-        if (token === this._token && this.mode === 'intro' && !(err && err.name === 'AbortError')) this.cut('error');
+        if (token === this._token && this.inIntro && !(err && err.name === 'AbortError')) this.cut('error');
       });
     }
-
     onPlaying() {
       if (this.mode !== 'intro') return;
       clearTimeout(this._stall);
@@ -154,47 +128,41 @@
       emit('hero:intro-start', { source: this.dataset.source || 'bundled', variant: this.introVariant });
       this.watch();
     }
-
     onMeta() {
-      // Source check: orientation or width changed since the src was chosen.
       const now = this.variant();
       if (this.mode !== 'intro' || now === this.introVariant) return;
       const other = this.pick('intro', now);
       if (other) { this.introVariant = now; this.load(other); }
     }
-
     onStall() {
       if (this.mode !== 'intro' || this.dataset.state !== 'playing') return;
       clearTimeout(this._stall);
-      this._stall = this.later(() => { if (this.mode === 'intro' && this.$intro.readyState < 3) this.cut('error'); }, WATCH);
+      this._stall = this.later(() => { if (this.inIntro && this.$intro.readyState < 3) this.cut('error'); }, WATCH);
     }
-
     duration() {
       const d = this.$intro.duration;
       return Number.isFinite(d) && d > 0 ? Math.min(d, CAP) : CAP;
     }
-
-    /* Beat detection on rAF reading currentTime (frame-accurate enough for a 1.2 s reveal). */
     watch() {
-      cancelAnimationFrame(this._raf);
       const v = this.$intro;
+      const w = (this._w = (this._w || 0) + 1);
+      const next = v.requestVideoFrameCallback ? (f) => v.requestVideoFrameCallback(f) : (f) => requestAnimationFrame(f);
       const tick = () => {
-        if (this.mode !== 'intro') return;
+        if (w !== this._w || this.mode !== 'intro') return;
         const t = v.currentTime;
         if (!this.beat8 && t >= this.duration() - 0.4) this.onBeat8();
         if (t >= CAP || v.ended) return this.onEnd();
-        this._raf = requestAnimationFrame(tick);
+        if (!v.paused) next(tick);
       };
-      this._raf = requestAnimationFrame(tick);
+      next(tick);
     }
-
     onBeat8() {
       this.beat8 = true;
-      this.prepareLoop(); // ready for beat 9
+      this.prepareLoop();
       if (this.dataset.logoReveal === 'false' || !this.$mark) return;
       this.classList.add('is-beat-8');
       const m = this.$mark;
-      if (!(window.CSS && CSS.registerProperty && m.animate)) return; // opacity + scale only
+      if (!(window.CSS && CSS.registerProperty && m.animate)) return;
       try {
         m.classList.add('is-sweeping');
         this._sweep = m.animate([{ '--sweep': '-30%' }, { '--sweep': '130%' }], {
@@ -203,21 +171,19 @@
         this._sweep.onfinish = this._sweep.oncancel = () => { m.classList.remove('is-sweeping'); this._sweep = null; };
       } catch (e) { m.classList.remove('is-sweeping'); }
     }
-
     onEnd() {
       if (this.mode !== 'intro' || this.ending) return;
       this.ending = true;
       if (!this.beat8) this.onBeat8();
       if (this.$intro.currentTime >= CAP) this.$intro.pause();
-      this.later(() => this.finish('ended'), 600); // beat 9 at D + 0.6 s
+      this.later(() => this.finish('ended'), 600);
     }
-
-    /* Beat 9 (natural end) or an early end (cut: jump to the end of beat 9 in --sf-dur-base). */
     finish(reason, cut) {
       if (this.mode !== 'intro') return;
       this.mode = 'done';
       this.baseState = 'ended';
       this.disarm();
+      this._w++;
       if (cut) {
         this.clear();
         if (this._sweep) this._sweep.cancel();
@@ -229,9 +195,8 @@
       this.setControl(this.userPaused ? 'play' : 'pause');
       this.markSeen();
       this.startLoop();
-      // Free the decoder once the intro has faded out (no new request).
       this.later(() => {
-        if (this.mode === 'intro') return;
+        if (this.inIntro) return;
         this.$intro.pause();
         this.$intro.removeAttribute('src');
         this.$intro.load();
@@ -239,40 +204,32 @@
       emit('hero:intro-end', { reason });
       if (reason === 'skipped') focus(this.$primary);
     }
-
+    get inIntro() { return this.mode === 'intro'; }
     cut(reason) { this.finish(reason, true); }
-
     arm() {
       this.disarm();
-      const ac = (this._early = new AbortController());
-      const o = { signal: ac.signal, passive: true };
-      const scrolled = () => this.cut('scrolled');
-      ['wheel', 'touchmove', 'scroll'].forEach((t) => window.addEventListener(t, scrolled, o));
-      window.addEventListener('keydown', (e) => {
-        // Enter/Space on SKIP INTRO arrives as its click (which moves focus to the primary CTA).
+      const o = { signal: (this._early = new AbortController()).signal, passive: true };
+      const scrolled = (e) => { if (e.type !== 'scroll' || performance.now() > (this._quiet | 0)) this.cut('scrolled'); };
+      ['wheel', 'touchmove', 'scroll'].forEach((t) => addEventListener(t, scrolled, o));
+      addEventListener('keydown', (e) => {
         if (e.target === this.$ctl && (e.key === 'Enter' || e.key === ' ')) return;
         this.cut('key');
       }, o);
       if (this.$content) this.$content.addEventListener('focusin', () => this.cut('focus'), o);
     }
-
     disarm() { if (this._early) this._early.abort(); this._early = null; }
-
-    /* ---------- loop ---------- */
     prepareLoop() {
       const src = this.pick('loop');
       const l = this.$loop;
-      if (!src || !l || 'sfSaveData' in html.dataset) return;
+      if (!src || !l || noData()) return;
       if (l.getAttribute('src') !== src) { l.preload = 'auto'; l.src = src; }
     }
-
     startLoop() {
-      if (!this.$loop || 'sfSaveData' in html.dataset || !this.pick('loop')) return; // end still only
+      if (!this.$loop || noData() || !this.pick('loop')) return;
       this.loopWanted = true;
       this.prepareLoop();
       this.playLoop();
     }
-
     playLoop() {
       const l = this.$loop;
       if (!this.loopWanted || this.userPaused || !this.visible || document.hidden || this.drawer) return;
@@ -282,23 +239,19 @@
       }, WATCH * 2);
       play(l, (err) => { if (err && err.name === 'NotAllowedError') this.loopFail(); });
     }
-
     pauseLoop() { if (this.$loop && !this.$loop.paused) this.$loop.pause(); }
-
     loopFail() {
       const l = this.$loop;
-      debug('loop failed');
       this.loopWanted = false;
       l.pause();
       l.removeAttribute('src');
-      l.load(); // cancels the download
+      l.load();
       this.classList.remove('is-loop-on');
       this.setControl(false);
       this.setState('fallback');
     }
-
     onControl() {
-      if (this.mode === 'intro') return this.cut('skipped');
+      if (this.inIntro) return this.cut('skipped');
       if (this.$ctl.dataset.mode === 'play') {
         this.userPaused = false;
         this.setControl('pause');
@@ -311,90 +264,75 @@
         this.setState('paused');
       }
     }
-
     replay(e) {
       const src = this.pick('intro');
-      if (!src) return; // stays a plain link
+      if (!src) return;
       e.preventDefault();
       this.clear();
       if (this._sweep) this._sweep.cancel();
-      this.userPaused = false;
-      this.loopWanted = false;
+      this.userPaused = this.loopWanted = false;
       this.pauseLoop();
       this.classList.remove('is-loop-on');
+      this._quiet = performance.now() + 1500;
+      if (scrollY > 0) scrollTo({ top: 0, behavior: 'instant' });
       this.playIntro(src);
-      focus(this.$ctl); // keep focus on something visible
+      focus(this.$ctl);
     }
-
     bind(signal) {
       const o = { signal };
       const v = this.$intro;
       const l = this.$loop;
-      if (v) {
-        v.addEventListener('playing', () => this.onPlaying(), o);
-        v.addEventListener('loadedmetadata', () => this.onMeta(), o);
-        v.addEventListener('ended', () => this.onEnd(), o);
-        v.addEventListener('error', () => { if (this.mode === 'intro' && v.getAttribute('src')) this.cut('error'); }, o);
-        v.addEventListener('waiting', () => this.onStall(), o);
-        v.addEventListener('stalled', () => this.onStall(), o);
-      }
-      if (l) {
-        l.addEventListener('playing', () => { clearTimeout(this._lw); this.classList.add('is-loop-on'); }, o);
-        l.addEventListener('error', () => { if (l.getAttribute('src')) this.loopFail(); }, o);
-      }
-      if (this.$ctl) this.$ctl.addEventListener('click', () => this.onControl(), o);
-      if (this.$secondary && this.$secondary.dataset.action === 'replay') {
-        this.$secondary.addEventListener('click', (e) => this.replay(e), o);
-      }
-
-      // Leaving during the intro ends it; the loop pauses below 25 % visibility.
+      const on = (el, t, fn) => el && el.addEventListener(t, fn, o);
+      on(v, 'playing', () => this.onPlaying());
+      on(v, 'loadedmetadata', () => this.onMeta());
+      on(v, 'ended', () => this.onEnd());
+      on(v, 'error', () => { if (this.inIntro && v.getAttribute('src')) this.cut('error'); });
+      on(v, 'waiting', () => this.onStall());
+      on(v, 'stalled', () => this.onStall());
+      on(l, 'playing', () => { clearTimeout(this._lw); this.classList.add('is-loop-on'); });
+      on(l, 'error', () => { if (l.getAttribute('src')) this.loopFail(); });
+      on(this.$ctl, 'click', () => this.onControl());
+      if (this.$secondary && this.$secondary.dataset.action === 'replay') on(this.$secondary, 'click', (e) => this.replay(e));
       if ('IntersectionObserver' in window) {
         this._io = new IntersectionObserver((entries) => {
           const en = entries[entries.length - 1];
           this.visible = en.isIntersecting && en.intersectionRatio >= 0.25;
           if (this.visible) return this.playLoop();
-          if (this.mode === 'intro') this.cut('scrolled');
+          if (this.inIntro && performance.now() > (this._quiet | 0)) this.cut('scrolled');
           this.pauseLoop();
         }, { threshold: [0, 0.25] });
         this._io.observe(this);
       }
-
-      document.addEventListener('visibilitychange', () => {
+      on(document, 'visibilitychange', () => {
         if (document.hidden) {
-          if (this.mode === 'intro') v.pause();
+          if (this.inIntro) v.pause();
           return this.pauseLoop();
         }
-        if (this.mode === 'intro') { play(v, () => this.cut('error')); this.watch(); }
+        if (this.inIntro) { play(v, () => this.cut('error')); this.watch(); }
         this.playLoop();
-      }, o);
-
-      const film = 'sf-campaign-film-' + (this.dataset.sectionId || '');
-      const isFilm = (e) => { const id = (e.detail && e.detail.id) || ''; return id === film || 'sf-' + id === film; };
-      document.addEventListener('drawer:open', (e) => {
-        if (this.mode === 'intro') this.cut('drawer');
+      });
+      const isFilm = (e) => { const id = (e.detail && e.detail.id) || ''; return id === film(this) || 'sf-' + id === film(this); };
+      on(document, 'drawer:open', (e) => {
+        if (this.inIntro) this.cut('drawer');
         this.drawer = true;
         this.pauseLoop();
         if (isFilm(e)) this.film(true);
-      }, o);
-      document.addEventListener('drawer:close', (e) => {
+      });
+      on(document, 'drawer:close', (e) => {
         if (isFilm(e)) this.film(false);
         this.drawer = false;
         this.playLoop();
-      }, o);
-
-      // Visitor switched to reduced motion: stop, never start anything new.
-      document.addEventListener('motion:change', (e) => {
+      });
+      on(document, 'motion:change', (e) => {
         if (((e.detail && e.detail.level) || html.dataset.sfMotion) !== 'reduced') return;
         this.userPaused = true;
-        if (this.mode === 'intro') this.cut('paused');
+        if (this.inIntro) this.cut('paused');
         this.pauseLoop();
         if (this.$ctl && !this.$ctl.hidden) this.setControl('play');
-      }, o);
+      });
     }
-
-    /* Campaign film (merchant upload only): src set lazily by MOBILE_MQ, native controls. */
     film(open) {
-      const f = document.querySelector('#sf-campaign-film-' + CSS.escape(this.dataset.sectionId || '') + ' [data-sf-campaign-film]');
+      const f = document.querySelector('#' + CSS.escape(film(this)) + ' [data-sf-campaign-film]');
       if (!f) return;
       if (!open) return f.pause();
       const d = f.dataset;
@@ -404,6 +342,6 @@
       play(f);
     }
   }
-
+  const film = (el) => 'sf-campaign-film-' + (el.dataset.sectionId || '');
   if (!customElements.get('sf-hero-film')) customElements.define('sf-hero-film', SfHeroFilm);
 })();

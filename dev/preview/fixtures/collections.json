@@ -1,0 +1,125 @@
+{
+  "placeholder": true,
+  "_note": "Sample data derived only from the garments visible in the supplied client assets (CONTEXT.md). Prices, sizes, inventory, SKUs and dates are placeholders, not STEADFAST data.",
+  "collections": [
+    {
+      "id": 4001,
+      "handle": "hoodies",
+      "title": "Hoodies",
+      "description_html": "",
+      "image": {
+        "base": "stills/sf-category-hoodies",
+        "ext": "webp",
+        "widths": [
+          540,
+          900,
+          1200
+        ],
+        "width": 1200,
+        "height": 1500,
+        "alt": "Hoodies"
+      },
+      "product_handles": [
+        "zip-hoodie-washed-blue-grey",
+        "embossed-gothic-hoodie",
+        "heavyweight-zip-hoodie-black"
+      ],
+      "default_sort_by": "manual",
+      "placeholder": true
+    },
+    {
+      "id": 4002,
+      "handle": "tracksuits",
+      "title": "Tracksuits",
+      "description_html": "",
+      "image": {
+        "base": "stills/sf-category-tracksuits",
+        "ext": "webp",
+        "widths": [
+          540,
+          900,
+          1200
+        ],
+        "width": 1200,
+        "height": 1500,
+        "alt": "Tracksuits"
+      },
+      "product_handles": [
+        "reflective-piping-tracksuit-black-speckle",
+        "embossed-gothic-tracksuit-stone"
+      ],
+      "default_sort_by": "manual",
+      "placeholder": true
+    },
+    {
+      "id": 4003,
+      "handle": "tops",
+      "title": "Tops",
+      "description_html": "",
+      "image": null,
+      "product_handles": [],
+      "default_sort_by": "manual",
+      "placeholder": true
+    },
+    {
+      "id": 4004,
+      "handle": "bottoms",
+      "title": "Bottoms",
+      "description_html": "",
+      "image": {
+        "base": "stills/sf-category-bottoms",
+        "ext": "webp",
+        "widths": [
+          540,
+          900,
+          1200
+        ],
+        "width": 1200,
+        "height": 1500,
+        "alt": "Bottoms"
+      },
+      "product_handles": [
+        "wide-sweatpants-black"
+      ],
+      "default_sort_by": "manual",
+      "placeholder": true
+    },
+    {
+      "id": 4005,
+      "handle": "new-arrivals",
+      "title": "New arrivals",
+      "description_html": "",
+      "image": {
+        "base": "stills/sf-category-new-arrivals",
+        "ext": "webp",
+        "widths": [
+          540,
+          720
+        ],
+        "width": 720,
+        "height": 900,
+        "alt": "New arrivals"
+      },
+      "product_handles": [
+        "embossed-gothic-hoodie",
+        "zip-hoodie-washed-blue-grey",
+        "reflective-piping-tracksuit-black-speckle"
+      ],
+      "default_sort_by": "manual",
+      "placeholder": true
+    },
+    {
+      "id": 4006,
+      "handle": "zip-ups",
+      "title": "Zip-ups",
+      "description_html": "",
+      "image": null,
+      "product_handles": [
+        "zip-hoodie-washed-blue-grey",
+        "heavyweight-zip-hoodie-black"
+      ],
+      "default_sort_by": "manual",
+      "placeholder": true
+    }
+  ]
+}

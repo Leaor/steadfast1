@@ -65,7 +65,18 @@ window.Steadfast = window.Steadfast || {};
     'collections.empty_filtered': {{ 'collections.empty_filtered' | t | json }},
     'newsletter.error_email': {{ 'newsletter.error_email' | t | json }},
     'motion.reduce': {{ 'motion.reduce' | t | json }},
-    'motion.reduced_on': {{ 'motion.reduced_on' | t | json }}
+    'motion.reduced_on': {{ 'motion.reduced_on' | t | json }},
+    'cart.item_updated': {{ 'cart.item_updated' | t: title: '[title]', quantity: '[quantity]' | json }},
+    'facets.results_count': { one: {{ 'facets.results_count' | t: count: 1 | replace_first: '1', '[count]' | json }}, other: {{ 'facets.results_count' | t: count: 2 | replace_first: '2', '[count]' | json }} },
+    'facets.filter_count': {{ 'facets.filter_count' | t: count: '[count]' | json }},
+    'facets.filter': {{ 'facets.filter' | t | json }},
+    'search.predictive_count': { one: {{ 'search.predictive_count' | t: count: 1 | replace_first: '1', '[count]' | json }}, other: {{ 'search.predictive_count' | t: count: 2 | replace_first: '2', '[count]' | json }} },
+    'search.predictive_none': {{ 'search.predictive_none' | t | json }},
+    'quick_view.loading': {{ 'quick_view.loading' | t | json }},
+    'quick_view.error': {{ 'quick_view.error' | t | json }},
+    'products.media_position': {{ 'products.media_position' | t: current: '[current]', total: '[total]' | json }},
+    'products.value_sold_out': {{ 'products.value_sold_out' | t | json }},
+    'collections.loading_more': {{ 'collections.loading_more' | t | json }}
   };
   S.assets = {
     gsap: {{ 'gsap.min.js' | asset_url | json }},

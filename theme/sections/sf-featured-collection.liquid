@@ -7,11 +7,11 @@
   if col != blank and col.products_count > 0
     assign has_products = true
   endif
-  assign count = nil
+  assign count = ''
   if s.show_count and has_products
     assign count = col.products_count
   endif
-  assign view_all_url = nil
+  assign view_all_url = ''
   if s.show_view_all and s.view_all_label != blank
     if has_products
       assign view_all_url = col.url

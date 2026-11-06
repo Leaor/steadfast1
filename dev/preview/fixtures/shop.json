@@ -1,0 +1,69 @@
+{
+  "placeholder": true,
+  "_note": "Sample data derived only from the supplied client assets (CONTEXT.md). Every value is a placeholder for exercising the theme; nothing here is STEADFAST data.",
+  "name": "STEADFAST",
+  "domain": "steadfast.preview",
+  "url": "http://127.0.0.1:9292",
+  "email": null,
+  "description": null,
+  "currency": "USD",
+  "money_format": "${{amount}}",
+  "money_with_currency_format": "${{amount}} USD",
+  "customer_accounts_enabled": true,
+  "customer_accounts_optional": true,
+  "password_message": "Opening soon.",
+  "policies": [
+    {
+      "handle": "privacy-policy",
+      "title": "Privacy policy"
+    },
+    {
+      "handle": "refund-policy",
+      "title": "Refund policy"
+    },
+    {
+      "handle": "shipping-policy",
+      "title": "Shipping policy"
+    },
+    {
+      "handle": "terms-of-service",
+      "title": "Terms of service"
+    }
+  ],
+  "countries": [
+    {
+      "iso_code": "US",
+      "name": "United States",
+      "currency": {
+        "iso_code": "USD",
+        "symbol": "$",
+        "name": "United States Dollar"
+      }
+    },
+    {
+      "iso_code": "GB",
+      "name": "United Kingdom",
+      "currency": {
+        "iso_code": "GBP",
+        "symbol": "£",
+        "name": "British Pound"
+      }
+    },
+    {
+      "iso_code": "CA",
+      "name": "Canada",
+      "currency": {
+        "iso_code": "CAD",
+        "symbol": "$",
+        "name": "Canadian Dollar"
+      }
+    }
+  ],
+  "languages": [
+    {
+      "iso_code": "en",
+      "name": "English",
+      "endonym_name": "English"
+    }
+  ]
+}

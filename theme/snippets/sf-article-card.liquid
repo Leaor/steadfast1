@@ -1,0 +1,25 @@
+{%- doc -%}
+  Journal article card: 4:5 image (if any), date, title as the single link, excerpt.
+
+  @param {object} article - The article.
+  @param {boolean} [show_image] - Default true.
+  @param {string} [loading] - 'lazy' (default) | 'eager'.
+  @param {number} [heading_level] - Default 2.
+
+  @example
+  {% render 'sf-article-card', article: article, loading: 'eager' %}
+{%- enddoc -%}
+{%- assign a_level = heading_level | default: 2 -%}
+<article class="sf-article-card">
+  {%- if show_image != false and article.image != blank -%}
+    <div class="sf-article-card__media">
+      {%- render 'sf-image', image: article.image, sizes: '(min-width: 990px) 31vw, (min-width: 750px) 48vw, 100vw', widths: '540,720,900,1200', loading: loading, alt: '' -%}
+    </div>
+  {%- endif -%}
+  <div class="sf-article-card__info">
+    <p class="sf-article-card__date sf-micro">{{ article.published_at | time_tag: '%B %-d, %Y' }}</p>
+    <h{{ a_level }} class="sf-article-card__title sf-text-xl"><a class="sf-article-card__link" href="{{ article.url }}">{{ article.title | escape }}</a></h{{ a_level }}>
+    {%- assign excerpt = article.excerpt_or_content | strip_html | truncatewords: 28 -%}
+    {%- if excerpt != blank -%}<p class="sf-article-card__excerpt">{{ excerpt }}</p>{%- endif -%}
+  </div>
+</article>

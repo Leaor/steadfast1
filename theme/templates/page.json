@@ -1,0 +1,4 @@
+{
+  "sections": { "main": { "type": "sf-main-page", "settings": { "spacing": "compact" } } },
+  "order": ["main"]
+}

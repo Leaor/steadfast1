@@ -1,0 +1,39 @@
+{
+ "_doc": "MEDIA-owned (ARCHITECTURE §10.3). Default alt text per bundled asset base, read by tools/media/gen_asset_snippet.py. Alts never contain '|'. An empty string means decorative (or the caller sets the alt, e.g. sf-logo). 'pending' lists bases a caller may request before their files exist; the generator emits them only with --include-pending.",
+ "alts": {
+  "sf-logo-textured": "",
+  "sf-logo-streaks": "",
+  "sf-category-hoodies": "Hoodies",
+  "sf-category-tracksuits": "Tracksuits",
+  "sf-category-tops": "Tops",
+  "sf-category-bottoms": "Bottoms",
+  "sf-category-new-arrivals": "New arrivals",
+  "sf-signature-hero": "STEADFAST zip hoodie in washed blue-grey on black, front",
+  "sf-signature-hero-back": "Back of the washed blue-grey STEADFAST zip hoodie on black",
+  "sf-signature-front": "Front of the washed blue-grey STEADFAST zip hoodie",
+  "sf-signature-back": "Back of the washed blue-grey STEADFAST zip hoodie",
+  "sf-signature-detail-zip": "Detail: zip and neck label",
+  "sf-signature-detail-neck-label": "Detail: neck label",
+  "sf-signature-detail-chest-logo": "Detail: distressed chest logo",
+  "sf-signature-detail-shoulder": "Detail: shoulder embellishment",
+  "sf-signature-detail-cuff-label": "Detail: sleeve label",
+  "sf-signature-detail-hem": "Detail: hem",
+  "sf-lookbook-reflective-front": "Black speckle STEADFAST tracksuit with white piping, front",
+  "sf-lookbook-reflective-back": "Black speckle STEADFAST tracksuit with white piping, back",
+  "sf-lookbook-black-tracksuit": "Black STEADFAST zip hoodie and wide sweatpants, photographed at night",
+  "sf-lookbook-embossed-hoodie": "STEADFAST lettering on the back of a washed charcoal hoodie",
+  "sf-campaign-back": "Model seen from behind in a stone STEADFAST tracksuit under a single overhead light",
+  "sf-campaign-back-portrait": "Model seen from behind in a stone STEADFAST tracksuit under a single overhead light",
+  "sf-campaign-back-916": "Model seen from behind in a stone STEADFAST tracksuit under a single overhead light",
+  "sf-editorial-black-tracksuit-4x5": "Black STEADFAST zip hoodie and wide sweatpants, photographed at night",
+  "sf-editorial-black-tracksuit-2x3": "Black STEADFAST zip hoodie and wide sweatpants, photographed at night",
+  "sf-film-end-desktop": "",
+  "sf-film-end-mobile": "",
+  "sf-grain": ""
+ },
+ "pending": {
+  "sf-film-end-desktop": {"webp_widths": [960, 1600, 1920], "fallback_width": 1600, "fallback_ext": "jpg", "width": 1600, "height": 900},
+  "sf-film-end-mobile": {"webp_widths": [480, 720], "fallback_width": 720, "fallback_ext": "jpg", "width": 720, "height": 1280},
+  "sf-logo-streaks": {"webp_widths": [1200, 1800], "fallback_width": 1200, "fallback_ext": "webp", "width": 1200, "height": 408}
+ }
+}

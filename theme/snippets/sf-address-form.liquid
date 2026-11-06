@@ -1,0 +1,63 @@
+{%- doc -%}
+  Address fields for {% form 'customer_address' %} (new or edit). The country select carries
+  Shopify's data-provinces; <sf-address-form> (sf-customer.js) fills the province select.
+
+  @param {object} form - The customer_address form object.
+  @param {string} id_prefix - Unique id prefix ('new' or the address id).
+
+  @example
+  {% render 'sf-address-form', form: form, id_prefix: 'new' %}
+{%- enddoc -%}
+{%- assign p = 'sf-address-' | append: id_prefix -%}
+<sf-address-form class="sf-address-form">
+  <div class="sf-form__row">
+    <div class="sf-field">
+      <label class="sf-field__label" for="{{ p }}-first">{{ 'customer.addresses.first_name' | t }}</label>
+      <input class="sf-input" type="text" id="{{ p }}-first" name="address[first_name]" value="{{ form.first_name | escape }}" autocomplete="given-name">
+    </div>
+    <div class="sf-field">
+      <label class="sf-field__label" for="{{ p }}-last">{{ 'customer.addresses.last_name' | t }}</label>
+      <input class="sf-input" type="text" id="{{ p }}-last" name="address[last_name]" value="{{ form.last_name | escape }}" autocomplete="family-name">
+    </div>
+  </div>
+  <div class="sf-field">
+    <label class="sf-field__label" for="{{ p }}-company">{{ 'customer.addresses.company' | t }}</label>
+    <input class="sf-input" type="text" id="{{ p }}-company" name="address[company]" value="{{ form.company | escape }}" autocomplete="organization">
+  </div>
+  <div class="sf-field">
+    <label class="sf-field__label" for="{{ p }}-address1">{{ 'customer.addresses.address1' | t }}</label>
+    <input class="sf-input" type="text" id="{{ p }}-address1" name="address[address1]" value="{{ form.address1 | escape }}" autocomplete="address-line1">
+  </div>
+  <div class="sf-field">
+    <label class="sf-field__label" for="{{ p }}-address2">{{ 'customer.addresses.address2' | t }}</label>
+    <input class="sf-input" type="text" id="{{ p }}-address2" name="address[address2]" value="{{ form.address2 | escape }}" autocomplete="address-line2">
+  </div>
+  <div class="sf-form__row">
+    <div class="sf-field">
+      <label class="sf-field__label" for="{{ p }}-city">{{ 'customer.addresses.city' | t }}</label>
+      <input class="sf-input" type="text" id="{{ p }}-city" name="address[city]" value="{{ form.city | escape }}" autocomplete="address-level2">
+    </div>
+    <div class="sf-field">
+      <label class="sf-field__label" for="{{ p }}-zip">{{ 'customer.addresses.zip' | t }}</label>
+      <input class="sf-input" type="text" id="{{ p }}-zip" name="address[zip]" value="{{ form.zip | escape }}" autocomplete="postal-code" autocapitalize="characters">
+    </div>
+  </div>
+  <div class="sf-form__row">
+    <div class="sf-field">
+      <label class="sf-field__label" for="{{ p }}-country">{{ 'customer.addresses.country' | t }}</label>
+      <select class="sf-select" id="{{ p }}-country" name="address[country]" data-default="{{ form.country | escape }}" data-sf-country autocomplete="country">{{ all_country_option_tags }}</select>
+    </div>
+    <div class="sf-field" data-sf-province-wrap hidden>
+      <label class="sf-field__label" for="{{ p }}-province">{{ 'customer.addresses.province' | t }}</label>
+      <select class="sf-select" id="{{ p }}-province" name="address[province]" data-default="{{ form.province | escape }}" data-sf-province autocomplete="address-level1"></select>
+    </div>
+  </div>
+  <div class="sf-field">
+    <label class="sf-field__label" for="{{ p }}-phone">{{ 'customer.addresses.phone' | t }}</label>
+    <input class="sf-input" type="tel" id="{{ p }}-phone" name="address[phone]" value="{{ form.phone | escape }}" autocomplete="tel">
+  </div>
+  <label class="sf-check-label">
+    {{ form.set_as_default_checkbox | replace: 'type="checkbox"', 'type="checkbox" class="sf-checkbox"' }}
+    {{ 'customer.addresses.set_default' | t }}
+  </label>
+</sf-address-form>

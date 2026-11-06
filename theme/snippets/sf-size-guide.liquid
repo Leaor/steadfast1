@@ -1,0 +1,35 @@
+{%- doc -%}
+  Size guide (DESIGN §7.8): a SIZE GUIDE text trigger on the size label row, and a right drawer
+  holding settings.size_guide_page, else settings.size_guide_fallback. Never invented measurements.
+
+  @param {string} section_id - Owning section id.
+  @param {string} mode - 'trigger' | 'drawer'.
+
+  @example
+  {% render 'sf-size-guide', section_id: section.id, mode: 'drawer' %}
+{%- enddoc -%}
+{%- if mode == 'trigger' -%}
+  <sf-size-guide class="sf-size-guide-trigger">
+    {%- if settings.size_guide_page != blank -%}
+      <a class="sf-btn sf-btn--text sf-btn--sm" href="{{ settings.size_guide_page.url }}" data-sf-open="size-guide-{{ section_id }}" aria-haspopup="dialog" aria-expanded="false" aria-controls="sf-size-guide-{{ section_id }}"><span class="sf-btn__label">{{ 'products.size_guide' | t }}</span></a>
+    {%- else -%}
+      <button type="button" class="sf-btn sf-btn--text sf-btn--sm" data-sf-open="size-guide-{{ section_id }}" aria-haspopup="dialog" aria-expanded="false" aria-controls="sf-size-guide-{{ section_id }}"><span class="sf-btn__label">{{ 'products.size_guide' | t }}</span></button>
+    {%- endif -%}
+  </sf-size-guide>
+{%- else -%}
+  <sf-dialog id="sf-size-guide-{{ section_id }}" data-sf-dialog-type="drawer-right">
+    <dialog class="sf-size-guide" aria-labelledby="sf-size-guide-title-{{ section_id }}">
+      <div class="sf-dialog__head">
+        <h2 class="sf-dialog__title" id="sf-size-guide-title-{{ section_id }}" tabindex="-1" data-sf-initial-focus>{{ 'products.size_guide' | t }}</h2>
+        <button type="button" class="sf-btn sf-btn--text sf-btn--sm" data-sf-close><span class="sf-btn__label">{{ 'general.close' | t }}</span></button>
+      </div>
+      <div class="sf-dialog__body sf-size-guide__body sf-rte">
+        {%- if settings.size_guide_page != blank and settings.size_guide_page.content != blank -%}
+          {{ settings.size_guide_page.content }}
+        {%- else -%}
+          {{ settings.size_guide_fallback }}
+        {%- endif -%}
+      </div>
+    </dialog>
+  </sf-dialog>
+{%- endif -%}

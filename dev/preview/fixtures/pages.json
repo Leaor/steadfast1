@@ -1,0 +1,27 @@
+{
+  "placeholder": true,
+  "_note": "Sample data derived only from the supplied client assets (CONTEXT.md). Every value is a placeholder for exercising the theme; nothing here is STEADFAST data.",
+  "pages": [
+    {
+      "id": 6001,
+      "handle": "contact",
+      "title": "Contact",
+      "template_suffix": "contact",
+      "content": "<p>Contact details to be confirmed.</p>"
+    },
+    {
+      "id": 6002,
+      "handle": "size-guide",
+      "title": "Size guide",
+      "template_suffix": null,
+      "content": "<p>Size guide to be provided by STEADFAST.</p>"
+    },
+    {
+      "id": 6003,
+      "handle": "shipping-returns",
+      "title": "Shipping and returns",
+      "template_suffix": null,
+      "content": "<p>Shipping and returns details to be confirmed.</p>"
+    }
+  ]
+}

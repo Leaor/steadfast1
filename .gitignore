@@ -1,0 +1,9 @@
+node_modules/
+dev/tests/reports/html/
+dev/tests/reports/artifacts/
+dev/tests/test-results/
+dev/tests/screenshots/desktop/
+dev/tests/screenshots/mobile/
+.DS_Store
+__pycache__/
+*.pyc

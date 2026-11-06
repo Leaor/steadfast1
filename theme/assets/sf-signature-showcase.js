@@ -60,20 +60,28 @@
       return;
     }
 
-    // If GSAP never arrives, fall back to the stacked layout rather than a dark stage.
-    const failsafe = setTimeout(() => { if (!state.ready) el.classList.add('is-static'); }, 8000);
-    signal.addEventListener('abort', () => clearTimeout(failsafe));
-
-    state.mm = S.motion.gsapMatchMedia(el, (cond, level, gsap, ScrollTrigger) => {
-      state.ready = true;
-      el.classList.remove('is-static');
-      const staged = Boolean(cond.desktop && !cond.osReduce && level === 'full' && el.classList.contains('sf-signature-showcase--pin'));
-      state.staged = staged;
-      delete el.dataset.face;
-      setFace(staged ? 'back' : 'front');
-      if (!staged) return () => { state.st = null; };
-      return build(el, state, gsap, ScrollTrigger);
-    });
+    // GSAP is needed only for the staged desktop layout; mobile, "subtle" and reduced never download it.
+    const desk = window.matchMedia('(min-width: 990px)');
+    const eligible = () => desk.matches && S.motion.level === 'full' && el.classList.contains('sf-signature-showcase--pin');
+    const startGsap = () => {
+      if (state.mm || !eligible()) return;
+      // If GSAP never arrives, fall back to the stacked layout rather than a dark stage.
+      const failsafe = setTimeout(() => { if (!state.ready) el.classList.add('is-static'); }, 8000);
+      signal.addEventListener('abort', () => clearTimeout(failsafe));
+      state.mm = S.motion.gsapMatchMedia(el, (cond, level, gsap, ScrollTrigger) => {
+        state.ready = true;
+        el.classList.remove('is-static');
+        const staged = Boolean(cond.desktop && !cond.osReduce && level === 'full' && el.classList.contains('sf-signature-showcase--pin'));
+        state.staged = staged;
+        delete el.dataset.face;
+        setFace(staged ? 'back' : 'front');
+        if (!staged) return () => { state.st = null; };
+        return build(el, state, gsap, ScrollTrigger);
+      });
+    };
+    desk.addEventListener('change', startGsap, { signal });
+    document.addEventListener('motion:change', startGsap, { signal });
+    startGsap();
   }
 
   function build(el, state, gsap, ScrollTrigger) {
@@ -164,6 +172,10 @@
     // 0.90–1.00 CTA
     tl.to(back, { scale: 0.96, duration: 0.1 }, 0.9)
       .fromTo(buy, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.04 }, 0.9);
+
+    // An anchor scroll (e.g. VIEW THE CAMPAIGN → #campaign) may be under way: the new pin spacer moved its
+    // target, so refresh now; sf-core re-targets the hash after every refresh (S.anchor).
+    if (S.anchor && S.anchor.recent()) requestAnimationFrame(() => ScrollTrigger.refresh());
 
     // Refresh once the stage stills have decoded (the 2730 px renditions are lazy).
     const imgs = [...el.querySelectorAll('.sf-signature-showcase__stage img')];

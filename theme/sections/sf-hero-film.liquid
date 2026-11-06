@@ -108,7 +108,7 @@
 
   {%- if has_campaign_film -%}
     <sf-dialog id="sf-campaign-film-{{ section.id }}" data-sf-dialog-type="fullscreen">
-      <dialog class="sf-hero-film__dialog" aria-label="{{ 'home.hero.campaign_film' | t | escape }}">
+      <dialog class="sf-hero-film__dialog" aria-label="{{ s.cta_secondary_label | default: shop.name | escape }}">
         <video class="sf-hero-film__film" controls playsinline preload="none" data-sf-campaign-film {% render 'sf-hero-film-sources', settings: s, part: 'campaign' %}></video>
         <button type="button" class="sf-btn sf-btn--text sf-hero-film__close" data-sf-close>
           <span class="sf-btn__label">{{ 'general.close' | t }}</span>

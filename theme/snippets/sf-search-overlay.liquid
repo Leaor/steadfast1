@@ -1,0 +1,31 @@
+{%- doc -%}
+  Search overlay (DESIGN §7.4, ARCHITECTURE §4.7): a top sheet with a bare Spectral input and the
+  predictive results region. The form is a plain GET to /search, so it works without JS.
+
+  @example
+  {% render 'sf-search-overlay' %}
+{%- enddoc -%}
+<noscript>{{ 'sf-search.css' | asset_url | stylesheet_tag }}</noscript>
+<sf-dialog id="sf-search-overlay" data-sf-dialog-type="sheet-top" data-sf-css="{{ 'sf-search.css' | asset_url }}">
+  <dialog class="sf-search-overlay" aria-labelledby="sf-search-overlay-title">
+    <div class="sf-search-overlay__inner sf-container">
+      <h2 class="sf-visually-hidden" id="sf-search-overlay-title">{{ 'search.title' | t }}</h2>
+      <sf-predictive-search class="sf-search-overlay__search" data-enabled="{{ settings.predictive_search_enabled }}">
+        <form action="{{ routes.search_url }}" method="get" role="search" class="sf-search-overlay__form">
+          <label class="sf-visually-hidden" for="sf-search-overlay-input">{{ 'search.label' | t }}</label>
+          <input class="sf-search-overlay__input" id="sf-search-overlay-input" type="search" name="q" value=""
+            placeholder="{{ 'search.placeholder' | t | escape }}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+            role="combobox" aria-expanded="false" aria-controls="sf-predictive-results" aria-autocomplete="list" aria-haspopup="listbox" data-sf-initial-focus>
+          <input type="hidden" name="options[prefix]" value="last">
+          <button type="submit" class="sf-btn sf-btn--icon sf-search-overlay__submit" aria-label="{{ 'search.submit' | t | escape }}">
+            {%- render 'sf-icon', name: 'search', size: 20 -%}
+          </button>
+          <button type="button" class="sf-btn sf-btn--text sf-btn--sm sf-search-overlay__close" data-sf-close><span class="sf-btn__label">{{ 'search.close' | t }}</span></button>
+        </form>
+        <div class="sf-search-overlay__results" data-sf-predictive-body>
+          <div id="sf-predictive-results" role="listbox" aria-label="{{ 'search.suggestions' | t | escape }}" hidden></div>
+        </div>
+      </sf-predictive-search>
+    </div>
+  </dialog>
+</sf-dialog>

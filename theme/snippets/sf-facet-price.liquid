@@ -1,0 +1,35 @@
+{%- doc -%}
+  Price range filter: two number inputs in major units (Shopify's filter.v.price.gte / .lte).
+
+  @param {object} filter - The price_range filter.
+  @param {string} id_prefix - Unique id prefix.
+
+  @example
+  {% render 'sf-facet-price', filter: filter, id_prefix: 'sf-facet-main' %}
+{%- enddoc -%}
+{%- liquid
+  assign max_major = filter.range_max | divided_by: 100.0 | ceil
+  assign gte = ''
+  if filter.min_value.value != blank
+    assign gte = filter.min_value.value | divided_by: 100.0
+  endif
+  assign lte = ''
+  if filter.max_value.value != blank
+    assign lte = filter.max_value.value | divided_by: 100.0
+  endif
+  assign max_money = filter.range_max | money
+-%}
+<div class="sf-facet-price">
+  <div class="sf-facet-price__fields">
+    <div class="sf-field">
+      <label class="sf-field__label" for="{{ id_prefix }}-gte">{{ 'facets.price_from' | t }}</label>
+      <input class="sf-input sf-facet-price__input sf-tabular" type="number" inputmode="decimal" id="{{ id_prefix }}-gte" name="{{ filter.min_value.param_name }}" value="{{ gte }}" min="0" max="{{ max_major }}" placeholder="0" data-sf-price-input>
+    </div>
+    <span class="sf-facet-price__sep" aria-hidden="true"></span>
+    <div class="sf-field">
+      <label class="sf-field__label" for="{{ id_prefix }}-lte">{{ 'facets.price_to' | t }}</label>
+      <input class="sf-input sf-facet-price__input sf-tabular" type="number" inputmode="decimal" id="{{ id_prefix }}-lte" name="{{ filter.max_value.param_name }}" value="{{ lte }}" min="0" max="{{ max_major }}" placeholder="{{ max_major }}" data-sf-price-input>
+    </div>
+  </div>
+  <p class="sf-field__help">{{ 'facets.price_range' | t: price: max_money }}</p>
+</div>

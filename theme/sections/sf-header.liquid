@@ -9,12 +9,14 @@
   if hdr.show_account and shop.customer_accounts_enabled
     assign show_account = true
   endif
+  assign logo_w_d = settings.logo_width_desktop | default: 148
+  assign logo_condensed = 120.0 | divided_by: logo_w_d | at_most: 1 | round: 3
   assign cart_opens_drawer = false
   if settings.cart_type == 'drawer'
     assign cart_opens_drawer = true
   endif
 -%}
-<header class="sf-header" data-sf-header data-sticky="{{ sticky }}" data-transparent="{{ is_transparent }}" data-state="{% if is_transparent %}transparent{% else %}solid{% endif %}" style="--sf-logo-w-d: {{ settings.logo_width_desktop | default: 148 }}px; --sf-logo-w-m: {{ settings.logo_width_mobile | default: 112 }}px;">
+<header class="sf-header" data-sf-header data-sticky="{{ sticky }}" data-transparent="{{ is_transparent }}" data-state="{% if is_transparent %}transparent{% else %}solid{% endif %}" data-condensed="false" data-hidden="false" style="--sf-logo-w-d: {{ logo_w_d }}px; --sf-logo-w-m: {{ settings.logo_width_mobile | default: 112 }}px; --sf-logo-condensed: {{ logo_condensed }};">
   <sf-header class="sf-header__bar" data-sticky="{{ sticky }}" data-transparent="{{ is_transparent }}">
     <span class="sf-header__scrim" aria-hidden="true"></span>
     <span class="sf-header__surface" aria-hidden="true"></span>
@@ -24,7 +26,7 @@
       </div>
 
       <a class="sf-header__logo" href="{{ routes.root_url }}" aria-label="{{ 'header.home_label' | t: shop: shop.name }}">
-        {%- render 'sf-logo', variant: 'flat', width: settings.logo_width_desktop, loading: 'eager' -%}
+        {%- render 'sf-logo', variant: 'flat', width: logo_w_d, loading: 'eager' -%}
       </a>
 
       <div class="sf-header__actions">

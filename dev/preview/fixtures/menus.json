@@ -1,0 +1,129 @@
+{
+  "placeholder": true,
+  "_note": "Sample data derived only from the supplied client assets (CONTEXT.md). Every value is a placeholder for exercising the theme; nothing here is STEADFAST data.",
+  "menus": [
+    {
+      "handle": "main-menu",
+      "title": "Main menu",
+      "links": [
+        {
+          "title": "Shop",
+          "url": "/collections/all",
+          "type": "catalog_link",
+          "links": [
+            {
+              "title": "Hoodies",
+              "url": "/collections/hoodies",
+              "type": "collection_link",
+              "object": "collection:hoodies"
+            },
+            {
+              "title": "Tracksuits",
+              "url": "/collections/tracksuits",
+              "type": "collection_link",
+              "object": "collection:tracksuits"
+            },
+            {
+              "title": "Tops",
+              "url": "/collections/tops",
+              "type": "collection_link",
+              "object": "collection:tops"
+            },
+            {
+              "title": "Bottoms",
+              "url": "/collections/bottoms",
+              "type": "collection_link",
+              "object": "collection:bottoms"
+            },
+            {
+              "title": "New arrivals",
+              "url": "/collections/new-arrivals",
+              "type": "collection_link",
+              "object": "collection:new-arrivals"
+            },
+            {
+              "title": "All products",
+              "url": "/collections/all",
+              "type": "catalog_link"
+            }
+          ]
+        },
+        {
+          "title": "Campaign",
+          "url": "/#campaign",
+          "type": "http_link"
+        },
+        {
+          "title": "Contact",
+          "url": "/pages/contact",
+          "type": "page_link",
+          "object": "page:contact"
+        }
+      ]
+    },
+    {
+      "handle": "footer-shop",
+      "title": "Shop",
+      "links": [
+        {
+          "title": "Hoodies",
+          "url": "/collections/hoodies",
+          "type": "collection_link",
+          "object": "collection:hoodies"
+        },
+        {
+          "title": "Tracksuits",
+          "url": "/collections/tracksuits",
+          "type": "collection_link",
+          "object": "collection:tracksuits"
+        },
+        {
+          "title": "Tops",
+          "url": "/collections/tops",
+          "type": "collection_link",
+          "object": "collection:tops"
+        },
+        {
+          "title": "Bottoms",
+          "url": "/collections/bottoms",
+          "type": "collection_link",
+          "object": "collection:bottoms"
+        },
+        {
+          "title": "New arrivals",
+          "url": "/collections/new-arrivals",
+          "type": "collection_link",
+          "object": "collection:new-arrivals"
+        }
+      ]
+    },
+    {
+      "handle": "footer",
+      "title": "Help",
+      "links": [
+        {
+          "title": "Shipping",
+          "url": "/policies/shipping-policy",
+          "type": "policy_link"
+        },
+        {
+          "title": "Returns",
+          "url": "/policies/refund-policy",
+          "type": "policy_link"
+        },
+        {
+          "title": "Contact",
+          "url": "/pages/contact",
+          "type": "page_link",
+          "object": "page:contact"
+        },
+        {
+          "title": "Size guide",
+          "url": "/pages/size-guide",
+          "type": "page_link",
+          "object": "page:size-guide"
+        }
+      ]
+    }
+  ]
+}

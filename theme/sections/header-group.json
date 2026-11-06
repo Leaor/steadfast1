@@ -15,8 +15,23 @@
         "menu": "main-menu",
         "sticky_behavior": "on-scroll-up",
         "transparent_on_home": true
-      }
+      },
+      "blocks": {
+        "promo_shop": {
+          "type": "menu_promo",
+          "settings": {
+            "menu_item": "Shop",
+            "heading": "Shop all"
+          }
+        }
+      },
+      "block_order": [
+        "promo_shop"
+      ]
     }
   },
-  "order": ["announcement", "header"]
+  "order": [
+    "announcement",
+    "header"
+  ]
 }

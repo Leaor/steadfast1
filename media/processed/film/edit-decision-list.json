@@ -1,0 +1,295 @@
+{
+ "title": "STEADFAST hero edit \u2014 supplied footage",
+ "note": "Edit of client-supplied phone footage and photography. Not a commissioned campaign film.",
+ "fps": 30,
+ "intro_duration_s": 12.8,
+ "shots": [
+  {
+   "shot": "S1",
+   "beat": 1,
+   "description": "Extreme close-up: hood ornament and lettering",
+   "record_in": 0.0,
+   "record_out": 2.2,
+   "duration_s": 2.2,
+   "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+   "kind": "clip",
+   "source_in": 0.5,
+   "source_out": 1.6,
+   "speed": 0.5,
+   "slow_motion": "mci",
+   "vidstab": true,
+   "crop_x0y0x1y1": {
+    "*": [
+     [
+      0.0,
+      0.24,
+      0.56,
+      0.8
+     ],
+     [
+      0.021,
+      0.261,
+      0.539,
+      0.779
+     ]
+    ]
+   },
+   "in": [
+    "fade",
+    1.2
+   ],
+   "out": [
+    "cut"
+   ]
+  },
+  {
+   "shot": "S2",
+   "beat": 2,
+   "description": "Tilt down the zip: neck label and pull, logo, pocket",
+   "record_in": 2.2,
+   "record_out": 4.0,
+   "duration_s": 1.8,
+   "source": "media/source/photos/zip-hoodie-blue-grey-front.png",
+   "kind": "still",
+   "crop_x0y0x1y1": {
+    "*": [
+     [
+      0.4137,
+      0.1,
+      0.5863,
+      0.65
+     ],
+     [
+      0.4137,
+      0.36,
+      0.5863,
+      0.91
+     ]
+    ]
+   },
+   "in": [
+    "cut"
+   ],
+   "out": [
+    "cut"
+   ]
+  },
+  {
+   "shot": "S3",
+   "beat": 3,
+   "description": "The camera passes across the word on the back",
+   "record_in": 4.0,
+   "record_out": 5.0,
+   "duration_s": 1.0,
+   "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+   "kind": "clip",
+   "source_in": 3.15,
+   "source_out": 3.65,
+   "speed": 0.5,
+   "slow_motion": "mci",
+   "vidstab": true,
+   "crop_x0y0x1y1": {
+    "*": [
+     [
+      0.0,
+      0.18,
+      0.7,
+      0.88
+     ],
+     [
+      0.0,
+      0.18,
+      0.7,
+      0.88
+     ]
+    ]
+   },
+   "in": [
+    "cut"
+   ],
+   "out": [
+    "cut"
+   ]
+  },
+  {
+   "shot": "S4",
+   "beat": 4,
+   "description": "Side profile, push toward hood and shoulder",
+   "record_in": 5.0,
+   "record_out": 6.4,
+   "duration_s": 1.4,
+   "source": "media/source/footage/IMG_4374-night-profile-car.MOV",
+   "kind": "clip",
+   "source_in": 1.4,
+   "source_out": 2.1,
+   "speed": 0.5,
+   "slow_motion": "mci",
+   "vidstab": false,
+   "crop_x0y0x1y1": {
+    "*": [
+     [
+      0.22,
+      0.23,
+      0.76,
+      0.77
+     ],
+     [
+      0.25,
+      0.25,
+      0.76,
+      0.76
+     ]
+    ]
+   },
+   "in": [
+    "cut"
+   ],
+   "out": [
+    "dip",
+    0.3
+   ]
+  },
+  {
+   "shot": "S5",
+   "beat": 5,
+   "description": "Tilt up the black tracksuit from the drawcords to the hood",
+   "record_in": 6.4,
+   "record_out": 8.0,
+   "duration_s": 1.6,
+   "source": "media/source/photos/black-tracksuit-night.jpg",
+   "kind": "still",
+   "crop_x0y0x1y1": {
+    "*": [
+     [
+      0.25,
+      0.4,
+      0.65,
+      0.8
+     ],
+     [
+      0.25,
+      0.32,
+      0.65,
+      0.72
+     ]
+    ]
+   },
+   "in": [
+    "dip",
+    0.3
+   ],
+   "out": [
+    "cut"
+   ]
+  },
+  {
+   "shot": "S6",
+   "beat": 6,
+   "description": "The figure turns slightly; back design",
+   "record_in": 8.0,
+   "record_out": 9.6,
+   "duration_s": 1.6,
+   "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+   "kind": "clip",
+   "source_in": 3.7,
+   "source_out": 4.5,
+   "speed": 0.5,
+   "slow_motion": "mci",
+   "vidstab": true,
+   "crop_x0y0x1y1": {
+    "*": [
+     [
+      0.04,
+      0.0,
+      0.8,
+      0.76
+     ],
+     [
+      0.04,
+      0.0,
+      0.8,
+      0.76
+     ]
+    ]
+   },
+   "in": [
+    "cut"
+   ],
+   "out": [
+    "dip",
+    0.3
+   ]
+  },
+  {
+   "shot": "S7",
+   "beat": 7,
+   "description": "Pull back into darkness; the aperture opens",
+   "record_in": 9.6,
+   "record_out": 12.4,
+   "duration_s": 2.8,
+   "source": "media/source/photos/campaign-back-embossed-set.png",
+   "kind": "still",
+   "source_note": "balaclava third-party mark toned down (process_stills.retouch_balaclava_logo)",
+   "aperture": "side masks open from the 608 px shaft to full frame over 0.0-0.9 s (power3.out)",
+   "crop_x0y0x1y1": {
+    "d": [
+     [
+      0.315,
+      0.14,
+      0.685,
+      0.51
+     ],
+     [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+     ]
+    ],
+    "m": [
+     [
+      0.4336,
+      0.17,
+      0.5664,
+      0.59
+     ],
+     [
+      0.3418,
+      0.0,
+      0.6582,
+      1.0
+     ]
+    ]
+   },
+   "in": [
+    "dip",
+    0.3
+   ],
+   "out": [
+    "collapse",
+    1.9
+   ]
+  },
+  {
+   "shot": "BLACK",
+   "record_in": 12.4,
+   "record_out": 12.8,
+   "duration_s": 0.4,
+   "source": "black",
+   "description": "black hold: handoff to the DOM logo reveal"
+  }
+ ],
+ "loop": {
+  "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+  "source_in": 3.4,
+  "source_out": 4.8,
+  "speed": 0.5,
+  "structure": "85 frames forward + 83 frames reversed = 168 frames (5.6 s), seamless",
+  "crop_x0y0x1y1": [
+   0.04,
+   0.0,
+   0.8,
+   0.76
+  ]
+ }
+}

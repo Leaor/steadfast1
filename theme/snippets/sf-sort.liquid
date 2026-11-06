@@ -1,0 +1,21 @@
+{%- doc -%}
+  Sort select styled as a text control ("SORT: FEATURED"). Associated with the facets form by
+  id; without JS a noscript submit applies it.
+
+  @param {object} results - collection or search.
+  @param {string} form_id - The facets form id.
+  @param {string} id_prefix - Unique id prefix.
+
+  @example
+  {% render 'sf-sort', results: collection, form_id: 'sf-facets-form-main', id_prefix: 'sf-sort-main' %}
+{%- enddoc -%}
+{%- assign sort_current = results.sort_by | default: results.default_sort_by -%}
+<div class="sf-sort">
+  <label class="sf-sort__label" for="{{ id_prefix }}">{{ 'facets.sort' | t }}:</label>
+  <select class="sf-sort__select" id="{{ id_prefix }}" name="sort_by" form="{{ form_id }}" data-sf-sort>
+    {%- for option in results.sort_options -%}
+      <option value="{{ option.value | escape }}"{% if option.value == sort_current %} selected{% endif %}>{{ option.name | escape }}</option>
+    {%- endfor -%}
+  </select>
+  <noscript><button type="submit" form="{{ form_id }}" class="sf-btn sf-btn--text sf-btn--sm"><span class="sf-btn__label">{{ 'facets.apply' | t }}</span></button></noscript>
+</div>

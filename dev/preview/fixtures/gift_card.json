@@ -1,0 +1,16 @@
+{
+  "placeholder": true,
+  "_note": "Sample data derived only from the supplied client assets (CONTEXT.md). Every value is a placeholder for exercising the theme; nothing here is STEADFAST data.",
+  "gift_card": {
+    "code": "PREV-IEW0-0000",
+    "balance": 5000,
+    "initial_value": 5000,
+    "currency": "USD",
+    "expires_on": null,
+    "enabled": true,
+    "expired": false,
+    "qr_identifier": "preview-qr",
+    "pass_url": null,
+    "product_handle": null
+  }
+}

@@ -1,0 +1,99 @@
+{%- doc -%}
+  Variant picker (DESIGN §6.6, §7.8; ARCHITECTURE §4.7, §7.6). One fieldset + legend per option
+  with native radios (arrow-key operable) or a labelled <select>. Colour values render as square
+  swatches when Shopify swatch data exists. Unavailable values stay selectable, slashed, and say
+  "Sold out" to screen readers. Hidden without JS (the product form's noscript select takes over).
+
+  @param {object} product - The product.
+  @param {string} section_id - Owning section id.
+  @param {string} [picker_type] - 'buttons' (default) | 'dropdown'.
+  @param {boolean} [color_as_swatches] - Default true.
+  @param {boolean} [show_size_guide] - Render the SIZE GUIDE trigger on the size row.
+  @param {boolean} [hide_single] - Hide options with a single value. Default true.
+  @param {boolean} [update_url] - Update ?variant= on change. Default true.
+  @param {string} [block_attrs] - The block's shopify_attributes.
+
+  @example
+  {% render 'sf-variant-picker', product: product, section_id: section.id, show_size_guide: true %}
+{%- enddoc -%}
+{%- liquid
+  assign p_type = picker_type | default: 'buttons'
+  assign swatches = true
+  if color_as_swatches == false
+    assign swatches = false
+  endif
+  assign hide_one = true
+  if hide_single == false
+    assign hide_one = false
+  endif
+  assign url_flag = 'true'
+  if update_url == false
+    assign url_flag = 'false'
+  endif
+  assign color_names = 'color,colour,colorway,colourway' | split: ','
+  assign size_names = 'size,sizes,taille' | split: ','
+-%}
+{%- unless product.has_only_default_variant -%}
+<sf-variant-picker class="sf-variant-picker" data-section-id="{{ section_id }}" data-product-id="{{ product.id }}" data-update-url="{{ url_flag }}" {{ block_attrs }}>
+  {%- for option in product.options_with_values -%}
+    {%- liquid
+      assign opt_name = option.name | downcase | strip
+      assign is_color = false
+      if color_names contains opt_name
+        assign is_color = true
+      endif
+      assign is_size = false
+      if size_names contains opt_name
+        assign is_size = true
+      endif
+      assign base_id = 'sf-opt-' | append: section_id | append: '-' | append: option.position
+    -%}
+    {%- if hide_one and option.values.size == 1 -%}
+      <input type="hidden" data-sf-option-fixed data-index="{{ forloop.index0 }}" value="{{ option.selected_value | default: option.values.first | escape }}">
+      {%- continue -%}
+    {%- endif -%}
+    {%- if p_type == 'dropdown' -%}
+      <div class="sf-option sf-option--select" data-sf-option data-index="{{ forloop.index0 }}">
+        <div class="sf-option__head">
+          <label class="sf-option__legend" for="{{ base_id }}">
+            <span class="sf-option__name">{{ option.name | escape }}</span>
+          </label>
+          {%- if is_size and show_size_guide -%}{%- render 'sf-size-guide', section_id: section_id, mode: 'trigger' -%}{%- endif -%}
+        </div>
+        <select class="sf-select" id="{{ base_id }}" name="{{ base_id }}" data-sf-option-select>
+          {%- for value in option.values -%}
+            <option value="{{ value | escape }}"{% if option.selected_value == value %} selected{% endif %} data-label="{{ value | escape }}">
+              {%- if value.available -%}{{ value | escape }}{%- else -%}{{ 'products.value_unavailable' | t: value: value }}{%- endif -%}
+            </option>
+          {%- endfor -%}
+        </select>
+      </div>
+    {%- else -%}
+      <fieldset class="sf-option{% if is_color and swatches %} sf-option--swatch{% elsif is_size %} sf-option--size{% else %} sf-option--text{% endif %}" data-sf-option data-index="{{ forloop.index0 }}">
+        <legend class="sf-option__legend">
+          <span class="sf-option__name">{{ option.name | escape }}</span>
+          <span class="sf-option__value" data-sf-option-value>{{ option.selected_value | escape }}</span>
+        </legend>
+        {%- if is_size and show_size_guide -%}{%- render 'sf-size-guide', section_id: section_id, mode: 'trigger' -%}{%- endif -%}
+        <div class="sf-option__values">
+          {%- for value in option.values -%}
+            {%- assign vid = base_id | append: '-' | append: forloop.index -%}
+            {%- assign use_swatch = false -%}
+            {%- if is_color and swatches and value.swatch.color != blank -%}{%- assign use_swatch = true -%}{%- endif -%}
+            <input class="sf-option__input" type="radio" id="{{ vid }}" name="{{ base_id }}" value="{{ value | escape }}"{% if option.selected_value == value %} checked{% endif %}>
+            <label class="sf-option__label{% if use_swatch %} sf-option__label--swatch{% endif %}{% unless value.available %} is-unavailable{% endunless %}" for="{{ vid }}">
+              {%- if use_swatch -%}
+                <span class="sf-option__swatch" style="--sf-swatch: {{ value.swatch.color }}" aria-hidden="true"></span>
+                <span class="sf-visually-hidden">{{ value | escape }}</span>
+              {%- else -%}
+                <span class="sf-option__text">{{ value | escape }}</span>
+              {%- endif -%}
+              <span class="sf-visually-hidden" data-sf-unavailable-text{% if value.available %} hidden{% endif %}>, {{ 'products.value_sold_out' | t }}</span>
+            </label>
+          {%- endfor -%}
+        </div>
+      </fieldset>
+    {%- endif -%}
+  {%- endfor -%}
+</sf-variant-picker>
+{%- endunless -%}

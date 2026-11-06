@@ -424,6 +424,7 @@
     color: var(--sf-fg);
     overflow: auto;
     overscroll-behavior: contain;
+    pointer-events: auto; /* dialogs may live inside a pointer-events: none wrapper (the sticky header) */
     transition:
       transform var(--_close-dur) var(--sf-ease-in-out),
       opacity var(--_close-dur) var(--sf-ease-in-out),
@@ -619,6 +620,9 @@
 @layer sf.state {
   [hidden] { display: none !important; }
   html.sf-scroll-locked { overflow: hidden; scrollbar-gutter: stable; }
+  /* With classic scrollbars the reserved gutter shows the canvas: paint it as the surface of an edge-to-edge dialog. */
+  html.sf-scroll-locked:has(sf-dialog[data-sf-dialog-type="drawer-right"] > dialog[open]) { background-color: var(--sf-bg-raised); }
+  html.sf-scroll-locked:has(sf-dialog[data-sf-dialog-type="fullscreen"] > dialog[open]) { background-color: var(--sf-bg); }
   html[data-sf-motion="reduced"] { --sf-motion: 0; }
   html[data-sf-motion="reduced"] *, html[data-sf-motion="reduced"] *::before, html[data-sf-motion="reduced"] *::after { scroll-behavior: auto !important; }
   /* No-JS / OS safety net: the OS preference always wins (DESIGN §8.5). */

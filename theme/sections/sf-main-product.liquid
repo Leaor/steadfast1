@@ -1,0 +1,151 @@
+{%- comment -%}
+  Product page (DESIGN §7.8; ARCHITECTURE §2.4, §4.7). Desktop: a 4:5 media stack (cols 1–7)
+  beside a sticky info column (cols 9–12). Mobile: a full-bleed snap rail, info below.
+  Variant changes are client-side from sf-product-json; the form is a native /cart/add POST.
+{%- endcomment -%}
+{{ 'sf-product.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'sf-product.js' | asset_url }}" defer></script>
+{%- liquid
+  assign current = product.selected_or_first_available_variant
+  assign has_size_guide_link = false
+  for block in section.blocks
+    if block.type == 'variant_picker' and block.settings.show_size_guide_link
+      assign has_size_guide_link = true
+    endif
+  endfor
+-%}
+<section class="sf-section sf-main-product sf-tone-ink sf-space-none{% if section.settings.sticky_info %} sf-main-product--sticky{% endif %}" data-sf-product-root data-section-id="{{ section.id }}" data-product-id="{{ product.id }}" aria-labelledby="sf-product-title-{{ section.id }}">
+  <div class="sf-main-product__grid sf-container">
+    <div class="sf-main-product__media">
+      {%- render 'sf-product-gallery', product: product, section_id: section.id, layout: section.settings.gallery_layout, zoom: section.settings.enable_zoom, video_loop: section.settings.enable_video_loop -%}
+    </div>
+    <div class="sf-main-product__info">
+      <div class="sf-main-product__info-inner">
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+            {%- when '@app' -%}
+              {% render block %}
+            {%- when 'title' -%}
+              <h1 class="sf-main-product__title sf-text-xl" id="sf-product-title-{{ section.id }}" {{ block.shopify_attributes }}>{{ product.title | escape }}</h1>
+            {%- when 'price' -%}
+              <div class="sf-main-product__price" {{ block.shopify_attributes }}>
+                {%- render 'sf-price', product: product, variant: current, class: 'sf-price--pdp' -%}
+                <p class="sf-main-product__tax">{{ 'products.tax_at_checkout' | t }}</p>
+              </div>
+            {%- when 'variant_picker' -%}
+              <div class="sf-main-product__picker" {{ block.shopify_attributes }}>
+                {%- render 'sf-variant-picker', product: product, section_id: section.id, picker_type: block.settings.picker_type, color_as_swatches: block.settings.color_as_swatches, show_size_guide: block.settings.show_size_guide_link, hide_single: section.settings.hide_single_value_options, update_url: true -%}
+              </div>
+            {%- when 'quantity' -%}
+              {%- comment -%} Rendered inside the product form (buy_buttons) so it submits with it. {%- endcomment -%}
+            {%- when 'buy_buttons' -%}
+              {%- liquid
+                assign show_qty = false
+                for b in section.blocks
+                  if b.type == 'quantity'
+                    assign show_qty = true
+                  endif
+                endfor
+              -%}
+              <div class="sf-main-product__buy" {{ block.shopify_attributes }}>
+                {%- render 'sf-product-form', product: product, section_id: section.id, show_quantity: show_qty, source: 'product-form' -%}
+              </div>
+            {%- when 'description' -%}
+              {%- if product.description != blank -%}
+                <div class="sf-main-product__description sf-rte" {{ block.shopify_attributes }}>{{ product.description }}</div>
+              {%- endif -%}
+            {%- when 'text' -%}
+              {%- if block.settings.text != blank -%}
+                <p class="sf-main-product__text" {{ block.shopify_attributes }}>{{ block.settings.text }}</p>
+              {%- endif -%}
+            {%- when 'collapsible' -%}
+              {%- liquid
+                assign c_body = ''
+                case block.settings.source
+                  when 'description'
+                    assign c_body = product.description
+                  when 'shipping_returns'
+                    if settings.shipping_returns_page != blank and settings.shipping_returns_page.content != blank
+                      assign c_body = settings.shipping_returns_page.content
+                    else
+                      assign c_body = settings.shipping_returns_fallback
+                    endif
+                  else
+                    if block.settings.page != blank and block.settings.page.content != blank
+                      assign c_body = block.settings.page.content
+                    else
+                      assign c_body = block.settings.content
+                    endif
+                endcase
+              -%}
+              {%- if c_body != blank -%}
+                <details class="sf-accordion sf-main-product__accordion" {{ block.shopify_attributes }}>
+                  <summary>
+                    <span>{{ block.settings.heading | escape }}</span>
+                    {%- render 'sf-icon', name: 'plus', size: 16 -%}{%- render 'sf-icon', name: 'minus', size: 16 -%}
+                  </summary>
+                  <div class="sf-accordion__body sf-rte">
+                    {{ c_body }}
+                    {%- if block.settings.source == 'shipping_returns' -%}
+                      {%- if shop.shipping_policy != blank or shop.refund_policy != blank -%}
+                        <ul class="sf-main-product__policies" role="list">
+                          {%- if shop.shipping_policy != blank -%}<li><a href="{{ shop.shipping_policy.url }}">{{ shop.shipping_policy.title | escape }}</a></li>{%- endif -%}
+                          {%- if shop.refund_policy != blank -%}<li><a href="{{ shop.refund_policy.url }}">{{ shop.refund_policy.title | escape }}</a></li>{%- endif -%}
+                        </ul>
+                      {%- endif -%}
+                    {%- endif -%}
+                  </div>
+                </details>
+              {%- endif -%}
+          {%- endcase -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+  {%- render 'sf-product-json', product: product -%}
+  {%- if has_size_guide_link -%}{%- render 'sf-size-guide', section_id: section.id, mode: 'drawer' -%}{%- endif -%}
+  <script type="application/ld+json">{{ product | structured_data }}</script>
+</section>
+
+{% schema %}
+{
+  "name": "Product information",
+  "class": "sf-shopify-section--main-product",
+  "settings": [
+    { "type": "select", "id": "gallery_layout", "label": "Gallery layout", "default": "stacked",
+      "options": [ { "value": "stacked", "label": "Stacked (desktop), rail (mobile)" }, { "value": "carousel", "label": "Rail on every screen" } ] },
+    { "type": "checkbox", "id": "enable_zoom", "label": "Enable full-screen image viewer", "default": true },
+    { "type": "checkbox", "id": "sticky_info", "label": "Keep product information in view on desktop", "default": true },
+    { "type": "checkbox", "id": "enable_video_loop", "label": "Loop product videos", "default": false },
+    { "type": "checkbox", "id": "hide_single_value_options", "label": "Hide options with a single value", "default": true }
+  ],
+  "blocks": [
+    { "type": "@app" },
+    { "type": "title", "name": "Title", "limit": 1, "settings": [] },
+    { "type": "price", "name": "Price", "limit": 1, "settings": [] },
+    { "type": "variant_picker", "name": "Variant picker", "limit": 1, "settings": [
+      { "type": "select", "id": "picker_type", "label": "Style", "default": "buttons",
+        "options": [ { "value": "buttons", "label": "Buttons" }, { "value": "dropdown", "label": "Dropdown" } ] },
+      { "type": "checkbox", "id": "color_as_swatches", "label": "Show colours as swatches", "default": true },
+      { "type": "checkbox", "id": "show_size_guide_link", "label": "Show size guide link", "default": true,
+        "info": "Content comes from Theme settings > Product information." }
+    ] },
+    { "type": "quantity", "name": "Quantity selector", "limit": 1, "settings": [] },
+    { "type": "buy_buttons", "name": "Buy buttons", "limit": 1, "settings": [
+      { "type": "checkbox", "id": "show_dynamic_checkout", "label": "Show dynamic checkout buttons", "default": false,
+        "info": "Not rendered in this version: branded payment buttons break the monochrome button system." }
+    ] },
+    { "type": "description", "name": "Description", "limit": 1, "settings": [] },
+    { "type": "collapsible", "name": "Collapsible row", "settings": [
+      { "type": "text", "id": "heading", "label": "Heading", "default": "Details" },
+      { "type": "select", "id": "source", "label": "Content", "default": "custom",
+        "options": [ { "value": "custom", "label": "Page or text below" }, { "value": "description", "label": "Product description" }, { "value": "shipping_returns", "label": "Shipping and returns (theme settings)" } ] },
+      { "type": "richtext", "id": "content", "label": "Text" },
+      { "type": "page", "id": "page", "label": "Page", "info": "Overrides the text. The row is hidden when both are empty." }
+    ] },
+    { "type": "text", "name": "Text", "settings": [
+      { "type": "inline_richtext", "id": "text", "label": "Text" }
+    ] }
+  ]
+}
+{% endschema %}

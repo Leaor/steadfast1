@@ -64,6 +64,8 @@
                           </span>
                           {%- if block.settings.heading != blank -%}
                             <span class="sf-mega__tile-name">{{ block.settings.heading | escape }}</span>
+                          {%- else -%}
+                            <span class="sf-visually-hidden">{{ link.title | escape }}</span>
                           {%- endif -%}
                         </a>
                       {%- endif -%}

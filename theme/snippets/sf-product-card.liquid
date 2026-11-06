@@ -28,7 +28,7 @@
     assign has_secondary = true
   endif
 -%}
-{%- if product == blank -%}
+{%- if product == blank or product.id == blank -%}
   {%- render 'sf-product-card-placeholder', index: placeholder_index, heading_level: card_level -%}
 {%- else -%}
 <sf-product-card class="sf-card{% unless product.available %} is-sold-out{% endunless %}{% if has_secondary %} sf-card--has-secondary{% endif %}" data-product-id="{{ product.id }}" data-product-handle="{{ product.handle }}" data-product-url="{{ product.url }}">
@@ -39,7 +39,8 @@
       {{- 'product-apparel-1' | placeholder_svg_tag: 'sf-placeholder sf-img sf-card__img sf-card__img--primary' -}}
     {%- endif -%}
     {%- if has_secondary -%}
-      {%- render 'sf-image', image: product.media[1], sizes: card_sizes, loading: 'lazy', widths: card_widths, class: 'sf-card__img sf-card__img--secondary', alt: '' -%}
+      {%- comment -%} Hover-only (pointer: fine): kept inert in a template so touch devices and the initial load never fetch it; sf-product-card.js inserts it on first pointerenter. {%- endcomment -%}
+      <template data-sf-card-secondary>{%- render 'sf-image', image: product.media[1], sizes: card_sizes, loading: 'eager', widths: card_widths, class: 'sf-card__img sf-card__img--secondary', alt: '' -%}</template>
     {%- endif -%}
     {%- capture card_badges -%}
       {%- if product.tags contains 'new' -%}<span class="sf-card__badge">{{ 'product_card.new' | t }}</span>{%- endif -%}

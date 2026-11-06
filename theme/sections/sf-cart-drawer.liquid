@@ -1,0 +1,35 @@
+{%- comment -%}
+  Cart drawer (DESIGN §7.7, ARCHITECTURE §4.7). Static section rendered by the layout in drawer
+  mode. The dialog persists; only [data-sf-cart-drawer-body] is replaced by Section Rendering.
+{%- endcomment -%}
+<noscript>{{ 'sf-cart.css' | asset_url | stylesheet_tag }}</noscript>
+<sf-dialog id="sf-cart-drawer" data-sf-dialog-type="drawer-right" data-sf-css="{{ 'sf-cart.css' | asset_url }}">
+  <dialog class="sf-cart-drawer" aria-labelledby="sf-cart-drawer-title">
+    <sf-cart-drawer class="sf-cart-drawer__inner">
+      <div class="sf-cart-drawer__body" data-sf-cart-drawer-body>
+        <div class="sf-dialog__head sf-cart-drawer__head">
+          <h2 class="sf-dialog__title" id="sf-cart-drawer-title" tabindex="-1" data-sf-initial-focus data-sf-cart-title>
+            {{- 'cart.title' | t }} <span class="sf-tabular">({{ cart.item_count }})</span>
+          </h2>
+          <button type="button" class="sf-btn sf-btn--text sf-btn--sm" data-sf-close aria-label="{{ 'cart.close' | t }}"><span class="sf-btn__label">{{ 'general.close' | t }}</span></button>
+        </div>
+        {%- if cart.item_count > 0 -%}
+          <ul class="sf-cart-drawer__lines" role="list" aria-label="{{ 'cart.title' | t }}">
+            {%- for item in cart.items -%}
+              {%- render 'sf-cart-line', item: item, index: forloop.index, context: 'drawer' -%}
+            {%- endfor -%}
+          </ul>
+          <div class="sf-cart-drawer__foot">
+            {%- render 'sf-cart-totals', context: 'drawer' -%}
+          </div>
+        {%- else -%}
+          {%- render 'sf-cart-empty', context: 'drawer' -%}
+        {%- endif -%}
+      </div>
+    </sf-cart-drawer>
+  </dialog>
+</sf-dialog>
+
+{% schema %}
+{ "name": "Cart drawer" }
+{% endschema %}

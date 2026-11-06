@@ -1,0 +1,4 @@
+{
+  "sections": { "main": { "type": "sf-main-list-collections", "settings": { "heading": "Collections", "sort": "alphabetical" } } },
+  "order": ["main"]
+}

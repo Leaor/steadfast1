@@ -188,6 +188,8 @@
 
   /* ── scripts and GSAP ──────────────────────────────────── */
   var scriptPromises = {};
+  var dclFired = doc.readyState === 'complete';
+  if (!dclFired) doc.addEventListener('DOMContentLoaded', function () { dclFired = true; }, { once: true });
   S.loadScript = function (url) {
     if (!url) return Promise.reject(new Error('No script URL'));
     if (scriptPromises[url]) return scriptPromises[url];
@@ -196,6 +198,17 @@
       if (existing && existing.dataset.sfLoaded === '1') return resolve();
       var s = existing || doc.createElement('script');
       s.addEventListener('load', function () { s.dataset.sfLoaded = '1'; resolve(); }, { once: true });
+      // A parser-inserted script already in the markup may have run before this call: its load event
+      // will not fire again. Deferred/sync scripts have run by DOMContentLoaded, async ones by window load.
+      if (existing) {
+        var done = function () { existing.dataset.sfLoaded = '1'; resolve(); };
+        if (doc.readyState === 'complete') done();
+        else if (!existing.async && dclFired) done();
+        else {
+          if (!existing.async) doc.addEventListener('DOMContentLoaded', done, { once: true });
+          window.addEventListener('load', done, { once: true });
+        }
+      }
       s.addEventListener('error', function () { delete scriptPromises[url]; reject(new Error('Failed to load ' + url)); }, { once: true });
       if (!existing) {
         s.src = url;
@@ -204,6 +217,26 @@
       }
     });
     return scriptPromises[url];
+  };
+
+  /* In-page anchors: GSAP arrives lazily and ScrollTrigger.refresh() (and pin spacers) cancel a smooth anchor
+     scroll in progress. After a refresh, re-target a hash navigated to in the last 4 s unless the visitor
+     has scrolled by hand since. */
+  var hashNavAt = location.hash ? 0 : -1e9;
+  var markHash = function () { hashNavAt = performance.now(); };
+  window.addEventListener('hashchange', markHash);
+  doc.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (a && a.getAttribute('href').length > 1) markHash();
+  }, true);
+  ['wheel', 'touchstart', 'keydown'].forEach(function (t) { window.addEventListener(t, function () { hashNavAt = -1e9; }, { passive: true }); });
+  S.anchor = {
+    recent: function () { return performance.now() - hashNavAt < 4000 && location.hash.length > 1; },
+    retarget: function () {
+      if (!S.anchor.recent()) return;
+      var t = doc.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (t) t.scrollIntoView({ block: 'start' });
+    }
   };
 
   var gsapPromise = null;
@@ -216,6 +249,7 @@
         gsap.registerPlugin(ScrollTrigger);
         gsap.config({ nullTargetWarn: false });
         ScrollTrigger.config({ ignoreMobileResize: true });
+        ScrollTrigger.addEventListener('refresh', function () { requestAnimationFrame(S.anchor.retarget); });
         var fontsReady = doc.fonts && doc.fonts.ready ? doc.fonts.ready : Promise.resolve();
         var loaded = doc.readyState === 'complete' ? Promise.resolve() : new Promise(function (r) { window.addEventListener('load', r, { once: true }); });
         Promise.all([fontsReady, loaded]).then(function () { ScrollTrigger.refresh(); });
@@ -439,7 +473,49 @@
   });
 
   /* ── <sf-dialog> ────────────────────────────────────────── */
-  var EVENT_ALIASES = { 'sf-search-overlay': 'search' };
+  var EVENT_ALIASES = { 'sf-search-overlay': 'search', 'sf-menu-drawer': 'menu' };
+  /* data-sf-open keys whose dialog id is not simply 'sf-' + key (ARCHITECTURE §4.2 mapping). */
+  var OPEN_ALIASES = { menu: 'sf-menu-drawer', search: 'sf-search-overlay', cart: 'sf-cart-drawer' };
+  function dialogFor(key) {
+    return doc.getElementById(OPEN_ALIASES[key] || 'sf-' + key) || doc.getElementById('sf-' + key);
+  }
+  function keysFor(id) {
+    var keys = [id.replace(/^sf-/, '')];
+    Object.keys(OPEN_ALIASES).forEach(function (k) { if (OPEN_ALIASES[k] === id) keys.push(k); });
+    return keys;
+  }
+  S.dialogs = { get: dialogFor };
+
+  /* Stylesheets of closed dialogs load on intent (hover/focus/touch of an opener) or on open, never at page
+     load: the cart drawer, search overlay and quick view declare theirs in data-sf-css. */
+  var stylePromises = {};
+  S.loadStyle = function (url) {
+    if (stylePromises[url]) return stylePromises[url];
+    stylePromises[url] = new Promise(function (resolve) {
+      var link = doc.querySelector('link[rel="stylesheet"][href="' + url + '"]');
+      if (link && link.sheet) return resolve();
+      if (!link) {
+        link = doc.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = url;
+        doc.head.appendChild(link);
+      }
+      link.addEventListener('load', resolve, { once: true });
+      link.addEventListener('error', resolve, { once: true });
+      setTimeout(resolve, 3000);
+    });
+    return stylePromises[url];
+  };
+  function prepareDialog(d) { return d && typeof d.prepare === 'function' ? d.prepare() : null; }
+  function onIntent(e) {
+    var t = e.target.closest && e.target.closest('[data-sf-open], [data-sf-quick-view], [data-sf-quick-add], [data-sf-add-button]');
+    if (!t) return;
+    var key = t.getAttribute('data-sf-open');
+    if (key) prepareDialog(dialogFor(key));
+    else if (t.hasAttribute('data-sf-add-button')) prepareDialog(doc.getElementById('sf-cart-drawer'));
+    else { prepareDialog(doc.getElementById('sf-quick-view')); prepareDialog(doc.getElementById('sf-cart-drawer')); }
+  }
+  ['pointerover', 'focusin', 'touchstart'].forEach(function (type) { doc.addEventListener(type, onIntent, { passive: true }); });
 
   function durationOf(el) {
     var cs = window.getComputedStyle(el);
@@ -489,14 +565,33 @@
       return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
     }
     _setExpanded(value) {
-      var key = this.key;
-      if (!key) return;
-      doc.querySelectorAll('[data-sf-open="' + key + '"][aria-expanded]').forEach(function (t) {
-        t.setAttribute('aria-expanded', value ? 'true' : 'false');
+      if (!this.id) return;
+      keysFor(this.id).forEach(function (key) {
+        doc.querySelectorAll('[data-sf-open="' + key + '"][aria-expanded]').forEach(function (t) {
+          t.setAttribute('aria-expanded', value ? 'true' : 'false');
+        });
       });
     }
+    prepare() {
+      var urls = (this.getAttribute('data-sf-css') || '').split(/\s+/).filter(Boolean);
+      if (!urls.length) return null;
+      var self = this;
+      if (!this._css) this._css = Promise.all(urls.map(S.loadStyle)).then(function () { self._cssReady = true; });
+      return this._cssReady ? null : this._css;
+    }
     open(trigger) {
-      if (!this.dialog || this.isOpen) return;
+      if (!this.dialog || this.isOpen || this._pending) return;
+      var css = this.prepare();
+      if (css) {
+        var self = this;
+        this._pending = trigger || doc.activeElement || true;
+        css.then(function () {
+          var t = self._pending;
+          self._pending = null;
+          if (t) self.open(t === true ? undefined : t);
+        });
+        return;
+      }
       clearTimeout(this._closeTimer);
       this._closing = false;
       this.classList.remove('is-closing');
@@ -520,6 +615,7 @@
       if (EVENT_ALIASES[this.id]) S.bus.emit(EVENT_ALIASES[this.id] + ':open', {});
     }
     close() {
+      this._pending = null;
       if (!this.dialog || !this.isOpen || this._closing) return;
       this._closing = true;
       clearTimeout(this._openTimer);
@@ -555,7 +651,7 @@
     if (opener) {
       var key = opener.getAttribute('data-sf-open');
       if (key === 'cart' && S.settings.cartType === 'page') return;
-      var target = doc.getElementById('sf-' + key);
+      var target = dialogFor(key);
       if (target && typeof target.open === 'function') {
         e.preventDefault();
         if (target.isOpen) target.close();
@@ -610,8 +706,16 @@
     // Newsletter: after a successful post Shopify reloads the page; focus the status message.
     var success = doc.querySelector('.sf-newsletter-form__success[tabindex="-1"]');
     if (success) {
-      success.focus({ preventScroll: true });
-      success.scrollIntoView({ block: 'center', behavior: 'auto' });
+      var focusSuccess = function () {
+        if (doc.activeElement === success) return;
+        success.focus({ preventScroll: true });
+        success.scrollIntoView({ block: 'center', behavior: 'auto' });
+      };
+      focusSuccess();
+      // The redirect's #form fragment is applied after load and moves focus to the document; re-apply.
+      var refocus = function () { requestAnimationFrame(function () { setTimeout(focusSuccess, 0); }); };
+      if (doc.readyState === 'complete') refocus();
+      else window.addEventListener('load', refocus, { once: true });
     }
   }
   if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', ready, { once: true });

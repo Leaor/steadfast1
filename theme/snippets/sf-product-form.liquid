@@ -1,0 +1,64 @@
+{%- doc -%}
+  Product form (DESIGN §6.2, §7.8; ARCHITECTURE §4.7): hidden variant id, optional quantity,
+  the Add to cart button (state follows the selected variant) and an inline error. A real
+  {% form 'product' %} POST to /cart/add, with a noscript variant <select> for no-JS buyers.
+
+  @param {object} product - The product.
+  @param {string} section_id - Owning section id.
+  @param {boolean} [show_quantity] - Render the quantity stepper.
+  @param {string} [source] - 'product-form' (default) | 'quick-view'.
+  @param {string} [block_attrs] - The block's shopify_attributes.
+
+  @example
+  {% render 'sf-product-form', product: product, section_id: section.id %}
+{%- enddoc -%}
+{%- liquid
+  assign current = product.selected_or_first_available_variant
+  assign form_id = 'sf-product-form-' | append: section_id
+  assign f_source = source | default: 'product-form'
+-%}
+<sf-product-form class="sf-product-form" data-section-id="{{ section_id }}" data-source="{{ f_source }}" data-product-title="{{ product.title | escape }}" {{ block_attrs }}>
+  {%- form 'product', product, id: form_id, class: 'sf-product-form__form', novalidate: 'novalidate' -%}
+    <input type="hidden" name="id" value="{{ current.id }}" data-sf-variant-id>
+    {%- unless product.has_only_default_variant -%}
+      <noscript>
+        <div class="sf-field sf-product-form__noscript">
+          <label class="sf-field__label" for="{{ form_id }}-select">{{ product.options | join: ' / ' | escape }}</label>
+          <select class="sf-select" id="{{ form_id }}-select" name="id">
+            {%- for variant in product.variants -%}
+              <option value="{{ variant.id }}"{% if variant.id == current.id %} selected{% endif %}{% unless variant.available %} disabled{% endunless %}>
+                {{- variant.title | escape }}{% unless variant.available %} – {{ 'products.sold_out' | t }}{% endunless %} – {{ variant.price | money -}}
+              </option>
+            {%- endfor -%}
+          </select>
+        </div>
+      </noscript>
+    {%- endunless -%}
+    {%- if show_quantity -%}
+      <div class="sf-field sf-product-form__qty">
+        <span class="sf-field__label" aria-hidden="true">{{ 'products.quantity' | t }}</span>
+        {%- assign qty_id = form_id | append: '-qty' -%}
+        {%- render 'sf-quantity-input', id: qty_id, name: 'quantity', value: current.quantity_rule.min, min: current.quantity_rule.min, max: current.quantity_rule.max, step: current.quantity_rule.increment, product_title: product.title -%}
+      </div>
+    {%- else -%}
+      <input type="hidden" name="quantity" value="{{ current.quantity_rule.min | default: 1 }}" data-sf-min-qty>
+    {%- endif -%}
+    <p class="sf-product-form__error sf-form-error" role="alert" data-sf-form-error hidden>
+      {%- render 'sf-icon', name: 'error', size: 16 -%}<span data-sf-form-error-text></span>
+    </p>
+    {%- liquid
+      assign btn_label = 'products.add_to_cart' | t
+      assign btn_disabled = false
+      if current == blank
+        assign btn_label = 'products.unavailable' | t
+        assign btn_disabled = true
+      elsif current.available == false
+        assign btn_label = 'products.sold_out' | t
+        assign btn_disabled = true
+      endif
+    -%}
+    <button type="submit" name="add" class="sf-btn sf-btn--primary sf-btn--full sf-product-form__submit" data-sf-add-button{% if btn_disabled %} disabled aria-disabled="true"{% endif %}>
+      <span class="sf-btn__label" data-sf-add-label>{{ btn_label }}</span>
+    </button>
+  {%- endform -%}
+</sf-product-form>

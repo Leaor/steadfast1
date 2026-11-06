@@ -38,8 +38,8 @@
               assign img = c.image
             endif
             assign asset = 'sf-category-' | append: b.asset
-            assign count = nil
-            if s.show_counts and c != blank
+            assign count = ''
+            if s.show_counts and c != blank and c.products_count > 0
               assign count = c.products_count
             endif
           -%}
@@ -50,7 +50,7 @@
               </span>
               <span class="sf-category-grid__label">
                 <span class="sf-category-grid__name">{{ title | escape }}</span>
-                {%- if count != nil -%}
+                {%- if count != '' -%}
                   <span class="sf-category-grid__count">{{ 'home.category.count' | t: count: count }}</span>
                 {%- endif -%}
               </span>

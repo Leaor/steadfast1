@@ -1,0 +1,31 @@
+{%- comment -%}
+  Quick view body (DESIGN §7.6; ARCHITECTURE §4.7). Rendered only through the Section Rendering
+  API (?section_id=sf-quick-view on a product URL) and injected into #sf-quick-view.
+{%- endcomment -%}
+{%- if product != blank -%}
+{{ 'sf-product.css' | asset_url | stylesheet_tag }}
+<div class="sf-qv" data-sf-product-root data-section-id="{{ section.id }}" data-product-id="{{ product.id }}" data-product-url="{{ product.url }}">
+  <div class="sf-qv__media">
+    {%- render 'sf-product-gallery', product: product, section_id: section.id, layout: 'quick-view', zoom: false, video_loop: false -%}
+  </div>
+  <div class="sf-qv__info">
+    <h2 class="sf-qv__title sf-text-xl" id="sf-quick-view-title" tabindex="-1">{{ product.title | escape }}</h2>
+    <div class="sf-qv__price">
+      {%- render 'sf-price', product: product, variant: product.selected_or_first_available_variant, class: 'sf-price--pdp' -%}
+      <p class="sf-main-product__tax">{{ 'products.tax_at_checkout' | t }}</p>
+    </div>
+    <div class="sf-qv__picker">
+      {%- render 'sf-variant-picker', product: product, section_id: section.id, picker_type: 'buttons', color_as_swatches: true, show_size_guide: false, hide_single: true, update_url: false -%}
+    </div>
+    <div class="sf-qv__buy">
+      {%- render 'sf-product-form', product: product, section_id: section.id, show_quantity: false, source: 'quick-view' -%}
+    </div>
+    <a class="sf-btn sf-btn--text sf-btn--sm sf-qv__details" href="{{ product.url }}"><span class="sf-btn__label">{{ 'quick_view.full_details' | t }}</span><span class="sf-visually-hidden">: {{ product.title | escape }}</span></a>
+  </div>
+  {%- render 'sf-product-json', product: product -%}
+</div>
+{%- endif -%}
+
+{% schema %}
+{ "name": "Quick view" }
+{% endschema %}

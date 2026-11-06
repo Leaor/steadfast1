@@ -1,0 +1,48 @@
+{%- doc -%}
+  Cart summary (DESIGN §7.7): subtotal, cart-level discounts, the cart note text, the optional
+  order note and the checkout button. The checkout POSTs to /cart with name="checkout", which
+  hands over to Shopify's own checkout. Never a fake checkout.
+
+  @param {string} context - 'drawer' (renders its own form) | 'page' (inside #sf-cart-form).
+
+  @example
+  {% render 'sf-cart-totals', context: 'drawer' %}
+{%- enddoc -%}
+{%- capture totals_inner -%}
+  {%- if cart.cart_level_discount_applications.size > 0 -%}
+    <ul class="sf-cart-totals__discounts" role="list">
+      {%- for discount in cart.cart_level_discount_applications -%}
+        <li class="sf-cart-totals__row"><span>{{ discount.title | escape }}</span><span class="sf-tabular">-{{ discount.total_allocated_amount | money }}</span></li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+  <div class="sf-cart-totals__row sf-cart-totals__subtotal">
+    <span class="sf-cart-totals__label">{{ 'cart.subtotal' | t }}</span>
+    <span class="sf-cart-totals__amount sf-tabular" data-sf-cart-subtotal>{{ cart.total_price | money }}</span>
+  </div>
+  {%- if settings.cart_note_text != blank -%}
+    <p class="sf-cart-totals__note">{{ settings.cart_note_text | escape }}</p>
+  {%- endif -%}
+  {%- if settings.cart_show_note -%}
+    <details class="sf-cart-totals__order-note"{% if cart.note != blank %} open{% endif %}>
+      <summary class="sf-cart-totals__note-toggle">{{ 'cart.note' | t }}{% render 'sf-icon', name: 'plus', size: 16 %}</summary>
+      <label class="sf-visually-hidden" for="sf-cart-note-{{ context }}">{{ 'cart.note' | t }}</label>
+      <textarea class="sf-textarea" id="sf-cart-note-{{ context }}" name="note" data-sf-cart-note placeholder="{{ 'cart.note_help' | t | escape }}"{% if context == 'page' %} form="sf-cart-form"{% endif %}>{{ cart.note }}</textarea>
+    </details>
+  {%- endif -%}
+{%- endcapture -%}
+<div class="sf-cart-totals sf-cart-totals--{{ context }}">
+  {%- if context == 'drawer' -%}
+    <form action="{{ routes.cart_url }}" method="post" class="sf-cart-totals__form" id="sf-cart-drawer-form">
+      {{ totals_inner }}
+      <button type="submit" name="checkout" class="sf-btn sf-btn--primary sf-btn--full sf-cart-totals__checkout"><span class="sf-btn__label">{{ 'cart.checkout' | t }}</span></button>
+    </form>
+    <a class="sf-btn sf-btn--text sf-btn--sm sf-cart-totals__view" href="{{ routes.cart_url }}"><span class="sf-btn__label">{{ 'cart.view_cart' | t }}</span></a>
+  {%- else -%}
+    {{ totals_inner }}
+    <button type="submit" name="checkout" form="sf-cart-form" class="sf-btn sf-btn--primary sf-btn--full sf-cart-totals__checkout"><span class="sf-btn__label">{{ 'cart.checkout' | t }}</span></button>
+    {%- if additional_checkout_buttons -%}
+      <div class="sf-cart-totals__dynamic">{{ content_for_additional_checkout_buttons }}</div>
+    {%- endif -%}
+  {%- endif -%}
+</div>

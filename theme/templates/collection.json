@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "main": {
+      "type": "sf-main-collection",
+      "settings": { "show_description": true, "show_banner_image": true, "products_per_page": 24, "columns_desktop": "4", "columns_mobile": "2", "show_density_toggle": true, "enable_filtering": true, "enable_sorting": true, "pagination_type": "pager" }
+    }
+  },
+  "order": ["main"]
+}

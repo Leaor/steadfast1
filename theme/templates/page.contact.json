@@ -1,0 +1,7 @@
+{
+  "sections": {
+    "main": { "type": "sf-main-page", "settings": { "spacing": "compact" } },
+    "form": { "type": "sf-contact-form", "settings": { "heading": "Send a message" } }
+  },
+  "order": ["main", "form"]
+}

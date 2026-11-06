@@ -1,0 +1,67 @@
+{%- comment -%}
+  All collections (DESIGN §7.9 header; 4:5 tiles). Each tile is one link: image + name + count.
+  A collection without an image shows a raised tile with the flat wordmark, never a stock image.
+{%- endcomment -%}
+{{ 'sf-collection.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  case section.settings.sort
+    when 'alphabetical_reversed'
+      assign sorted = collections | sort: 'title' | reverse
+    when 'products_high'
+      assign sorted = collections | sort: 'all_products_count' | reverse
+    when 'products_low'
+      assign sorted = collections | sort: 'all_products_count'
+    else
+      assign sorted = collections | sort: 'title'
+  endcase
+-%}
+<section class="sf-section sf-list-collections sf-tone-ink sf-space-none" aria-labelledby="sf-list-collections-title-{{ section.id }}">
+  <div class="sf-container">
+    <header class="sf-list-collections__header">
+      <h1 class="sf-display-lg" id="sf-list-collections-title-{{ section.id }}">{%- if section.settings.heading != blank -%}{{ section.settings.heading | escape }}{%- else -%}{{ 'collections.all_collections' | t }}{%- endif -%}</h1>
+    </header>
+    <ul class="sf-list-collections__grid" role="list">
+      {%- for collection in sorted -%}
+        {%- liquid
+          assign c_image = collection.featured_image | default: collection.image
+          if c_image == blank and collection.products.size > 0
+            assign c_image = collection.products.first.featured_media
+          endif
+        -%}
+        <li>
+          <a class="sf-collection-tile" href="{{ collection.url }}">
+            <div class="sf-collection-tile__media">
+              {%- if c_image != blank -%}
+                {%- liquid
+                  assign t_loading = 'lazy'
+                  if forloop.index <= 3
+                    assign t_loading = 'eager'
+                  endif
+                -%}
+                {%- render 'sf-image', image: c_image, sizes: '(min-width: 990px) 33vw, 50vw', widths: '540,720,900,1200', loading: t_loading, alt: '' -%}
+              {%- else -%}
+                <span class="sf-collection-tile__empty" aria-hidden="true">{%- render 'sf-logo', variant: 'flat', width: 160 -%}</span>
+              {%- endif -%}
+            </div>
+            <div class="sf-collection-tile__info">
+              <h2 class="sf-collection-tile__title">{{ collection.title | escape }}</h2>
+              <span class="sf-collection-tile__count sf-micro sf-tabular">{{ 'collections.products_count' | t: count: collection.all_products_count }}</span>
+            </div>
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Collections list",
+  "class": "sf-shopify-section--list-collections",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Collections" },
+    { "type": "select", "id": "sort", "label": "Sort collections", "default": "alphabetical",
+      "options": [ { "value": "alphabetical", "label": "Alphabetical, A–Z" }, { "value": "alphabetical_reversed", "label": "Alphabetical, Z–A" }, { "value": "products_high", "label": "Product count, high to low" }, { "value": "products_low", "label": "Product count, low to high" } ] }
+  ]
+}
+{% endschema %}

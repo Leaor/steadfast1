@@ -1,0 +1,21 @@
+{
+  "name": "steadfast-theme-dev",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dev-only preview harness and tests for the STEADFAST Shopify theme. Never shipped.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "preview": "node preview/server.mjs --port 9292",
+    "test": "playwright test --config tests/playwright.config.mjs",
+    "theme-check": "shopify theme check --path ../theme"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@playwright/test": "1.63.0",
+    "@shopify/cli": "5.0.1",
+    "liquidjs": "10.30.1"
+  }
+}

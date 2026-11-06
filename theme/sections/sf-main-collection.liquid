@@ -1,0 +1,112 @@
+{%- comment -%}
+  Collection page (DESIGN §7.9; ARCHITECTURE §2.4, §4.7): header (title, description, count,
+  optional banner), sticky toolbar (FILTER (n), sort, density), filter drawer, product grid,
+  pager or load more, empty states. Filtering is a native GET form; sf-facets.js enhances it.
+{%- endcomment -%}
+{{ 'sf-collection.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'sf-facets.js' | asset_url }}" defer></script>
+{%- paginate collection.products by section.settings.products_per_page -%}
+{%- liquid
+  assign cols_d = section.settings.columns_desktop | plus: 0
+  assign cols_m = section.settings.columns_mobile | plus: 0
+  assign size_d = '24vw'
+  if cols_d == 2
+    assign size_d = '48vw'
+  endif
+  assign size_m = '50vw'
+  if cols_m == 1
+    assign size_m = '100vw'
+  endif
+  assign card_sizes = '(min-width: 990px) ' | append: size_d | append: ', (min-width: 750px) 48vw, ' | append: size_m
+  assign active_count = 0
+  for filter in collection.filters
+    if filter.type == 'price_range'
+      if filter.min_value.value != blank or filter.max_value.value != blank
+        assign active_count = active_count | plus: 1
+      endif
+    else
+      assign active_count = active_count | plus: filter.active_values.size
+    endif
+  endfor
+  assign clear_url = collection.url
+  if collection.sort_by != blank and collection.sort_by != collection.default_sort_by
+    assign clear_url = collection.url | append: '?sort_by=' | append: collection.sort_by
+  endif
+  assign show_banner = false
+  if section.settings.show_banner_image and collection.image != blank
+    assign show_banner = true
+  endif
+-%}
+<section class="sf-section sf-main-collection sf-tone-ink sf-space-none" data-section-id="{{ section.id }}" aria-labelledby="sf-collection-title-{{ section.id }}">
+  <header class="sf-collection-header{% if show_banner %} sf-collection-header--banner{% endif %}">
+    {%- if show_banner -%}
+      <div class="sf-collection-header__banner">
+        {%- render 'sf-image', image: collection.image, sizes: '100vw', widths: '750,1100,1500,2200,3000', loading: 'eager', fetchpriority: 'high', alt: '', class: 'sf-collection-header__img' -%}
+      </div>
+    {%- endif -%}
+    <div class="sf-collection-header__text sf-container">
+      <h1 class="sf-collection-header__title sf-display-lg" id="sf-collection-title-{{ section.id }}">{{ collection.title | escape }}</h1>
+      {%- if section.settings.show_description and collection.description != blank -%}
+        <div class="sf-collection-header__description sf-rte">{{ collection.description }}</div>
+      {%- endif -%}
+      <p class="sf-collection-header__count sf-micro sf-tabular">{{ 'collections.products_count' | t: count: collection.products_count }}</p>
+    </div>
+  </header>
+
+  <sf-facets class="sf-facets" data-section-id="{{ section.id }}" data-default-desktop="{{ cols_d }}" data-default-mobile="{{ cols_m }}">
+    {%- render 'sf-facets', results: collection, section_id: section.id, action_url: collection.url, clear_url: clear_url, count: paginate.items, enable_filtering: section.settings.enable_filtering, enable_sorting: section.settings.enable_sorting, show_density: section.settings.show_density_toggle -%}
+
+    <div class="sf-facets__results sf-container" data-sf-facets-results>
+      {%- if collection.products.size > 0 -%}
+        <ul class="sf-product-grid sf-product-grid--d{{ cols_d }} sf-product-grid--m{{ cols_m }}" role="list" data-sf-product-grid>
+          {%- for product in collection.products -%}
+            {%- liquid
+              assign c_loading = 'lazy'
+              assign c_priority = blank
+              if forloop.index <= 4 and paginate.current_page == 1
+                assign c_loading = 'eager'
+              endif
+              if forloop.first and paginate.current_page == 1 and show_banner == false
+                assign c_priority = 'high'
+              endif
+            -%}
+            <li class="sf-product-grid__item">
+              {%- render 'sf-product-card', product: product, sizes: card_sizes, loading: c_loading, fetchpriority: c_priority, heading_level: 2 -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+        {%- render 'sf-pagination', paginate: paginate, type: section.settings.pagination_type -%}
+      {%- elsif active_count > 0 -%}
+        <div class="sf-collection-empty">
+          <p class="sf-collection-empty__title sf-text-xl">{{ 'collections.empty_filtered' | t }}</p>
+          <a class="sf-btn sf-btn--secondary" href="{{ clear_url }}" data-sf-facet-link><span class="sf-btn__label">{{ 'facets.clear_all' | t }}</span></a>
+        </div>
+      {%- else -%}
+        <div class="sf-collection-empty">
+          <p class="sf-collection-empty__title sf-text-xl">{{ 'collections.empty' | t }}</p>
+          <p class="sf-collection-empty__text">{{ 'collections.empty_hint' | t }}</p>
+          <a class="sf-btn sf-btn--secondary" href="{{ routes.all_products_collection_url }}"><span class="sf-btn__label">{{ 'cart.explore' | t }}</span></a>
+        </div>
+      {%- endif -%}
+    </div>
+  </sf-facets>
+</section>
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "Collection",
+  "class": "sf-shopify-section--main-collection",
+  "settings": [
+    { "type": "checkbox", "id": "show_description", "label": "Show collection description", "default": true },
+    { "type": "checkbox", "id": "show_banner_image", "label": "Show collection image", "default": true, "info": "21:9 on desktop, 4:5 on mobile." },
+    { "type": "range", "id": "products_per_page", "label": "Products per page", "min": 8, "max": 48, "step": 4, "default": 24 },
+    { "type": "select", "id": "columns_desktop", "label": "Columns on desktop", "default": "4", "options": [ { "value": "2", "label": "2" }, { "value": "4", "label": "4" } ] },
+    { "type": "select", "id": "columns_mobile", "label": "Columns on mobile", "default": "2", "options": [ { "value": "1", "label": "1" }, { "value": "2", "label": "2" } ] },
+    { "type": "checkbox", "id": "show_density_toggle", "label": "Let visitors change the grid density", "default": true },
+    { "type": "checkbox", "id": "enable_filtering", "label": "Enable filtering", "default": true, "info": "Configure filters with the Search & Discovery app." },
+    { "type": "checkbox", "id": "enable_sorting", "label": "Enable sorting", "default": true },
+    { "type": "select", "id": "pagination_type", "label": "Pagination", "default": "pager", "options": [ { "value": "pager", "label": "Numbered pages" }, { "value": "load_more", "label": "Load more button" } ] }
+  ]
+}
+{% endschema %}

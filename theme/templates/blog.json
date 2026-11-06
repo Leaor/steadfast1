@@ -1,0 +1,1 @@
+{ "sections": { "main": { "type": "sf-main-blog", "settings": { "show_image": true, "posts_per_page": 12 } } }, "order": ["main"] }

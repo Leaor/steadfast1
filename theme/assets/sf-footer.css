@@ -1,0 +1,170 @@
+/*
+ * STEADFAST · sf-footer.css (CORE; loaded by the sf-footer section)
+ * Footer columns (SHOP / HELP / LEGAL / FOLLOW), bottom bar, localization, social links and the
+ * visitor motion toggle. Spec: DESIGN §7.11. Black field, hairline top, no payment icons.
+ */
+
+@layer sf.components {
+  .shopify-section:has(> .sf-footer) { content-visibility: auto; contain-intrinsic-size: auto 560px; }
+  /* Below 990 px the groups are accordions that sf-header.js closes on load; collapse them from first paint so
+     closing them never shifts the page (the markup keeps them open for no-JS). */
+  @media (max-width: 989px) {
+    html.js .sf-footer__group[open]:not([data-sf-synced]) > :not(summary) { display: none; }
+  }
+
+  .sf-footer {
+    border-top: var(--sf-hairline) solid var(--sf-line);
+    padding-top: var(--sf-space-8);
+    padding-bottom: calc(var(--sf-space-6) + env(safe-area-inset-bottom));
+    color: var(--sf-fg-muted);
+  }
+  @media (min-width: 990px) { .sf-footer { padding-top: var(--sf-space-9); padding-bottom: var(--sf-space-7); } }
+
+  .sf-footer__top { display: grid; gap: var(--sf-space-7); }
+  .sf-footer__logo { display: inline-block; color: var(--sf-fg); }
+  .sf-footer__logo .sf-logo--flat { width: 148px; }
+
+  /* Link groups: accordions on mobile, columns on desktop. */
+  .sf-footer__nav { display: grid; }
+  .sf-footer__group { border-top: var(--sf-hairline) solid var(--sf-line); }
+  .sf-footer__group:last-child { border-bottom: var(--sf-hairline) solid var(--sf-line); }
+  .sf-footer__title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 52px;
+    list-style: none;
+    color: var(--sf-fg-subtle);
+    font-family: var(--sf-font-label);
+    font-weight: 500;
+    font-size: var(--sf-text-2xs);
+    letter-spacing: var(--sf-tracking-label);
+    text-transform: uppercase;
+  }
+  .sf-footer__title::-webkit-details-marker { display: none; }
+  .sf-footer__toggle { color: var(--sf-fg-subtle); transition: transform calc(var(--sf-dur-base) * var(--sf-motion)) var(--sf-ease-standard); }
+  .sf-footer__group[open] .sf-footer__toggle { transform: rotate(45deg); }
+  .sf-footer__links,
+  .sf-footer__text,
+  .sf-footer__social { padding-bottom: var(--sf-space-5); }
+  .sf-footer__links { display: grid; gap: 4px; }
+  .sf-footer__link,
+  .sf-social__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 40px;
+    color: var(--sf-fg-muted);
+    font-size: var(--sf-text-sm);
+    line-height: 1.4;
+    text-decoration: none;
+    transition: color calc(var(--sf-dur-instant) * var(--sf-motion)) linear;
+  }
+  .sf-footer__link[aria-current="page"] { color: var(--sf-fg); }
+  @media (hover: hover) and (pointer: fine) {
+    .sf-footer__link:hover, .sf-social__link:hover { color: var(--sf-fg); }
+  }
+  .sf-footer__text { font-size: var(--sf-text-sm); color: var(--sf-fg-muted); max-width: 32ch; }
+
+  .sf-social { display: grid; gap: 4px; }
+  .sf-social .sf-icon { color: var(--sf-fg-subtle); }
+  .sf-social:not(.sf-social--labels) { display: flex; gap: 4px; }
+  .sf-social:not(.sf-social--labels) .sf-social__link { justify-content: center; min-width: 44px; min-height: 44px; }
+
+  @media (min-width: 990px) {
+    .sf-footer__top {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--sf-grid-gap);
+      align-items: start;
+    }
+    .sf-footer__brand { grid-column: 1 / span 3; padding-top: 4px; }
+    .sf-footer__nav {
+      grid-column: 5 / span 8;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      column-gap: var(--sf-grid-gap);
+    }
+    .sf-footer__group,
+    .sf-footer__group:last-child { border: 0; }
+    .sf-footer__title { min-height: 0; margin-bottom: var(--sf-space-5); cursor: default; }
+    .sf-footer__toggle { display: none; }
+    .sf-footer__links { gap: 12px; padding: 0; }
+    .sf-footer__link, .sf-social__link { min-height: 24px; }
+    .sf-footer__social, .sf-footer__text { padding: 0; }
+    .sf-social { gap: 12px; }
+  }
+
+  /* ── bottom bar ───────────────────────────────────────────── */
+  .sf-footer__bottom {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sf-space-4);
+    margin-top: var(--sf-space-8);
+  }
+  .sf-footer__bottom::before {
+    content: "";
+    display: block;
+    height: 1px;
+    background: var(--sf-line);
+    margin-bottom: var(--sf-space-2);
+  }
+  .sf-footer__bottom-start,
+  .sf-footer__bottom-end { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sf-space-3) var(--sf-space-6); }
+  .sf-footer__copyright {
+    color: var(--sf-fg-subtle);
+    font-family: var(--sf-font-label);
+    font-weight: 500;
+    font-size: var(--sf-text-2xs);
+    letter-spacing: var(--sf-tracking-label);
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+  }
+  @media (min-width: 990px) {
+    .sf-footer__bottom {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      margin-top: var(--sf-space-9);
+    }
+    .sf-footer__bottom::before { grid-column: 1 / -1; margin-bottom: var(--sf-space-3); }
+    .sf-footer__bottom-end { justify-content: flex-end; }
+  }
+
+  /* ── visitor motion toggle ────────────────────────────────── */
+  .sf-motion-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    color: var(--sf-fg-subtle);
+    font-family: var(--sf-font-label);
+    font-weight: 500;
+    font-size: var(--sf-text-2xs);
+    letter-spacing: var(--sf-tracking-label);
+    text-transform: uppercase;
+    transition: color calc(var(--sf-dur-instant) * var(--sf-motion)) linear;
+  }
+  .sf-motion-toggle__box {
+    position: relative;
+    flex: none;
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--sf-fg-subtle);
+  }
+  .sf-motion-toggle[aria-pressed="true"] { color: var(--sf-fg-muted); }
+  .sf-motion-toggle[aria-pressed="true"] .sf-motion-toggle__box { background: var(--sf-fg); border-color: var(--sf-fg); }
+  .sf-motion-toggle[aria-pressed="true"] .sf-motion-toggle__box::after {
+    content: "";
+    position: absolute;
+    left: 3px;
+    top: 0;
+    width: 5px;
+    height: 9px;
+    border: solid #000;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+  }
+  .sf-motion-toggle[data-os-reduced] { cursor: default; }
+  @media (hover: hover) and (pointer: fine) { .sf-motion-toggle:hover { color: var(--sf-fg); } }
+
+  .sf-footer__localization .sf-localization__select { color: var(--sf-fg-muted); }
+}

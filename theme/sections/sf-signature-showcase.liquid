@@ -62,7 +62,7 @@
     </div>
 
     {%- if section.blocks.size > 0 -%}
-      <ul class="sf-signature-showcase__details" role="list" aria-label="{{ 'home.signature.details' | t }}">
+      <ul class="sf-signature-showcase__details" role="list" tabindex="0" aria-label="{{ 'home.signature.details' | t }}">
         {%- for block in section.blocks -%}
           {%- assign b = block.settings -%}
           {%- assign crop_asset = 'sf-signature-detail-' | append: b.asset_crop -%}
@@ -80,13 +80,15 @@
     {%- endif -%}
 
     <div class="sf-signature-showcase__buy" data-sf-ss-buy>
-      <div class="sf-signature-showcase__toggle" role="group" aria-label="{{ 'home.signature.view' | t }}" data-sf-ss-toggle hidden>
+      <div class="sf-signature-showcase__toggle" role="group" aria-label="{{ 'home.signature.view' | t }}" data-sf-ss-toggle>
         <button type="button" class="sf-signature-showcase__face-btn" data-sf-ss-face="front" aria-pressed="true">{{ 'home.signature.front' | t }}</button>
         <button type="button" class="sf-signature-showcase__face-btn" data-sf-ss-face="back" aria-pressed="false">{{ 'home.signature.back' | t }}</button>
       </div>
       {%- if p != blank -%}
         <p class="sf-signature-showcase__title">{{ p.title | escape }}</p>
         {%- render 'sf-price', product: p, show_from: true, class: 'sf-signature-showcase__price' -%}
+      {%- elsif heading != blank -%}
+        <p class="sf-signature-showcase__title sf-signature-showcase__title--staged" aria-hidden="true">{{ heading | escape }}</p>
       {%- endif -%}
       {%- if s.cta_label != blank -%}
         <a class="sf-btn sf-btn--primary sf-signature-showcase__cta" href="{{ cta_url }}">

@@ -1,0 +1,33 @@
+{%- doc -%}
+  Variant data for the client-side picker (ARCHITECTURE §4.7). Each variant carries pre-rendered
+  price_html (sf-price), so a variant change needs no round trip. Never includes inventory counts.
+
+  @param {object} product - The product.
+
+  @example
+  {% render 'sf-product-json', product: product %}
+{%- enddoc -%}
+<script type="application/json" data-sf-product-json>
+  {
+    "id": {{ product.id | json }},
+    "handle": {{ product.handle | json }},
+    "url": {{ product.url | json }},
+    "title": {{ product.title | json }},
+    "options": {{ product.options | json }},
+    "variants": [
+      {%- for variant in product.variants -%}
+        {%- capture v_price -%}{%- render 'sf-price', product: product, variant: variant -%}{%- endcapture -%}
+        {
+          "id": {{ variant.id | json }},
+          "title": {{ variant.title | json }},
+          "options": {{ variant.options | json }},
+          "available": {{ variant.available | json }},
+          "price_html": {{ v_price | strip | json }},
+          "featured_media_id": {% if variant.featured_media != blank %}{{ variant.featured_media.id | json }}{% else %}null{% endif %},
+          "quantity_rule": { "min": {{ variant.quantity_rule.min | default: 1 | json }}, "max": {% if variant.quantity_rule.max != blank %}{{ variant.quantity_rule.max | json }}{% else %}null{% endif %}, "increment": {{ variant.quantity_rule.increment | default: 1 | json }} },
+          "requires_selling_plan": false
+        }{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    ]
+  }
+</script>

@@ -1,0 +1,90 @@
+{%- comment -%} Journal article: title, meta, optional 16:9 image, body at the measure, tags, comments. {%- endcomment -%}
+{{ 'sf-content.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'sf-customer.js' | asset_url }}" defer></script>
+<article class="sf-section sf-content sf-main-article sf-tone-ink sf-space-compact" aria-labelledby="sf-article-title-{{ section.id }}">
+  <div class="sf-container sf-content__grid">
+    <header class="sf-content__header sf-main-article__header">
+      <a class="sf-btn sf-btn--text sf-btn--sm sf-main-article__back" href="{{ blog.url }}"><span class="sf-btn__label">{{ 'blogs.back_to_blog' | t: title: blog.title }}</span></a>
+      <h1 class="sf-content__title sf-display-lg" id="sf-article-title-{{ section.id }}">{{ article.title | escape }}</h1>
+      {%- if section.settings.show_date or section.settings.show_author -%}
+        <p class="sf-main-article__meta sf-micro">
+          {%- if section.settings.show_date -%}<span>{{ article.published_at | time_tag: '%B %-d, %Y' }}</span>{%- endif -%}
+          {%- if section.settings.show_author and article.author != blank -%}<span>{{ 'blogs.by_author' | t: author: article.author }}</span>{%- endif -%}
+        </p>
+      {%- endif -%}
+    </header>
+    {%- if section.settings.show_image and article.image != blank -%}
+      <div class="sf-main-article__media">
+        {%- assign article_alt = article.image.alt | default: '' -%}
+        {%- render 'sf-image', image: article.image, sizes: '(min-width: 990px) 1200px, 100vw', widths: '750,1100,1500,2200', loading: 'eager', fetchpriority: 'high', alt: article_alt -%}
+      </div>
+    {%- endif -%}
+    <div class="sf-content__body sf-rte">{{ article.content }}</div>
+    {%- if article.tags.size > 0 -%}
+      <div class="sf-main-article__tags">
+        <span class="sf-micro">{{ 'blogs.tagged' | t }}</span>
+        <ul class="sf-main-article__tag-list" role="list">
+          {%- for tag in article.tags -%}<li><a href="{{ blog.url }}/tagged/{{ tag | handleize }}">{{ tag | escape }}</a></li>{%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+
+    {%- if blog.comments_enabled? -%}
+      <section class="sf-comments" id="comments" aria-labelledby="sf-comments-title-{{ section.id }}">
+        <h2 class="sf-comments__title sf-text-xl" id="sf-comments-title-{{ section.id }}">{{ 'blogs.comments' | t: count: article.comments_count }}</h2>
+        {%- if article.comments_count > 0 -%}
+          <ul class="sf-comments__list" role="list">
+            {%- for comment in article.comments -%}
+              <li class="sf-comments__item">
+                <div class="sf-rte">{{ comment.content }}</div>
+                <p class="sf-comments__meta sf-micro">{{ comment.author | escape }} <span>{{ comment.created_at | time_tag: '%B %-d, %Y' }}</span></p>
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+        {%- form 'new_comment', article, class: 'sf-form sf-comments__form', novalidate: 'novalidate' -%}
+          <h3 class="sf-comments__form-title sf-micro">{{ 'blogs.leave_comment' | t }}</h3>
+          {%- if form.posted_successfully? -%}
+            <p class="sf-form__success" role="status" tabindex="-1" data-sf-form-status>{%- render 'sf-icon', name: 'check', size: 16 -%}{{ 'blogs.success_moderated' | t }}</p>
+          {%- endif -%}
+          {%- if form.errors -%}
+            <div class="sf-form__errors" role="alert" tabindex="-1" data-sf-error-summary>
+              <ul role="list">{%- for field in form.errors -%}<li>{{ form.errors.translated_fields[field] | capitalize }} {{ form.errors.messages[field] }}</li>{%- endfor -%}</ul>
+            </div>
+          {%- endif -%}
+          <div class="sf-form__row">
+            <div class="sf-field">
+              <label class="sf-field__label" for="CommentForm-author">{{ 'blogs.name' | t }}</label>
+              <input class="sf-input" type="text" id="CommentForm-author" name="comment[author]" autocomplete="name" value="{{ form.author | escape }}" required aria-required="true"{% if form.errors contains 'author' %} aria-invalid="true"{% endif %}>
+            </div>
+            <div class="sf-field">
+              <label class="sf-field__label" for="CommentForm-email">{{ 'blogs.email' | t }}</label>
+              <input class="sf-input" type="email" id="CommentForm-email" name="comment[email]" autocomplete="email" spellcheck="false" autocapitalize="off" value="{{ form.email | escape }}" required aria-required="true"{% if form.errors contains 'email' %} aria-invalid="true"{% endif %}>
+            </div>
+          </div>
+          <div class="sf-field">
+            <label class="sf-field__label" for="CommentForm-body">{{ 'blogs.message' | t }}</label>
+            <textarea class="sf-textarea" id="CommentForm-body" name="comment[body]" rows="5" required aria-required="true"{% if form.errors contains 'body' %} aria-invalid="true"{% endif %}>{{ form.body }}</textarea>
+          </div>
+          <p class="sf-field__help">{{ 'blogs.moderated' | t }}</p>
+          <div class="sf-form__actions">
+            <button type="submit" class="sf-btn sf-btn--secondary"><span class="sf-btn__label">{{ 'blogs.post' | t }}</span></button>
+          </div>
+        {%- endform -%}
+      </section>
+    {%- endif -%}
+  </div>
+</article>
+<script type="application/ld+json">{{ article | structured_data }}</script>
+
+{% schema %}
+{
+  "name": "Blog post",
+  "class": "sf-shopify-section--main-article",
+  "settings": [
+    { "type": "checkbox", "id": "show_image", "label": "Show featured image", "default": true },
+    { "type": "checkbox", "id": "show_date", "label": "Show date", "default": true },
+    { "type": "checkbox", "id": "show_author", "label": "Show author", "default": false }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,105 @@
+{%- doc -%}
+  Product gallery (DESIGN §7.8). Desktop: a vertical stack of 4:5 media at column width.
+  Mobile (and quick view): a full-bleed scroll-snap rail with a 1px progress bar and a "1 / N"
+  counter. The selected variant's media leads. Renders the zoom viewer dialog when enabled.
+
+  @param {object} product - The product.
+  @param {string} section_id - Owning section id.
+  @param {string} [layout] - 'stacked' (default) | 'carousel' | 'quick-view'.
+  @param {boolean} [zoom] - Enable the full-screen zoom viewer. Default false.
+  @param {boolean} [video_loop] - Loop hosted video.
+  @param {boolean} [eager] - First image eager + fetchpriority high. Default true.
+
+  @example
+  {% render 'sf-product-gallery', product: product, section_id: section.id, layout: 'stacked', zoom: true %}
+{%- enddoc -%}
+{%- liquid
+  assign g_layout = layout | default: 'stacked'
+  assign featured = product.selected_or_first_available_variant.featured_media | default: product.featured_media
+  assign total = product.media.size
+  assign g_sizes = '(min-width: 990px) 58vw, 100vw'
+  if g_layout == 'quick-view'
+    assign g_sizes = '(min-width: 990px) 560px, 100vw'
+  endif
+  assign first_loading = 'eager'
+  assign first_priority = 'high'
+  if eager == false
+    assign first_loading = 'lazy'
+    assign first_priority = blank
+  endif
+  assign image_count = 0
+  for m in product.media
+    if m.media_type == 'image'
+      assign image_count = image_count | plus: 1
+    endif
+  endfor
+-%}
+<sf-product-gallery class="sf-gallery sf-gallery--{{ g_layout }}" data-section-id="{{ section_id }}" data-zoom-id="sf-zoom-{{ section_id }}">
+  {%- if total > 0 -%}
+    <ul class="sf-gallery__list sf-no-scrollbar" role="list" aria-label="{{ 'products.gallery' | t | escape }}" data-sf-gallery-list tabindex="-1">
+      {%- comment -%} The featured (selected variant) media first, then the rest in order. {%- endcomment -%}
+      {%- assign position = 0 -%}
+      {%- if featured != blank -%}
+        {%- assign position = 1 -%}
+        <li class="sf-gallery__item is-active" data-media-id="{{ featured.id }}" data-index="1">
+          {%- render 'sf-product-media', media: featured, product: product, index: 1, loading: first_loading, fetchpriority: first_priority, zoom: zoom, video_loop: video_loop, sizes: g_sizes -%}
+        </li>
+      {%- endif -%}
+      {%- for media in product.media -%}
+        {%- if featured != blank and media.id == featured.id -%}{%- continue -%}{%- endif -%}
+        {%- assign position = position | plus: 1 -%}
+        {%- if position == 1 -%}
+          <li class="sf-gallery__item is-active" data-media-id="{{ media.id }}" data-index="{{ position }}">
+            {%- render 'sf-product-media', media: media, product: product, index: position, loading: first_loading, fetchpriority: first_priority, zoom: zoom, video_loop: video_loop, sizes: g_sizes -%}
+          </li>
+        {%- else -%}
+          <li class="sf-gallery__item" data-media-id="{{ media.id }}" data-index="{{ position }}">
+            {%- render 'sf-product-media', media: media, product: product, index: position, loading: 'lazy', zoom: zoom, video_loop: video_loop, sizes: g_sizes -%}
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+    {%- if total > 1 -%}
+      <div class="sf-gallery__meter" aria-hidden="true">
+        <span class="sf-gallery__progress"><span class="sf-gallery__progress-bar" data-sf-gallery-bar style="--_p: {{ 1.0 | divided_by: total }}"></span></span>
+        <span class="sf-gallery__counter sf-micro sf-tabular" data-sf-gallery-counter>{{ 'products.media_position' | t: current: 1, total: total }}</span>
+      </div>
+    {%- endif -%}
+  {%- else -%}
+    <div class="sf-gallery__empty">{{ 'product-apparel-1' | placeholder_svg_tag: 'sf-placeholder' }}</div>
+  {%- endif -%}
+</sf-product-gallery>
+{%- if zoom and image_count > 0 -%}
+  <sf-dialog id="sf-zoom-{{ section_id }}" data-sf-dialog-type="fullscreen" class="sf-zoom-dialog">
+    <dialog class="sf-zoom" aria-labelledby="sf-zoom-title-{{ section_id }}">
+      <sf-zoom-viewer class="sf-zoom__inner" data-section-id="{{ section_id }}">
+        <div class="sf-zoom__bar">
+          <h2 class="sf-visually-hidden" id="sf-zoom-title-{{ section_id }}">{{ 'products.zoom_title' | t }}</h2>
+          <span class="sf-zoom__counter sf-micro sf-tabular" data-sf-zoom-counter aria-live="polite">{{ 'products.media_position' | t: current: 1, total: image_count }}</span>
+          <div class="sf-zoom__nav">
+            <button type="button" class="sf-btn sf-btn--icon" data-sf-zoom-prev aria-label="{{ 'products.zoom_prev' | t | escape }}">{%- render 'sf-icon', name: 'arrow-left', size: 20 -%}</button>
+            <button type="button" class="sf-btn sf-btn--icon" data-sf-zoom-next aria-label="{{ 'products.zoom_next' | t | escape }}">{%- render 'sf-icon', name: 'arrow-right', size: 20 -%}</button>
+          </div>
+          <button type="button" class="sf-btn sf-btn--text sf-btn--sm sf-zoom__close" data-sf-close data-sf-initial-focus><span class="sf-btn__label">{{ 'general.close' | t }}</span></button>
+        </div>
+        <ul class="sf-zoom__track sf-no-scrollbar" role="list" data-sf-zoom-track>
+          {%- assign zi = 0 -%}
+          {%- for media in product.media -%}
+            {%- if media.media_type != 'image' -%}{%- continue -%}{%- endif -%}
+            {%- assign zi = zi | plus: 1 -%}
+            {%- liquid
+              assign zw = media.width | default: 2400 | at_most: 2400
+              assign zh = zw | times: 1.0 | divided_by: media.aspect_ratio | round
+              assign z_fallback = 'products.image_alt' | t: title: product.title, index: zi
+            -%}
+            <li class="sf-zoom__slide" data-media-id="{{ media.id }}" data-index="{{ zi }}">
+              <div class="sf-zoom__pan" data-sf-zoom-pan tabindex="-1">
+                <img class="sf-zoom__img" src="{{ media | image_url: width: zw }}" width="{{ zw }}" height="{{ zh }}" alt="{{ media.alt | default: z_fallback | escape }}" loading="lazy" decoding="async">
+              </div>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </sf-zoom-viewer>
+    </dialog>
+  </sf-dialog>
+{%- endif -%}

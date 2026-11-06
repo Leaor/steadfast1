@@ -1,0 +1,33 @@
+/*
+ * STEADFAST · sf-gift-card.css (COMMERCE)
+ * Standalone gift card page: one raised card on the black field; prints clean.
+ */
+@layer sf.sections {
+  .sf-gift-card { display: grid; justify-items: center; gap: var(--sf-space-8); min-height: 100vh; min-height: 100svh; padding: var(--sf-space-8) var(--sf-gutter); }
+  .sf-gift-card__logo { display: block; color: var(--sf-fg); }
+  .sf-gift-card__card {
+    display: grid;
+    gap: var(--sf-space-5);
+    width: min(520px, 100%);
+    align-self: start;
+    padding: var(--sf-space-7) var(--sf-space-6);
+    background: var(--sf-bg-raised);
+    border: 1px solid var(--sf-line-strong);
+  }
+  .sf-gift-card__title { color: var(--sf-fg-subtle); }
+  .sf-gift-card__meta { color: var(--sf-fg-muted); font-size: var(--sf-text-sm); }
+  .sf-gift-card__status { color: var(--sf-error); font-size: var(--sf-text-sm); }
+  .sf-gift-card__code-row { display: grid; gap: 8px; }
+  .sf-gift-card__code { display: flex; }
+  .sf-gift-card__code .sf-input { flex: 1; min-width: 0; border-right: 0; letter-spacing: .12em; }
+  .sf-gift-card__copied { min-height: 1.4em; color: var(--sf-success); font-size: var(--sf-text-sm); }
+  .sf-gift-card__qr:not(:empty) { justify-self: start; padding: 12px; background: var(--sf-bone); }
+  .sf-gift-card__qr img, .sf-gift-card__qr canvas { display: block; width: 128px; height: 128px; }
+  .sf-gift-card__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sf-space-4); }
+  @media print {
+    .sf-gift-card-page, .sf-gift-card__card { background: #fff; color: #000; border-color: #000; }
+    .sf-gift-card__actions, [data-sf-copy-code] { display: none; }
+    .sf-gift-card__logo { color: #000; }
+    .sf-gift-card .sf-input { color: #000; border-color: #000; }
+  }
+}

@@ -1,0 +1,12 @@
+{%- doc -%}
+  Empty cart state (DESIGN §7.7): one Spectral line and a primary "Explore collection" button.
+
+  @param {string} [context] - 'drawer' | 'page'. Default 'drawer'.
+
+  @example
+  {% render 'sf-cart-empty', context: 'page' %}
+{%- enddoc -%}
+<div class="sf-cart-empty sf-cart-empty--{{ context | default: 'drawer' }}">
+  <p class="sf-cart-empty__title sf-text-xl">{{ 'cart.empty' | t }}</p>
+  <a class="sf-btn sf-btn--primary" href="{{ routes.all_products_collection_url }}" data-sf-cart-focus-fallback><span class="sf-btn__label">{{ 'cart.explore' | t }}</span></a>
+</div>
