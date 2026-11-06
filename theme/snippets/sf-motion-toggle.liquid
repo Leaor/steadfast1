@@ -1,0 +1,11 @@
+{%- doc -%}
+  Visitor "Reduce motion" switch (ARCHITECTURE §1.3). sf-core.js handles the click, persists the
+  choice in localStorage 'sf:motion' and keeps aria-pressed in sync with html[data-sf-motion].
+
+  @example
+  {% render 'sf-motion-toggle' %}
+{%- enddoc -%}
+<button type="button" class="sf-motion-toggle" data-sf-motion-toggle aria-pressed="{% if settings.motion_level == 'reduced' %}true{% else %}false{% endif %}">
+  <span class="sf-motion-toggle__box" aria-hidden="true"></span>
+  <span class="sf-motion-toggle__label">{{ 'motion.reduce' | t }}</span>
+</button>

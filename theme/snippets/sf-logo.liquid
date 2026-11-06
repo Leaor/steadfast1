@@ -1,0 +1,112 @@
+{%- doc -%}
+  The STEADFAST wordmark: always the client's artwork, never typed text (DESIGN §3.4).
+  - flat: the traced SVG letters (7.24:1), inlined, fill currentColor. Use below 200 px.
+  - textured: the cream raster with streaks (1210 × 411 box, 2.944:1) from sf-asset-data.
+  - lockup: textured raster below 990 px; at ≥ 990 px the streak-only raster with the crisp SVG
+    letters layered on top (Section F).
+  A merchant logo (settings.logo) overrides all three.
+
+  @param {string} variant - 'flat' | 'textured' | 'lockup'.
+  @param {number} width - CSS width of the asset box in px.
+  @param {string} [class] - Extra classes on the root.
+  @param {string} [loading] - 'lazy' (default) or 'eager'.
+  @param {string} [fetchpriority] - e.g. 'high'.
+  @param {string} [alt] - Accessible name. Default shop.name.
+  @param {string} [sizes] - sizes attribute for the rasters. Default 'min(100vw, {width}px)'.
+
+  @example
+  {% render 'sf-logo', variant: 'flat', width: 148 %}
+  {% render 'sf-logo', variant: 'textured', width: 640, loading: 'eager', alt: shop.name %}
+{%- enddoc -%}
+{%- liquid
+  assign logo_w = width | default: 148 | plus: 0
+  assign logo_alt = alt | default: shop.name
+  assign logo_loading = loading | default: 'lazy'
+  assign logo_variant = variant | default: 'flat'
+  assign logo_sizes = sizes
+  if logo_sizes == blank
+    assign logo_sizes = 'min(100vw, ' | append: logo_w | append: 'px)'
+  endif
+  if logo_variant != 'flat' and settings.logo == blank
+    capture textured_rec
+      render 'sf-asset-data', asset: 'sf-logo-textured'
+    endcapture
+    assign textured_rec = textured_rec | strip
+    if textured_rec == blank
+      assign logo_variant = 'flat'
+    endif
+  endif
+-%}
+{%- if settings.logo != blank -%}
+  {%- liquid
+    assign w1 = logo_w
+    assign w2 = logo_w | times: 2
+    assign w3 = logo_w | times: 3
+    assign custom_widths = w1 | append: ',' | append: w2 | append: ',' | append: w3
+    assign custom_class = 'sf-logo sf-logo--custom'
+    if class != blank
+      assign custom_class = custom_class | append: ' ' | append: class
+    endif
+    assign max_w = w3 | at_most: settings.logo.width
+  -%}
+  <span class="sf-logo-custom-box" style="--sf-logo-w:{{ logo_w }}px">
+    {%- if fetchpriority != blank -%}
+      {{- settings.logo | image_url: width: max_w | image_tag: widths: custom_widths, sizes: logo_sizes, loading: logo_loading, fetchpriority: fetchpriority, class: custom_class, alt: logo_alt -}}
+    {%- else -%}
+      {{- settings.logo | image_url: width: max_w | image_tag: widths: custom_widths, sizes: logo_sizes, loading: logo_loading, class: custom_class, alt: logo_alt -}}
+    {%- endif -%}
+  </span>
+{%- elsif logo_variant == 'flat' -%}
+  <span class="sf-logo sf-logo--flat{% if class != blank %} {{ class }}{% endif %}" role="img" aria-label="{{ logo_alt | escape }}" style="--sf-logo-w:{{ logo_w }}px">
+    {{- 'sf-logo-wordmark.svg' | inline_asset_content -}}
+  </span>
+{%- else -%}
+  {%- liquid
+    assign rec = textured_rec | split: '|'
+    assign tex_webp = rec[0] | split: ','
+    assign tex_fallback = 'sf-logo-textured-' | append: rec[1] | append: '.' | append: rec[2]
+    assign tex_w = rec[3]
+    assign tex_h = rec[4]
+    assign streak_webp = ''
+    if logo_variant == 'lockup'
+      capture streak_rec
+        render 'sf-asset-data', asset: 'sf-logo-streaks'
+      endcapture
+      assign streak_rec = streak_rec | strip
+      if streak_rec != blank
+        assign srec = streak_rec | split: '|'
+        assign streak_webp = srec[0] | split: ','
+      endif
+    endif
+  -%}
+  {%- capture tex_srcset -%}
+    {%- for w in tex_webp -%}
+      {%- assign f = 'sf-logo-textured-' | append: w | append: '.webp' -%}
+      {{ f | asset_url }} {{ w }}w{% unless forloop.last %}, {% endunless %}
+    {%- endfor -%}
+  {%- endcapture -%}
+  {%- if logo_variant == 'lockup' -%}
+    <span class="sf-logo sf-logo--lockup{% if streak_webp != '' %} sf-logo--layered{% endif %}{% if class != blank %} {{ class }}{% endif %}" role="img" aria-label="{{ logo_alt | escape }}" style="--sf-logo-w:{{ logo_w }}px">
+      <picture class="sf-logo__raster">
+        {%- if streak_webp != '' -%}
+          <source media="(min-width: 990px)" type="image/webp" sizes="{{ logo_sizes }}" srcset="
+            {%- for w in streak_webp -%}
+              {%- assign f = 'sf-logo-streaks-' | append: w | append: '.webp' -%}
+              {{ f | asset_url }} {{ w }}w{% unless forloop.last %}, {% endunless %}
+            {%- endfor -%}
+          ">
+        {%- endif -%}
+        {%- if tex_webp.size > 0 -%}<source type="image/webp" sizes="{{ logo_sizes }}" srcset="{{ tex_srcset }}">{%- endif -%}
+        <img src="{{ tex_fallback | asset_url }}" width="{{ tex_w }}" height="{{ tex_h }}" alt="" loading="{{ logo_loading }}" decoding="async"{% if fetchpriority != blank %} fetchpriority="{{ fetchpriority }}"{% endif %}>
+      </picture>
+      {%- if streak_webp != '' -%}
+        <span class="sf-logo__letters">{{ 'sf-logo-wordmark.svg' | inline_asset_content }}</span>
+      {%- endif -%}
+    </span>
+  {%- else -%}
+    <picture class="sf-logo sf-logo--textured{% if class != blank %} {{ class }}{% endif %}" style="--sf-logo-w:{{ logo_w }}px">
+      {%- if tex_webp.size > 0 -%}<source type="image/webp" sizes="{{ logo_sizes }}" srcset="{{ tex_srcset }}">{%- endif -%}
+      <img src="{{ tex_fallback | asset_url }}" width="{{ tex_w }}" height="{{ tex_h }}" alt="{{ logo_alt | escape }}" loading="{{ logo_loading }}" decoding="async"{% if fetchpriority != blank %} fetchpriority="{{ fetchpriority }}"{% endif %}>
+    </picture>
+  {%- endif -%}
+{%- endif -%}

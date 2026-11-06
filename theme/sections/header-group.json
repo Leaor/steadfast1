@@ -1,0 +1,22 @@
+{
+  "type": "header",
+  "name": "Header group",
+  "sections": {
+    "announcement": {
+      "type": "sf-announcement",
+      "disabled": true,
+      "settings": {},
+      "blocks": {},
+      "block_order": []
+    },
+    "header": {
+      "type": "sf-header",
+      "settings": {
+        "menu": "main-menu",
+        "sticky_behavior": "on-scroll-up",
+        "transparent_on_home": true
+      }
+    }
+  },
+  "order": ["announcement", "header"]
+}

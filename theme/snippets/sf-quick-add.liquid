@@ -1,0 +1,68 @@
+{%- doc -%}
+  Card actions (ARCHITECTURE §4.6, §15 X1). Renders only for available products:
+  - Quick view link (settings.card_show_quick_view).
+  - Exactly one varying option that is a size, ≤ 8 variants: inline size cells, one POST form
+    per variant (works without JS). On touch a text "Add to cart" button toggles the row.
+  - A single default variant: one form with an "Add to cart" button.
+  - Anything else: an "Add to cart" link that opens quick view with intent 'add'.
+
+  @param {object} product - The product.
+
+  @example
+  {% render 'sf-quick-add', product: product %}
+{%- enddoc -%}
+{%- if product.available -%}
+  {%- liquid
+    assign varying_count = 0
+    assign varying_index = 0
+    assign varying_name = ''
+    for option in product.options_with_values
+      if option.values.size > 1
+        assign varying_count = varying_count | plus: 1
+        assign varying_index = forloop.index0
+        assign varying_name = option.name | downcase
+      endif
+    endfor
+    assign mode = 'view'
+    if settings.card_show_quick_add
+      if product.has_only_default_variant
+        assign mode = 'single'
+      elsif varying_count == 1 and product.variants.size <= 8 and varying_name contains 'size'
+        assign mode = 'sizes'
+      elsif varying_count == 0 and product.variants.size == 1
+        assign mode = 'single'
+      else
+        assign mode = 'quick'
+      endif
+    endif
+    assign single_variant = product.selected_or_first_available_variant
+  -%}
+  {%- if mode == 'sizes' -%}
+    <button type="button" class="sf-btn sf-btn--text sf-btn--sm sf-quick-add__toggle" aria-expanded="false" data-sf-sizes-toggle><span class="sf-btn__label">{{ 'product_card.add_to_cart' | t }}</span><span class="sf-visually-hidden">: {{ product.title | escape }}</span></button>
+    <div class="sf-quick-add__sizes" role="group" aria-label="{{ 'product_card.choose_size' | t }}: {{ product.title | escape }}" data-sf-sizes>
+      {%- for variant in product.variants -%}
+        {%- assign size_value = variant.options[varying_index] -%}
+        <form method="post" action="{{ routes.cart_add_url }}" class="sf-quick-add__form" data-sf-quick-add>
+          <input type="hidden" name="id" value="{{ variant.id }}">
+          <input type="hidden" name="quantity" value="{{ variant.quantity_rule.min | at_least: 1 }}">
+          {%- if variant.available -%}
+            <button type="submit" class="sf-quick-add__size" aria-label="{{ 'product_card.add_size_to_cart' | t: size: size_value }}">{{ size_value }}</button>
+          {%- else -%}
+            <button type="submit" class="sf-quick-add__size is-unavailable" disabled aria-disabled="true">{{ size_value }}<span class="sf-visually-hidden"> {{ 'product_card.sold_out' | t }}</span></button>
+          {%- endif -%}
+        </form>
+      {%- endfor -%}
+    </div>
+  {%- elsif mode == 'single' -%}
+    <form method="post" action="{{ routes.cart_add_url }}" class="sf-quick-add__form" data-sf-quick-add>
+      <input type="hidden" name="id" value="{{ single_variant.id }}">
+      <input type="hidden" name="quantity" value="{{ single_variant.quantity_rule.min | at_least: 1 }}">
+      <button type="submit" class="sf-btn sf-btn--text sf-btn--sm"><span class="sf-btn__label">{{ 'product_card.add_to_cart' | t }}</span><span class="sf-visually-hidden">: {{ product.title | escape }}</span></button>
+    </form>
+  {%- elsif mode == 'quick' -%}
+    <a class="sf-btn sf-btn--text sf-btn--sm" href="{{ product.url }}" data-sf-quick-view data-intent="add" aria-haspopup="dialog"><span class="sf-btn__label">{{ 'product_card.add_to_cart' | t }}</span><span class="sf-visually-hidden"> – {{ 'product_card.choose_options' | t }}: {{ product.title | escape }}</span></a>
+  {%- endif -%}
+  {%- if settings.card_show_quick_view -%}
+    <a class="sf-btn sf-btn--text sf-btn--sm sf-quick-add__view" href="{{ product.url }}" data-sf-quick-view data-intent="view" aria-haspopup="dialog"><span class="sf-btn__label">{{ 'product_card.quick_view' | t }}</span><span class="sf-visually-hidden">: {{ product.title | escape }}</span></a>
+  {%- endif -%}
+{%- endif -%}

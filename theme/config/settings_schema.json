@@ -1,0 +1,254 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Steadfast",
+    "theme_version": "1.1.0",
+    "theme_author": "Steadfast",
+    "theme_documentation_url": "https://help.shopify.com/manual/online-store/themes",
+    "theme_support_url": "https://help.shopify.com/manual/online-store/themes"
+  },
+  {
+    "name": "Logo",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "logo",
+        "label": "Logo",
+        "info": "Overrides the bundled STEADFAST wordmark everywhere. Leave blank to use the wordmark artwork."
+      },
+      {
+        "type": "range",
+        "id": "logo_width_desktop",
+        "label": "Header logo width (desktop)",
+        "min": 80,
+        "max": 260,
+        "step": 2,
+        "unit": "px",
+        "default": 148,
+        "info": "The condensed header uses 120 px."
+      },
+      {
+        "type": "range",
+        "id": "logo_width_mobile",
+        "label": "Header logo width (mobile)",
+        "min": 70,
+        "max": 180,
+        "step": 2,
+        "unit": "px",
+        "default": 112
+      },
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon",
+        "info": "Square image, at least 32 × 32 px."
+      }
+    ]
+  },
+  {
+    "name": "Colors",
+    "settings": [
+      { "type": "color", "id": "color_ink", "label": "Ink (page background)", "default": "#000000" },
+      { "type": "color", "id": "color_charcoal", "label": "Charcoal (drawers and dialogs)", "default": "#141619" },
+      { "type": "color", "id": "color_graphite", "label": "Graphite (hairlines)", "default": "#24272B" },
+      { "type": "color", "id": "color_washed_grey", "label": "Washed grey (muted text)", "default": "#8B9096" },
+      { "type": "color", "id": "color_steel", "label": "Steel (accent)", "default": "#7C91A5" },
+      { "type": "color", "id": "color_silver", "label": "Silver (secondary text)", "default": "#C3C8CD" },
+      {
+        "type": "color",
+        "id": "color_bone",
+        "label": "Bone (text and primary button)",
+        "default": "#F1E9DA",
+        "info": "Bone is used for text only. It is never a background."
+      }
+    ]
+  },
+  {
+    "name": "Typography",
+    "settings": [
+      {
+        "type": "range",
+        "id": "type_scale",
+        "label": "Type scale",
+        "min": 90,
+        "max": 115,
+        "step": 5,
+        "unit": "%",
+        "default": 100
+      },
+      {
+        "type": "paragraph",
+        "content": "Fonts and letter case are fixed by the design system."
+      }
+    ]
+  },
+  {
+    "name": "Motion",
+    "settings": [
+      {
+        "type": "select",
+        "id": "motion_level",
+        "label": "Motion",
+        "options": [
+          { "value": "full", "label": "Cinematic" },
+          { "value": "subtle", "label": "Subtle" },
+          { "value": "reduced", "label": "Minimal" }
+        ],
+        "default": "full",
+        "info": "Visitors who ask their device for reduced motion always get Minimal."
+      },
+      {
+        "type": "checkbox",
+        "id": "show_motion_toggle",
+        "label": "Show “Reduce motion” in the footer",
+        "default": true
+      }
+    ]
+  },
+  {
+    "name": "Layout",
+    "settings": [
+      {
+        "type": "select",
+        "id": "page_width",
+        "label": "Page width",
+        "options": [
+          { "value": "1440", "label": "1440 px" },
+          { "value": "1600", "label": "1600 px" },
+          { "value": "full", "label": "Full width" }
+        ],
+        "default": "1600"
+      },
+      {
+        "type": "select",
+        "id": "section_spacing",
+        "label": "Section spacing",
+        "options": [
+          { "value": "compact", "label": "Compact" },
+          { "value": "standard", "label": "Standard" },
+          { "value": "generous", "label": "Generous" }
+        ],
+        "default": "standard"
+      }
+    ]
+  },
+  {
+    "name": "Cart",
+    "settings": [
+      {
+        "type": "select",
+        "id": "cart_type",
+        "label": "Cart type",
+        "options": [
+          { "value": "drawer", "label": "Drawer" },
+          { "value": "page", "label": "Page" }
+        ],
+        "default": "drawer"
+      },
+      { "type": "checkbox", "id": "cart_show_note", "label": "Show order note", "default": false },
+      {
+        "type": "text",
+        "id": "cart_note_text",
+        "label": "Note under the subtotal",
+        "default": "Taxes and shipping calculated at checkout."
+      },
+      {
+        "type": "collection",
+        "id": "cart_empty_collection",
+        "label": "Empty cart collection",
+        "info": "Up to 4 products shown on the empty cart page."
+      }
+    ]
+  },
+  {
+    "name": "Product cards",
+    "settings": [
+      {
+        "type": "select",
+        "id": "card_image_ratio",
+        "label": "Image ratio",
+        "options": [
+          { "value": "portrait", "label": "Portrait (3:4)" },
+          { "value": "tall", "label": "Tall (4:5)" },
+          { "value": "natural", "label": "Natural" }
+        ],
+        "default": "tall"
+      },
+      { "type": "checkbox", "id": "card_show_secondary_image", "label": "Show second image on hover", "default": true },
+      { "type": "checkbox", "id": "card_show_colorways", "label": "Show colour swatches", "default": true },
+      { "type": "checkbox", "id": "card_show_quick_view", "label": "Show quick view", "default": true },
+      { "type": "checkbox", "id": "card_show_quick_add", "label": "Show add to cart", "default": true }
+    ]
+  },
+  {
+    "name": "Product information",
+    "settings": [
+      { "type": "page", "id": "size_guide_page", "label": "Size guide page" },
+      {
+        "type": "richtext",
+        "id": "size_guide_fallback",
+        "label": "Size guide text",
+        "default": "<p>Sizing information to be confirmed.</p>",
+        "info": "Used when no size guide page is set. Don't add measurements until they are confirmed."
+      },
+      { "type": "page", "id": "shipping_returns_page", "label": "Shipping and returns page" },
+      {
+        "type": "richtext",
+        "id": "shipping_returns_fallback",
+        "label": "Shipping and returns text",
+        "default": "<p>Shipping and returns details to be confirmed.</p>"
+      }
+    ]
+  },
+  {
+    "name": "Search",
+    "settings": [
+      { "type": "checkbox", "id": "predictive_search_enabled", "label": "Show search suggestions", "default": true },
+      { "type": "checkbox", "id": "predictive_search_show_price", "label": "Show prices in suggestions", "default": true }
+    ]
+  },
+  {
+    "name": "Social media",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Links appear in the footer and the mobile menu. Leave blank to hide."
+      },
+      { "type": "text", "id": "social_instagram_link", "label": "Instagram", "info": "https://instagram.com/…" },
+      { "type": "text", "id": "social_tiktok_link", "label": "TikTok", "info": "https://tiktok.com/@…" },
+      { "type": "text", "id": "social_youtube_link", "label": "YouTube", "info": "https://youtube.com/@…" },
+      { "type": "text", "id": "social_x_link", "label": "X", "info": "https://x.com/…" },
+      { "type": "text", "id": "social_facebook_link", "label": "Facebook", "info": "https://facebook.com/…" }
+    ]
+  },
+  {
+    "name": "Currency and language",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "show_currency_selector",
+        "label": "Show country/currency selector",
+        "default": true,
+        "info": "Add countries in Shopify Markets to show the selector."
+      },
+      { "type": "checkbox", "id": "show_language_selector", "label": "Show language selector", "default": false }
+    ]
+  },
+  {
+    "name": "Newsletter",
+    "settings": [
+      {
+        "type": "richtext",
+        "id": "newsletter_consent",
+        "label": "Consent text",
+        "default": "<p>By subscribing you agree to receive emails. Unsubscribe at any time.</p>"
+      },
+      {
+        "type": "text",
+        "id": "newsletter_success",
+        "label": "Success message",
+        "default": "You're subscribed."
+      }
+    ]
+  }
+]

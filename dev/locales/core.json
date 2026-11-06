@@ -1,0 +1,104 @@
+{
+  "general": {
+    "close": "Close",
+    "open": "Open",
+    "loading": "Loading",
+    "error": "Something went wrong. Try again.",
+    "view_all": "View all",
+    "previous": "Previous",
+    "next": "Next",
+    "continue_shopping": "Continue shopping",
+    "placeholder_info": "To be confirmed",
+    "back": "Back",
+    "pieces": {
+      "one": "{{ count }} piece",
+      "other": "{{ count }} pieces"
+    },
+    "placeholder_hint": "Add products in the theme editor",
+    "page": "Page {{ page }}"
+  },
+  "accessibility": {
+    "skip_to_content": "Skip to content",
+    "opens_new_window": "Opens in a new window",
+    "close_dialog": "Close",
+    "loading": "Loading",
+    "primary_nav": "Primary",
+    "mobile_nav": "Mobile",
+    "footer_nav": "Footer",
+    "unit_price_separator": "per"
+  },
+  "header": {
+    "search": "Search",
+    "account": "Account",
+    "cart": "Cart",
+    "cart_with_count": "Cart ({{ count }})",
+    "menu_open": "Open menu",
+    "menu_close": "Close menu",
+    "home_label": "{{ shop }} home",
+    "announcement_pause": "Pause announcements"
+  },
+  "menu": {
+    "categories": "Categories",
+    "collections": "Collections",
+    "back_to": "Back to {{ title }}",
+    "view_all_in": "View all {{ title }}"
+  },
+  "footer": {
+    "legal": "Legal",
+    "follow": "Follow",
+    "copyright": "© {{ year }} {{ shop }}",
+    "contact_information": "Contact"
+  },
+  "newsletter": {
+    "email_label": "Email",
+    "subscribe": "Subscribe",
+    "error_email": "Enter a valid email address."
+  },
+  "localization": {
+    "country_label": "Country/region",
+    "language_label": "Language",
+    "update": "Update"
+  },
+  "price": {
+    "regular": "Regular price",
+    "sale": "Sale price",
+    "from": "From {{ price }}",
+    "sold_out": "Sold out",
+    "unavailable": "Unavailable"
+  },
+  "product_card": {
+    "quick_view": "Quick view",
+    "add_to_cart": "Add to cart",
+    "add_size_to_cart": "Add size {{ size }} to cart",
+    "choose_size": "Choose a size",
+    "choose_options": "Choose options",
+    "new": "New",
+    "sold_out": "Sold out",
+    "pre_order": "Pre-order",
+    "colorways": {
+      "one": "{{ count }} colour",
+      "other": "{{ count }} colours"
+    },
+    "more_colorways": "{{ count }} more",
+    "show_sizes": "Add to cart",
+    "placeholder_title_1": "Zip hoodie, washed blue-grey",
+    "placeholder_title_2": "Tracksuit, black speckle",
+    "placeholder_title_3": "Tracksuit, stone",
+    "placeholder_title_4": "Hoodie, washed charcoal",
+    "placeholder_title_5": "Zip hoodie and sweatpants, black"
+  },
+  "quick_add": {
+    "added": "{{ title }} added to cart"
+  },
+  "motion": {
+    "reduce": "Reduce motion",
+    "reduced_on": "Reduced motion on"
+  },
+  "social": {
+    "instagram": "Instagram",
+    "tiktok": "TikTok",
+    "youtube": "YouTube",
+    "x": "X",
+    "facebook": "Facebook"
+  }
+}

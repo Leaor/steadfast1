@@ -1,0 +1,66 @@
+{%- doc -%}
+  Newsletter signup using Shopify's native customer form (tag "newsletter"). On success the
+  fields are replaced by a status message that sf-core.js focuses after the redirect
+  (DESIGN §7.10). Errors render inline and are linked with aria-describedby.
+
+  @param {string} id_suffix - Unique per page; the form id is 'sf-newsletter-' + id_suffix.
+  @param {string} [button_label] - Default newsletter.subscribe.
+  @param {string} [placeholder] - Default newsletter.email_label.
+  @param {boolean} [show_consent] - Default true; shows settings.newsletter_consent.
+
+  @example
+  {% render 'sf-newsletter-form', id_suffix: section.id, button_label: section.settings.button_label %}
+{%- enddoc -%}
+{%- liquid
+  assign nl_id = 'sf-newsletter-' | append: id_suffix
+  assign nl_input_id = nl_id | append: '-email'
+  assign nl_error_id = nl_id | append: '-error'
+  assign nl_button = button_label | default: 'newsletter.subscribe'
+  if button_label == blank
+    assign nl_button = 'newsletter.subscribe' | t
+  endif
+  assign nl_placeholder = placeholder
+  if placeholder == blank
+    assign nl_placeholder = 'newsletter.email_label' | t
+  endif
+  assign nl_consent = true
+  if show_consent == false
+    assign nl_consent = false
+  endif
+-%}
+{%- form 'customer', id: nl_id, class: 'sf-newsletter-form' -%}
+  {%- if form.posted_successfully? -%}
+    <p class="sf-newsletter-form__success" role="status" tabindex="-1">
+      {%- render 'sf-icon', name: 'check', size: 18 -%}
+      <span>{{ settings.newsletter_success | default: "You're subscribed." | escape }}</span>
+    </p>
+  {%- else -%}
+    <input type="hidden" name="contact[tags]" value="newsletter">
+    <div class="sf-newsletter-form__row">
+      <label class="sf-visually-hidden" for="{{ nl_input_id }}">{{ 'newsletter.email_label' | t }}</label>
+      <input
+        class="sf-input sf-newsletter-form__input"
+        id="{{ nl_input_id }}"
+        type="email"
+        name="contact[email]"
+        value="{{ form.email | escape }}"
+        autocomplete="email"
+        autocapitalize="off"
+        spellcheck="false"
+        required
+        placeholder="{{ nl_placeholder | escape }}"
+        {% if form.errors %}aria-invalid="true" aria-describedby="{{ nl_error_id }}"{% endif %}
+      >
+      <button type="submit" class="sf-btn sf-btn--primary sf-newsletter-form__submit"><span class="sf-btn__label">{{ nl_button | escape }}</span></button>
+    </div>
+    {%- if form.errors -%}
+      <p class="sf-form-error sf-newsletter-form__error" id="{{ nl_error_id }}">
+        {%- render 'sf-icon', name: 'error', size: 16 -%}
+        <span>{{ 'newsletter.error_email' | t }}</span>
+      </p>
+    {%- endif -%}
+    {%- if nl_consent and settings.newsletter_consent != blank -%}
+      <div class="sf-newsletter-form__consent sf-rte">{{ settings.newsletter_consent }}</div>
+    {%- endif -%}
+  {%- endif -%}
+{%- endform -%}

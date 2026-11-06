@@ -1,0 +1,44 @@
+<div class="sf-section sf-custom-liquid sf-tone-{{ section.settings.tone }} sf-space-{{ section.settings.spacing }}">
+  <div class="sf-container">
+    {{ section.settings.custom_liquid }}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Custom Liquid",
+  "class": "sf-shopify-section--custom-liquid",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "liquid",
+      "id": "custom_liquid",
+      "label": "Custom Liquid",
+      "info": "Add app snippets or other Liquid code."
+    },
+    {
+      "type": "select",
+      "id": "tone",
+      "label": "Tone",
+      "options": [
+        { "value": "ink", "label": "Ink" },
+        { "value": "charcoal", "label": "Charcoal" }
+      ],
+      "default": "ink"
+    },
+    {
+      "type": "select",
+      "id": "spacing",
+      "label": "Spacing",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "compact", "label": "Compact" },
+        { "value": "standard", "label": "Standard" },
+        { "value": "generous", "label": "Generous" }
+      ],
+      "default": "standard"
+    }
+  ],
+  "presets": [{ "name": "Custom Liquid" }]
+}
+{% endschema %}

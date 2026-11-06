@@ -1,0 +1,138 @@
+{%- liquid
+  assign hdr = section.settings
+  assign is_transparent = false
+  if hdr.transparent_on_home and template.name == 'index'
+    assign is_transparent = true
+  endif
+  assign sticky = hdr.sticky_behavior | default: 'on-scroll-up'
+  assign show_account = false
+  if hdr.show_account and shop.customer_accounts_enabled
+    assign show_account = true
+  endif
+  assign cart_opens_drawer = false
+  if settings.cart_type == 'drawer'
+    assign cart_opens_drawer = true
+  endif
+-%}
+<header class="sf-header" data-sf-header data-sticky="{{ sticky }}" data-transparent="{{ is_transparent }}" data-state="{% if is_transparent %}transparent{% else %}solid{% endif %}" style="--sf-logo-w-d: {{ settings.logo_width_desktop | default: 148 }}px; --sf-logo-w-m: {{ settings.logo_width_mobile | default: 112 }}px;">
+  <sf-header class="sf-header__bar" data-sticky="{{ sticky }}" data-transparent="{{ is_transparent }}">
+    <span class="sf-header__scrim" aria-hidden="true"></span>
+    <span class="sf-header__surface" aria-hidden="true"></span>
+    <div class="sf-header__inner sf-container">
+      <div class="sf-header__start">
+        {%- render 'sf-nav-desktop', menu: hdr.menu, secondary_menu: hdr.mega_secondary_menu, blocks: section.blocks -%}
+      </div>
+
+      <a class="sf-header__logo" href="{{ routes.root_url }}" aria-label="{{ 'header.home_label' | t: shop: shop.name }}">
+        {%- render 'sf-logo', variant: 'flat', width: settings.logo_width_desktop, loading: 'eager' -%}
+      </a>
+
+      <div class="sf-header__actions">
+        {%- if hdr.show_search -%}
+          <a class="sf-header__action sf-header__action--search" href="{{ routes.search_url }}" data-sf-open="search" aria-haspopup="dialog">
+            <span class="sf-header__text">{{ 'header.search' | t }}</span>
+            <span class="sf-header__glyph">{%- render 'sf-icon', name: 'search', size: 20 -%}<span class="sf-visually-hidden">{{ 'header.search' | t }}</span></span>
+          </a>
+        {%- endif -%}
+        {%- if show_account -%}
+          <a class="sf-header__action sf-header__action--account" href="{{ routes.account_url }}">
+            <span class="sf-header__text">{{ 'header.account' | t }}</span>
+          </a>
+        {%- endif -%}
+        <a class="sf-header__action sf-header__action--cart" href="{{ routes.cart_url }}"{% if cart_opens_drawer %} data-sf-open="cart" aria-haspopup="dialog"{% endif %}>
+          <span class="sf-header__text">{{ 'header.cart' | t }} (<sf-cart-count data-count="{{ cart.item_count }}">{{ cart.item_count }}</sf-cart-count>)</span>
+          <span class="sf-header__glyph">
+            {%- render 'sf-icon', name: 'bag', size: 20 -%}<span class="sf-visually-hidden">{{ 'header.cart' | t }}</span>
+            <sf-cart-count class="sf-header__count" data-count="{{ cart.item_count }}">{{ cart.item_count }}</sf-cart-count>
+          </span>
+        </a>
+        {%- if hdr.show_localization -%}
+          <div class="sf-header__localization">
+            {%- render 'sf-localization-form', id_suffix: 'header' -%}
+          </div>
+        {%- endif -%}
+        <button type="button" class="sf-header__action sf-header__action--menu sf-header__icon-btn" data-sf-open="menu" aria-expanded="false" aria-controls="sf-menu-drawer" aria-haspopup="dialog" aria-label="{{ 'header.menu_open' | t }}">
+          {%- render 'sf-icon', name: 'menu', size: 20 -%}
+        </button>
+      </div>
+    </div>
+    <span class="sf-header__mega-scrim" data-sf-mega-scrim aria-hidden="true"></span>
+  </sf-header>
+</header>
+
+{%- render 'sf-menu-drawer', menu: hdr.menu, secondary_menu: hdr.secondary_menu, logo_width: settings.logo_width_mobile -%}
+
+{% schema %}
+{
+  "name": "Header",
+  "class": "sf-shopify-section--header",
+  "tag": "div",
+  "enabled_on": { "groups": ["header"] },
+  "max_blocks": 2,
+  "settings": [
+    { "type": "link_list", "id": "menu", "label": "Menu", "default": "main-menu" },
+    {
+      "type": "link_list",
+      "id": "mega_secondary_menu",
+      "label": "Mega menu: collections column",
+      "info": "Optional. Shown next to the first menu item's links."
+    },
+    {
+      "type": "select",
+      "id": "sticky_behavior",
+      "label": "Sticky header",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "always", "label": "Always" },
+        { "value": "on-scroll-up", "label": "On scroll up" }
+      ],
+      "default": "on-scroll-up"
+    },
+    {
+      "type": "checkbox",
+      "id": "transparent_on_home",
+      "label": "Transparent over the homepage hero",
+      "default": true
+    },
+    { "type": "checkbox", "id": "show_search", "label": "Show search", "default": true },
+    {
+      "type": "checkbox",
+      "id": "show_account",
+      "label": "Show account",
+      "default": true,
+      "info": "Shown only when customer accounts are enabled."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_localization",
+      "label": "Show country selector in the header",
+      "default": false,
+      "info": "Desktop only. The footer and mobile menu always show it when enabled in theme settings."
+    },
+    {
+      "type": "link_list",
+      "id": "secondary_menu",
+      "label": "Mobile menu: secondary links",
+      "info": "Optional. Shown below the main links."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "menu_promo",
+      "name": "Menu image",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "text",
+          "id": "menu_item",
+          "label": "Menu item",
+          "info": "The exact title of the top-level menu link this image appears under, e.g. Shop."
+        },
+        { "type": "image_picker", "id": "image", "label": "Image", "info": "Shown at 3:4." },
+        { "type": "text", "id": "heading", "label": "Heading" },
+        { "type": "url", "id": "link", "label": "Link" }
+      ]
+    }
+  ]
+}
+{% endschema %}

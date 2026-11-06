@@ -1,0 +1,47 @@
+{%- doc -%}
+  Product price with optional compare-at price. Uses `money` only, tabular figures. Never renders
+  a percentage or "save" badge.
+
+  @param {object} product - The product.
+  @param {object} [variant] - Variant to price. Default product.selected_or_first_available_variant.
+  @param {boolean} [show_from] - Prefix "From" when the product's prices vary.
+  @param {string} [class] - Extra classes on the root.
+
+  @example
+  {% render 'sf-price', product: product, show_from: true %}
+{%- enddoc -%}
+{%- liquid
+  assign price_variant = variant | default: product.selected_or_first_available_variant
+  assign target = price_variant | default: product
+  assign current = target.price
+  assign compare = target.compare_at_price
+  if show_from and product.price_varies
+    assign current = product.price_min
+    assign compare = product.compare_at_price_min
+  endif
+  assign on_sale = false
+  if compare != blank and compare > current
+    assign on_sale = true
+  endif
+  assign available = product.available
+  if price_variant != blank
+    assign available = price_variant.available
+  endif
+-%}
+<div class="sf-price{% if on_sale %} sf-price--sale{% endif %}{% unless available %} sf-price--sold-out{% endunless %}{% if class != blank %} {{ class }}{% endif %}" data-sf-price>
+  {%- if on_sale -%}
+    <span class="sf-visually-hidden">{{ 'price.regular' | t }}</span>
+    <s class="sf-price__compare">{{ compare | money }}</s>
+    <span class="sf-visually-hidden">{{ 'price.sale' | t }}</span>
+  {%- else -%}
+    <span class="sf-visually-hidden">{{ 'price.regular' | t }}</span>
+  {%- endif -%}
+  <span class="sf-price__current">
+    {%- if show_from and product.price_varies -%}
+      {%- assign current_money = current | money -%}
+      {{- 'price.from' | t: price: current_money -}}
+    {%- else -%}
+      {{- current | money -}}
+    {%- endif -%}
+  </span>
+</div>

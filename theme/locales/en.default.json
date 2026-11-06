@@ -1,0 +1,131 @@
+{
+  "accessibility": {
+    "close_dialog": "Close",
+    "footer_nav": "Footer",
+    "loading": "Loading",
+    "mobile_nav": "Mobile",
+    "opens_new_window": "Opens in a new window",
+    "primary_nav": "Primary",
+    "skip_to_content": "Skip to content",
+    "unit_price_separator": "per"
+  },
+  "footer": {
+    "contact_information": "Contact",
+    "copyright": "© {{ year }} {{ shop }}",
+    "follow": "Follow",
+    "legal": "Legal"
+  },
+  "general": {
+    "back": "Back",
+    "close": "Close",
+    "continue_shopping": "Continue shopping",
+    "error": "Something went wrong. Try again.",
+    "loading": "Loading",
+    "next": "Next",
+    "open": "Open",
+    "page": "Page {{ page }}",
+    "pieces": {
+      "one": "{{ count }} piece",
+      "other": "{{ count }} pieces"
+    },
+    "placeholder_hint": "Add products in the theme editor",
+    "placeholder_info": "To be confirmed",
+    "previous": "Previous",
+    "view_all": "View all"
+  },
+  "header": {
+    "account": "Account",
+    "announcement_pause": "Pause announcements",
+    "cart": "Cart",
+    "cart_with_count": "Cart ({{ count }})",
+    "home_label": "{{ shop }} home",
+    "menu_close": "Close menu",
+    "menu_open": "Open menu",
+    "search": "Search"
+  },
+  "home": {
+    "category": {
+      "count": {
+        "one": "{{ count }} piece",
+        "other": "{{ count }} pieces"
+      }
+    },
+    "featured": {
+      "next": "Next pieces",
+      "previous": "Previous pieces",
+      "progress": "Scroll position",
+      "rail_label": "{{ heading }}, scrollable list"
+    },
+    "hero": {
+      "campaign_film": "Campaign film",
+      "pause": "Pause",
+      "play": "Play",
+      "skip": "Skip intro"
+    },
+    "signature": {
+      "back": "Back",
+      "details": "Details",
+      "front": "Front",
+      "label": "Signature piece: {{ title }}",
+      "view": "View"
+    }
+  },
+  "localization": {
+    "country_label": "Country/region",
+    "language_label": "Language",
+    "update": "Update"
+  },
+  "menu": {
+    "back_to": "Back to {{ title }}",
+    "categories": "Categories",
+    "collections": "Collections",
+    "view_all_in": "View all {{ title }}"
+  },
+  "motion": {
+    "reduce": "Reduce motion",
+    "reduced_on": "Reduced motion on"
+  },
+  "newsletter": {
+    "email_label": "Email",
+    "error_email": "Enter a valid email address.",
+    "subscribe": "Subscribe"
+  },
+  "price": {
+    "from": "From {{ price }}",
+    "regular": "Regular price",
+    "sale": "Sale price",
+    "sold_out": "Sold out",
+    "unavailable": "Unavailable"
+  },
+  "product_card": {
+    "add_size_to_cart": "Add size {{ size }} to cart",
+    "add_to_cart": "Add to cart",
+    "choose_options": "Choose options",
+    "choose_size": "Choose a size",
+    "colorways": {
+      "one": "{{ count }} colour",
+      "other": "{{ count }} colours"
+    },
+    "more_colorways": "{{ count }} more",
+    "new": "New",
+    "placeholder_title_1": "Zip hoodie, washed blue-grey",
+    "placeholder_title_2": "Tracksuit, black speckle",
+    "placeholder_title_3": "Tracksuit, stone",
+    "placeholder_title_4": "Hoodie, washed charcoal",
+    "placeholder_title_5": "Zip hoodie and sweatpants, black",
+    "pre_order": "Pre-order",
+    "quick_view": "Quick view",
+    "show_sizes": "Add to cart",
+    "sold_out": "Sold out"
+  },
+  "quick_add": {
+    "added": "{{ title }} added to cart"
+  },
+  "social": {
+    "facebook": "Facebook",
+    "instagram": "Instagram",
+    "tiktok": "TikTok",
+    "x": "X",
+    "youtube": "YouTube"
+  }
+}

@@ -1,0 +1,49 @@
+{%- doc -%}
+  Open Graph and Twitter meta tags. Falls back to the bundled sf-og-default.jpg when the page has
+  no image.
+
+  @example
+  {% render 'sf-meta-tags' %}
+{%- enddoc -%}
+{%- liquid
+  assign og_title = page_title | default: shop.name
+  assign og_url = canonical_url | default: request.origin
+  assign og_type = 'website'
+  assign og_description = page_description | default: shop.description | default: shop.name
+  if request.page_type == 'product'
+    assign og_type = 'product'
+  elsif request.page_type == 'article'
+    assign og_type = 'article'
+  endif
+  if page_image
+    assign og_image = page_image | image_url: width: 1200
+    assign og_image_w = 1200
+    assign og_image_h = 1200 | divided_by: page_image.aspect_ratio | round
+  else
+    assign og_image = 'sf-og-default.jpg' | asset_url
+    assign og_image_w = 1200
+    assign og_image_h = 630
+  endif
+  assign og_prefix = og_image | slice: 0, 2
+  if og_prefix == '//'
+    assign og_image = 'https:' | append: og_image
+  elsif og_prefix contains '/'
+    assign og_image = request.origin | append: og_image
+  endif
+-%}
+<meta property="og:site_name" content="{{ shop.name | escape }}">
+<meta property="og:url" content="{{ og_url }}">
+<meta property="og:title" content="{{ og_title | escape }}">
+<meta property="og:type" content="{{ og_type }}">
+<meta property="og:description" content="{{ og_description | strip_html | escape }}">
+<meta property="og:image" content="{{ og_image }}">
+<meta property="og:image:secure_url" content="{{ og_image }}">
+<meta property="og:image:width" content="{{ og_image_w }}">
+<meta property="og:image:height" content="{{ og_image_h }}">
+{%- if request.page_type == 'product' and product -%}
+  <meta property="og:price:amount" content="{{ product.price | money_without_currency | strip_html | escape }}">
+  <meta property="og:price:currency" content="{{ cart.currency.iso_code | default: shop.currency }}">
+{%- endif -%}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ og_title | escape }}">
+<meta name="twitter:description" content="{{ og_description | strip_html | escape }}">

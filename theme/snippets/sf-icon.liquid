@@ -1,0 +1,77 @@
+{%- doc -%}
+  Inline SVG icon on a 24 × 24 grid: 1.5 stroke, square caps, mitred joins, no fills, currentColor
+  (DESIGN §6.1). Decorative: aria-hidden. Unknown names render nothing.
+
+  Names: account bag search close menu arrow-right arrow-left chevron-down chevron-left
+  chevron-right plus minus play pause zoom filter instagram tiktok youtube x facebook check error
+  info globe ruler
+
+  @param {string} name - Icon name.
+  @param {number} [size] - Rendered size in px. Default 20.
+  @param {string} [class] - Extra classes on the <svg>.
+
+  @example
+  {% render 'sf-icon', name: 'search', size: 20 %}
+{%- enddoc -%}
+{%- liquid
+  assign icon_size = size | default: 20
+  case name
+    when 'account'
+      assign d = '<circle cx="12" cy="8" r="3.75"/><path d="M4.75 20.25c.6-3.9 3.6-6.5 7.25-6.5s6.65 2.6 7.25 6.5"/>'
+    when 'bag'
+      assign d = '<path d="M4.75 8.25h14.5v12.5H4.75z"/><path d="M8.75 8.25V6.5a3.25 3.25 0 0 1 6.5 0v1.75"/>'
+    when 'search'
+      assign d = '<circle cx="10.5" cy="10.5" r="6.25"/><path d="M15.25 15.25l4.75 4.75"/>'
+    when 'close'
+      assign d = '<path d="M5.5 5.5l13 13M18.5 5.5l-13 13"/>'
+    when 'menu'
+      assign d = '<path class="sf-icon__line sf-icon__line--a" d="M3.5 8.75h17"/><path class="sf-icon__line sf-icon__line--b" d="M3.5 15.25h17"/>'
+    when 'arrow-right'
+      assign d = '<path d="M3.5 12h16.5M14 6l6 6-6 6"/>'
+    when 'arrow-left'
+      assign d = '<path d="M20.5 12H4M10 6l-6 6 6 6"/>'
+    when 'chevron-down'
+      assign d = '<path d="M6 9.25l6 6 6-6"/>'
+    when 'chevron-left'
+      assign d = '<path d="M14.75 6l-6 6 6 6"/>'
+    when 'chevron-right'
+      assign d = '<path d="M9.25 6l6 6-6 6"/>'
+    when 'plus'
+      assign d = '<path d="M12 5v14M5 12h14"/>'
+    when 'minus'
+      assign d = '<path d="M5 12h14"/>'
+    when 'play'
+      assign d = '<path d="M7.75 5.25l11 6.75-11 6.75z"/>'
+    when 'pause'
+      assign d = '<path d="M8.75 5.5v13M15.25 5.5v13"/>'
+    when 'zoom'
+      assign d = '<circle cx="10.5" cy="10.5" r="6.25"/><path d="M15.25 15.25l4.75 4.75M10.5 8v5M8 10.5h5"/>'
+    when 'filter'
+      assign d = '<path d="M3.5 8.25h17M3.5 15.75h17M8.75 5.5v5.5M15.25 13v5.5"/>'
+    when 'instagram'
+      assign d = '<path d="M4.25 4.25h15.5v15.5H4.25z"/><circle cx="12" cy="12" r="3.75"/><path d="M16.75 7.25h.01"/>'
+    when 'tiktok'
+      assign d = '<path d="M13.75 3.75v11a3.5 3.5 0 1 1-3.5-3.5"/><path d="M13.75 3.75c.4 2.6 2.4 4.6 5 4.85"/>'
+    when 'youtube'
+      assign d = '<path d="M3.25 6.25h17.5v11.5H3.25z"/><path d="M10.25 9.25l4.75 2.75-4.75 2.75z"/>'
+    when 'x'
+      assign d = '<path d="M4.25 4.25h4l11.5 15.5h-4z"/><path d="M19.5 4.25l-6.25 7M10.75 12.75L4.5 19.75"/>'
+    when 'facebook'
+      assign d = '<path d="M13.75 20.75v-8h3l.4-3.25h-3.4V7.6c0-.95.3-1.6 1.65-1.6h1.85V3.2c-.35-.05-1.4-.15-2.65-.15-2.6 0-4.35 1.6-4.35 4.5v1.95H7.4v3.25h2.85v8"/>'
+    when 'check'
+      assign d = '<path d="M5 12.75l4.25 4.25 9.75-10"/>'
+    when 'error'
+      assign d = '<circle cx="12" cy="12" r="8.25"/><path d="M12 7.5v6M12 16v.5"/>'
+    when 'info'
+      assign d = '<circle cx="12" cy="12" r="8.25"/><path d="M12 10.75v6M12 7.5v.5"/>'
+    when 'globe'
+      assign d = '<circle cx="12" cy="12" r="8.25"/><path d="M3.75 12h16.5M12 3.75c2.3 2.3 3.5 5.1 3.5 8.25S14.3 17.95 12 20.25C9.7 17.95 8.5 15.15 8.5 12S9.7 6.05 12 3.75z"/>'
+    when 'ruler'
+      assign d = '<path d="M3.25 15.5L15.5 3.25l5.25 5.25L8.5 20.75z"/><path d="M7.5 11.25l2 2M10.5 8.25l2 2M13.5 5.25l2 2"/>'
+    else
+      assign d = ''
+  endcase
+-%}
+{%- if d != blank -%}
+<svg class="sf-icon sf-icon--{{ name }}{% if class != blank %} {{ class }}{% endif %}" aria-hidden="true" focusable="false" width="{{ icon_size }}" height="{{ icon_size }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter">{{ d }}</svg>
+{%- endif -%}

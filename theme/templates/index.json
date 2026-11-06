@@ -1,0 +1,106 @@
+{
+  "sections": {
+    "hero": {
+      "type": "sf-hero-film",
+      "settings": {
+        "intro_enabled": true,
+        "intro_frequency": "once_per_session",
+        "use_bundled_film": true,
+        "logo_reveal": true,
+        "show_skip": true,
+        "show_logo": true,
+        "logo_width": 640,
+        "eyebrow": "FIXED POINT",
+        "subheading": "The figure stays. The light moves.",
+        "cta_primary_label": "Explore collection",
+        "cta_secondary_label": "View the campaign",
+        "cta_secondary_action": "link"
+      }
+    },
+    "featured": {
+      "type": "sf-featured-collection",
+      "blocks": {
+        "drop": {
+          "type": "drop_teaser",
+          "settings": {
+            "label": "Next drop",
+            "text": "Details to be announced.",
+            "link_label": "Get notified"
+          }
+        }
+      },
+      "block_order": ["drop"],
+      "settings": {
+        "heading": "The collection",
+        "collection": "all",
+        "products_to_show": 8,
+        "layout": "rail",
+        "columns_desktop": 4,
+        "show_count": true,
+        "show_view_all": true,
+        "view_all_label": "View all",
+        "tone": "ink",
+        "spacing": "standard"
+      }
+    },
+    "signature": {
+      "type": "sf-signature-showcase",
+      "blocks": {
+        "zip": { "type": "detail", "settings": { "asset_crop": "zip", "title": "Zip and neck label" } },
+        "chest": { "type": "detail", "settings": { "asset_crop": "chest-logo", "title": "Distressed chest logo" } },
+        "shoulder": { "type": "detail", "settings": { "asset_crop": "shoulder", "title": "Shoulder embellishment" } },
+        "cuff": { "type": "detail", "settings": { "asset_crop": "cuff-label", "title": "Sleeve label" } }
+      },
+      "block_order": ["zip", "chest", "shoulder", "cuff"],
+      "settings": {
+        "eyebrow": "Signature piece",
+        "heading": "The zip hoodie",
+        "cta_label": "Shop the zip hoodie",
+        "pin_on_desktop": true,
+        "scroll_length": "standard",
+        "tone": "ink",
+        "spacing": "standard"
+      }
+    },
+    "campaign": {
+      "type": "sf-campaign-editorial",
+      "settings": {
+        "anchor_id": "campaign",
+        "heading": "Under one light.",
+        "text": "<p>The tracksuit in stone, seen from behind.</p>",
+        "text_position": "middle-left",
+        "tone": "ink",
+        "spacing": "standard"
+      }
+    },
+    "categories": {
+      "type": "sf-category-grid",
+      "blocks": {
+        "hoodies": { "type": "category", "settings": { "title": "Hoodies", "asset": "hoodies" } },
+        "tracksuits": { "type": "category", "settings": { "title": "Tracksuits", "asset": "tracksuits" } },
+        "tops": { "type": "category", "settings": { "title": "Tops", "asset": "tops" } },
+        "bottoms": { "type": "category", "settings": { "title": "Bottoms", "asset": "bottoms" } },
+        "new_arrivals": { "type": "category", "settings": { "title": "New arrivals", "asset": "new-arrivals" } }
+      },
+      "block_order": ["hoodies", "tracksuits", "tops", "bottoms", "new_arrivals"],
+      "settings": {
+        "heading": "Shop by category",
+        "layout": "index",
+        "show_counts": true,
+        "tone": "ink",
+        "spacing": "standard"
+      }
+    },
+    "story": {
+      "type": "sf-brand-story",
+      "settings": {
+        "heading": "About STEADFAST",
+        "logo_display": "textured",
+        "text": "<p>Steadfast. Firm in purpose, unmoved by noise.</p>",
+        "tone": "ink",
+        "spacing": "standard"
+      }
+    }
+  },
+  "order": ["hero", "featured", "signature", "campaign", "categories", "story"]
+}

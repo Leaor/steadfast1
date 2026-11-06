@@ -1,0 +1,81 @@
+/* STEADFAST · Section F · Brand story (HOME). Spec: DESIGN §3.4 (lockup), §8.2 device 3 (light sweep), §9 F.
+   The wordmark is the subject. A base copy sits at 0.14 so the mark never reads as empty; the lit copy
+   on top carries the 105° sweep mask, scrubbed by sf-brand-story.js at motion "full" only. */
+@layer sf.sections {
+  .sf-brand-story__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .sf-brand-story__mark {
+    --_w: min(84vw, 880px);
+    position: relative;
+    width: var(--_w);
+    max-width: 100%;
+    color: var(--sf-fg);
+  }
+
+  .sf-brand-story--flat .sf-brand-story__mark { --_w: min(84vw, 760px); }
+
+  .sf-brand-story__mark .sf-logo,
+  .sf-brand-story__mark picture,
+  .sf-brand-story__mark img,
+  .sf-brand-story__mark svg {
+    display: block;
+    width: 100%;
+    max-width: none;
+    height: auto;
+  }
+
+  .sf-brand-story__base { opacity: 1; }
+
+  .sf-brand-story__lit {
+    position: absolute;
+    inset: 0;
+    display: none;
+  }
+
+  /* Armed by JS at motion "full": base dims to 0.14, the lit copy sweeps in over it. */
+  .sf-brand-story.is-sweep-armed .sf-brand-story__base { opacity: 0.14; }
+
+  .sf-brand-story.is-sweep-armed .sf-brand-story__lit {
+    display: block;
+    --sweep: -30%;
+    -webkit-mask-image: linear-gradient(105deg, #000 0%, #000 calc(var(--sweep) - 15%), transparent calc(var(--sweep) + 15%));
+    mask-image: linear-gradient(105deg, #000 0%, #000 calc(var(--sweep) - 15%), transparent calc(var(--sweep) + 15%));
+  }
+
+  .sf-brand-story__copy {
+    max-width: 46ch;
+    margin-top: var(--sf-space-8);
+  }
+
+  .sf-brand-story__text {
+    font-family: var(--sf-font-display);
+    font-weight: 300;
+    font-size: calc(var(--sf-text-lg) * var(--sf-type-scale, 1));
+    line-height: var(--sf-leading-body);
+    color: var(--sf-fg-muted);
+    text-wrap: pretty;
+  }
+
+  .sf-brand-story__text > :first-child { margin-top: 0; }
+  .sf-brand-story__text > :last-child { margin-bottom: 0; }
+
+  .sf-brand-story__link { margin-top: var(--sf-space-5); min-height: 44px; }
+
+  /* "subtle": final state with one opacity reveal (DESIGN §8.1). */
+  .sf-brand-story.is-fade-armed .sf-brand-story__inner { opacity: 0; }
+
+  .sf-brand-story.is-fade-armed.is-revealed .sf-brand-story__inner {
+    opacity: 1;
+    transition: opacity calc(900ms * var(--sf-motion, 1)) var(--sf-ease-in-out);
+  }
+
+  @media (min-width: 990px) {
+    .sf-brand-story__mark { --_w: min(60vw, 880px); }
+    .sf-brand-story--flat .sf-brand-story__mark { --_w: min(52vw, 760px); }
+  }
+}

@@ -1,0 +1,70 @@
+{%- doc -%}
+  Country/currency (and optional language) selector. A native select that submits on change via
+  <sf-localization> (sf-header.js), with a visible submit button inside <noscript>. Renders only
+  when the store sells to more than one country (or has more than one language).
+
+  @param {string} id_suffix - Unique per page, e.g. 'footer', 'menu', 'header'.
+  @param {boolean} [show_country] - Default settings.show_currency_selector.
+  @param {boolean} [show_language] - Default settings.show_language_selector.
+  @param {string} [class] - Extra classes on the form.
+
+  @example
+  {% render 'sf-localization-form', id_suffix: 'footer' %}
+{%- enddoc -%}
+{%- liquid
+  assign loc_country = settings.show_currency_selector
+  if show_country != nil
+    assign loc_country = show_country
+  endif
+  assign loc_language = settings.show_language_selector
+  if show_language != nil
+    assign loc_language = show_language
+  endif
+  if localization.available_countries.size <= 1
+    assign loc_country = false
+  endif
+  if localization.available_languages.size <= 1
+    assign loc_language = false
+  endif
+  assign form_id = 'sf-localization-' | append: id_suffix
+  assign form_class = 'sf-localization'
+  if class != blank
+    assign form_class = form_class | append: ' ' | append: class
+  endif
+-%}
+{%- if loc_country or loc_language -%}
+  <sf-localization class="sf-localization-wrap">
+    {%- form 'localization', id: form_id, class: form_class -%}
+      {%- if loc_country -%}
+        {%- assign country_select_id = form_id | append: '-country' -%}
+        <div class="sf-localization__field">
+          <label class="sf-visually-hidden" for="{{ country_select_id }}">{{ 'localization.country_label' | t }}</label>
+          {%- render 'sf-icon', name: 'globe', size: 14, class: 'sf-localization__icon' -%}
+          <select class="sf-localization__select" id="{{ country_select_id }}" name="country_code" data-sf-localization-select>
+            {%- for country in localization.available_countries -%}
+              <option value="{{ country.iso_code }}"{% if country.iso_code == localization.country.iso_code %} selected{% endif %}>
+                {{- country.name }} ({{ country.currency.iso_code }} {{ country.currency.symbol }})
+              </option>
+            {%- endfor -%}
+          </select>
+        </div>
+      {%- endif -%}
+      {%- if loc_language -%}
+        {%- assign language_select_id = form_id | append: '-language' -%}
+        <div class="sf-localization__field">
+          <label class="sf-visually-hidden" for="{{ language_select_id }}">{{ 'localization.language_label' | t }}</label>
+          <select class="sf-localization__select" id="{{ language_select_id }}" name="language_code" data-sf-localization-select>
+            {%- for language in localization.available_languages -%}
+              <option value="{{ language.iso_code }}" lang="{{ language.iso_code }}"{% if language.iso_code == localization.language.iso_code %} selected{% endif %}>
+                {{- language.endonym_name | capitalize -}}
+              </option>
+            {%- endfor -%}
+          </select>
+        </div>
+      {%- endif -%}
+      <noscript>
+        <button type="submit" class="sf-btn sf-btn--text sf-btn--sm"><span class="sf-btn__label">{{ 'localization.update' | t }}</span></button>
+      </noscript>
+    {%- endform -%}
+  </sf-localization>
+{%- endif -%}

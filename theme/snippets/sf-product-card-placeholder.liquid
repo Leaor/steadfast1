@@ -1,0 +1,39 @@
+{%- doc -%}
+  Honest stand-in card for an empty collection: one bundled still of a garment that appears in
+  the supplied photography, with a plain garment description. No price, no buttons, no link.
+  In the theme editor only, a small hint tells the merchant to add products.
+
+  @param {number} index - 1–5 (wraps).
+  @param {number} [heading_level] - Default 3.
+
+  @example
+  {% render 'sf-product-card-placeholder', index: 1 %}
+{%- enddoc -%}
+{%- liquid
+  assign ph_level = heading_level | default: 3
+  assign ph_index = index | default: 1 | minus: 1 | modulo: 5 | plus: 1
+  case ph_index
+    when 1
+      assign ph_asset = 'sf-signature-front'
+    when 2
+      assign ph_asset = 'sf-lookbook-reflective-front'
+    when 3
+      assign ph_asset = 'sf-category-tracksuits'
+    when 4
+      assign ph_asset = 'sf-lookbook-embossed-hoodie'
+    else
+      assign ph_asset = 'sf-lookbook-black-tracksuit'
+  endcase
+  assign ph_key = 'product_card.placeholder_title_' | append: ph_index
+-%}
+<div class="sf-card sf-card--placeholder">
+  <div class="sf-card__media" style="--sf-ratio: var(--sf-ratio-card)">
+    {%- render 'sf-image', asset: ph_asset, sizes: '(min-width: 990px) 27vw, 78vw', class: 'sf-card__img sf-card__img--primary' -%}
+  </div>
+  <div class="sf-card__info">
+    <h{{ ph_level }} class="sf-card__title">{{ ph_key | t }}</h{{ ph_level }}>
+    {%- if request.design_mode -%}
+      <p class="sf-card__hint">{{ 'general.placeholder_hint' | t }}</p>
+    {%- endif -%}
+  </div>
+</div>

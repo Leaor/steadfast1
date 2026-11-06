@@ -1,0 +1,20 @@
+<div class="sf-section sf-apps sf-tone-ink{% if section.settings.include_margins %} sf-space-compact{% else %} sf-space-none{% endif %}">
+  <div class="{% if section.settings.include_margins %}sf-container{% endif %}">
+    {%- for block in section.blocks -%}
+      {% render block %}
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Apps",
+  "class": "sf-shopify-section--apps",
+  "tag": "section",
+  "settings": [
+    { "type": "checkbox", "id": "include_margins", "label": "Match the page margins", "default": true }
+  ],
+  "blocks": [{ "type": "@app" }],
+  "presets": [{ "name": "Apps" }]
+}
+{% endschema %}

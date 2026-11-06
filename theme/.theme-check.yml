@@ -1,0 +1,19 @@
+# STEADFAST theme check configuration (CORE).
+# Extends Shopify's recommended checks. Every change from the defaults is listed with its reason.
+extends: theme-check:recommended
+
+# Vendored, minified third-party files (GSAP + ScrollTrigger, unmodified with licence headers) and
+# generated media are not authored theme code.
+ignore:
+  - assets/gsap.min.js
+  - assets/ScrollTrigger.min.js
+
+# Schema labels are plain English strings by decision (ARCHITECTURE §0.7 / §12.7): the theme ships
+# one locale and does not use schema translation keys.
+ValidSchemaTranslations:
+  enabled: false
+
+# The ~1 KB motion/intro boot script must run synchronously before first paint (ARCHITECTURE §4.3);
+# every other script is deferred.
+ParserBlockingScript:
+  enabled: true

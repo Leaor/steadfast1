@@ -1,0 +1,85 @@
+{%- doc -%}
+  Desktop primary navigation (≥ 990 px) with disclosure-pattern mega panels (DESIGN §7.2).
+  Top-level links with children become <button aria-expanded aria-controls> + a full-width panel:
+  cols 1–3 the link's children (CATEGORIES), cols 4–6 the optional secondary menu (COLLECTIONS),
+  cols 7–12 up to two menu_promo tiles whose `menu_item` matches the link title.
+
+  @param {object} menu - The main linklist.
+  @param {object} [secondary_menu] - Linklist for the COLLECTIONS column.
+  @param {object} [blocks] - section.blocks (menu_promo blocks).
+
+  @example
+  {% render 'sf-nav-desktop', menu: section.settings.menu, secondary_menu: section.settings.mega_secondary_menu, blocks: section.blocks %}
+{%- enddoc -%}
+{%- if menu != blank and menu.links.size > 0 -%}
+  <nav class="sf-nav" aria-label="{{ 'accessibility.primary_nav' | t }}">
+    <ul class="sf-nav__list" role="list">
+      {%- for link in menu.links limit: 5 -%}
+        {%- assign panel_id = 'sf-mega-' | append: forloop.index -%}
+        <li class="sf-nav__item{% if link.links.size > 0 %} sf-nav__item--has-panel{% endif %}" data-sf-nav-item>
+          {%- if link.links.size > 0 -%}
+            <button type="button" class="sf-navlink sf-nav__trigger" aria-expanded="false" aria-controls="{{ panel_id }}" data-sf-mega-trigger>
+              {{- link.title | escape -}}
+            </button>
+            <div class="sf-mega" id="{{ panel_id }}" data-sf-mega-panel>
+              <div class="sf-mega__inner sf-container">
+                <div class="sf-mega__col sf-mega__col--categories" style="--i: 0">
+                  <p class="sf-mega__title">{{ 'menu.categories' | t }}</p>
+                  <ul class="sf-mega__links" role="list">
+                    {%- for child in link.links -%}
+                      <li>
+                        <a class="sf-mega__link" href="{{ child.url }}"{% if child.current %} aria-current="page"{% endif %}>{{ child.title | escape }}</a>
+                        {%- if child.links.size > 0 -%}
+                          <ul class="sf-mega__sublinks" role="list">
+                            {%- for grandchild in child.links -%}
+                              <li><a class="sf-mega__sublink" href="{{ grandchild.url }}"{% if grandchild.current %} aria-current="page"{% endif %}>{{ grandchild.title | escape }}</a></li>
+                            {%- endfor -%}
+                          </ul>
+                        {%- endif -%}
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+                </div>
+                {%- if secondary_menu != blank and secondary_menu.links.size > 0 and forloop.first -%}
+                  <div class="sf-mega__col sf-mega__col--collections" style="--i: 1">
+                    <p class="sf-mega__title">{{ 'menu.collections' | t }}</p>
+                    <ul class="sf-mega__links" role="list">
+                      {%- for child in secondary_menu.links -%}
+                        <li><a class="sf-mega__link" href="{{ child.url }}"{% if child.current %} aria-current="page"{% endif %}>{{ child.title | escape }}</a></li>
+                      {%- endfor -%}
+                    </ul>
+                  </div>
+                {%- endif -%}
+                {%- assign promo_count = 0 -%}
+                {%- capture promos -%}
+                  {%- for block in blocks -%}
+                    {%- if block.type == 'menu_promo' and promo_count < 2 -%}
+                      {%- assign promo_title = block.settings.menu_item | strip | downcase -%}
+                      {%- assign link_title = link.title | strip | downcase -%}
+                      {%- if promo_title == link_title -%}
+                        {%- assign promo_count = promo_count | plus: 1 -%}
+                        <a class="sf-mega__tile" href="{{ block.settings.link | default: link.url }}" {{ block.shopify_attributes }}>
+                          <span class="sf-mega__tile-media">
+                            {%- render 'sf-image', image: block.settings.image, asset: 'sf-category-hoodies', sizes: '(min-width: 990px) 20vw, 1px', class: 'sf-mega__tile-img', alt: '' -%}
+                          </span>
+                          {%- if block.settings.heading != blank -%}
+                            <span class="sf-mega__tile-name">{{ block.settings.heading | escape }}</span>
+                          {%- endif -%}
+                        </a>
+                      {%- endif -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- endcapture -%}
+                {%- if promo_count > 0 -%}
+                  <div class="sf-mega__tiles" style="--i: 2">{{ promos }}</div>
+                {%- endif -%}
+              </div>
+            </div>
+          {%- else -%}
+            <a class="sf-navlink" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>{{ link.title | escape }}</a>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+  </nav>
+{%- endif -%}

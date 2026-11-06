@@ -1,0 +1,198 @@
+/* STEADFAST · Section B · Featured collection (HOME). Spec: DESIGN §7.5, §8.3 B, §9 B. */
+@layer sf.sections {
+  .sf-featured-collection {
+    --_rail-start: max(var(--sf-gutter), calc((100vw - var(--sf-page-max)) / 2));
+    --_card-w: 78vw;
+    overflow: clip;
+  }
+
+  .sf-featured-collection__head .sf-heading { margin-bottom: var(--sf-space-6); }
+
+  /* ---------- Rail ---------- */
+  .sf-featured-collection__body { display: block; }
+
+  .sf-featured-collection__track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: var(--_card-w);
+    gap: var(--sf-space-1);
+    margin: 0;
+    padding: 0 var(--sf-gutter);
+    padding-inline-start: var(--_rail-start);
+    list-style: none;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--_rail-start) var(--sf-gutter);
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sf-featured-collection__track::-webkit-scrollbar { display: none; }
+
+  .sf-featured-collection__item {
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+
+  .sf-featured-collection__item > * { height: 100%; }
+
+  .sf-featured-collection__controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sf-space-5);
+    margin-top: var(--sf-space-5);
+  }
+
+  .sf-featured-collection__progress {
+    position: relative;
+    width: 160px;
+    height: 1px;
+    background: var(--sf-line);
+    overflow: hidden;
+  }
+
+  .sf-featured-collection__progress > span {
+    position: absolute;
+    inset: 0;
+    background: var(--sf-accent);
+    transform-origin: 0 50%;
+    transform: scaleX(var(--_progress, 0.3));
+  }
+
+  .sf-featured-collection__buttons { display: flex; gap: 0; margin-inline-end: calc(var(--sf-space-3) * -1); }
+  .sf-featured-collection__buttons[hidden] { display: none; }
+  .sf-featured-collection__btn { width: 44px; height: 44px; }
+
+  /* ---------- Grid layout ---------- */
+  .sf-featured-collection__body--grid .sf-featured-collection__track {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-columns: auto;
+    column-gap: var(--sf-space-1);
+    row-gap: var(--sf-space-6);
+    max-width: calc(var(--sf-page-max) + var(--sf-gutter) * 2);
+    margin-inline: auto;
+    padding-inline: var(--sf-gutter);
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+
+  /* ---------- Next-drop tile (typographic; DESIGN §9 B) ---------- */
+  .sf-drop-tile { display: flex; flex-direction: column; height: 100%; }
+
+  .sf-drop-tile__well {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    aspect-ratio: var(--sf-ratio-card, 4 / 5);
+    padding: var(--sf-space-5);
+    overflow: hidden;
+    background: var(--sf-bg-raised);
+  }
+
+  .sf-drop-tile__mark {
+    position: absolute;
+    left: 50%;
+    top: 42%;
+    width: 40%;
+    translate: -50% -50%;
+    color: var(--sf-fg);
+    opacity: 0.3;
+  }
+
+  .sf-drop-tile__mark .sf-logo { display: block; width: 100%; }
+  .sf-drop-tile__mark svg { display: block; width: 100%; height: auto; }
+
+  .sf-drop-tile__img,
+  .sf-drop-tile__well picture {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .sf-drop-tile--image .sf-drop-tile__well::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgb(0 0 0 / 0.6), transparent 40%);
+  }
+
+  .sf-drop-tile__text { position: relative; z-index: 1; }
+
+  .sf-drop-tile__label {
+    margin: 0 0 var(--sf-space-3);
+    font-family: var(--sf-font-label);
+    font-weight: var(--sf-weight-medium);
+    font-size: var(--sf-text-2xs);
+    letter-spacing: var(--sf-tracking-label);
+    text-transform: uppercase;
+    color: var(--sf-fg-muted);
+  }
+
+  .sf-drop-tile__line {
+    margin: 0 0 var(--sf-space-4);
+    max-width: 16ch;
+    font-family: var(--sf-font-display);
+    font-weight: 300;
+    font-size: calc(var(--sf-text-xl) * var(--sf-type-scale, 1));
+    line-height: var(--sf-leading-snug);
+    color: var(--sf-fg);
+  }
+
+  .sf-drop-tile__link { min-height: 44px; }
+
+  /* ---------- Exposure lift (DESIGN §8.2 device 1, §8.3 B). Armed by JS only; visible cards only. ---------- */
+  .sf-featured-collection .sf-card__media { position: relative; }
+
+  .sf-featured-collection [data-sf-lift] .sf-card__media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: #000;
+    opacity: 1;
+    pointer-events: none;
+    transition: opacity calc(900ms * var(--sf-motion, 1)) var(--sf-ease-in-out) calc(var(--_i, 0) * 80ms);
+  }
+
+  .sf-featured-collection [data-sf-lift] .sf-card__img--primary {
+    transform: scale(1.06);
+    transition: transform calc(var(--sf-dur-cinematic) * var(--sf-motion, 1)) var(--sf-ease-out) calc(var(--_i, 0) * 80ms);
+  }
+
+  .sf-featured-collection [data-sf-lift] .sf-card__info {
+    opacity: 0;
+    transition: opacity calc(400ms * var(--sf-motion, 1)) var(--sf-ease-in-out) calc(var(--_i, 0) * 80ms + 300ms);
+  }
+
+  .sf-featured-collection .is-lit [data-sf-lift] .sf-card__media::after { opacity: 0; }
+  .sf-featured-collection .is-lit [data-sf-lift] .sf-card__img--primary { transform: none; }
+  .sf-featured-collection .is-lit [data-sf-lift] .sf-card__info { opacity: 1; }
+
+  @media (min-width: 750px) {
+    .sf-featured-collection { --_card-w: 44vw; }
+  }
+
+  @media (min-width: 990px) {
+    .sf-featured-collection {
+      --_card-w: calc((min(100vw, var(--sf-page-max) + var(--sf-gutter) * 2) - 2 * var(--sf-gutter)) / 3.6);
+    }
+
+    .sf-featured-collection__head .sf-heading { margin-bottom: var(--sf-space-7); }
+    .sf-featured-collection__track { scroll-snap-type: x proximity; }
+
+    .sf-featured-collection__body--grid .sf-featured-collection__track {
+      grid-template-columns: repeat(var(--_cols, 4), minmax(0, 1fr));
+      row-gap: var(--sf-space-7);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-sf-motion='reduced']) .sf-featured-collection__track { scroll-behavior: smooth; }
+  }
+}

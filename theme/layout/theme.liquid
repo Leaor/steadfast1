@@ -1,0 +1,78 @@
+<!doctype html>
+<html class="no-js" lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    {%- render 'sf-head-boot' -%}
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="{{ settings.color_ink | default: '#000000' }}">
+    <link rel="canonical" href="{{ canonical_url }}">
+
+    {%- if settings.favicon != blank -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+      <link rel="apple-touch-icon" href="{{ settings.favicon | image_url: width: 180, height: 180 }}">
+    {%- else -%}
+      <link rel="icon" type="image/png" href="{{ 'sf-favicon-32.png' | asset_url }}">
+      <link rel="apple-touch-icon" href="{{ 'sf-apple-touch-icon-180.png' | asset_url }}">
+    {%- endif -%}
+
+    {%- liquid
+      assign title_suffix = ''
+      if current_tags
+        assign tags_joined = current_tags | join: ', '
+        assign title_suffix = title_suffix | append: ' – ' | append: tags_joined
+      endif
+      if current_page != 1 and current_page != blank
+        assign page_label = 'general.page' | t: page: current_page
+        assign title_suffix = title_suffix | append: ' – ' | append: page_label
+      endif
+    -%}
+    <title>
+      {{- page_title -}}
+      {{- title_suffix -}}
+      {%- unless page_title contains shop.name %} – {{ shop.name }}{% endunless -%}
+    </title>
+    {%- if page_description -%}
+      <meta name="description" content="{{ page_description | escape }}">
+    {%- endif -%}
+
+    {%- render 'sf-meta-tags' -%}
+
+    <link rel="preload" as="font" type="font/woff2" href="{{ 'sf-font-text-400.woff2' | asset_url }}" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="{{ 'sf-font-label-500.woff2' | asset_url }}" crossorigin>
+
+    {%- render 'sf-css-tokens' -%}
+    {{ 'sf-base.css' | asset_url | stylesheet_tag }}
+    {{ 'sf-header.css' | asset_url | stylesheet_tag }}
+    {{ 'sf-product-card.css' | asset_url | stylesheet_tag }}
+
+    {%- render 'sf-config-script' -%}
+    <script src="{{ 'sf-core.js' | asset_url }}" defer></script>
+    <script src="{{ 'sf-header.js' | asset_url }}" defer></script>
+    <script src="{{ 'sf-product-card.js' | asset_url }}" defer></script>
+    <script src="{{ 'sf-cart.js' | asset_url }}" defer></script>
+
+    {%- render 'sf-structured-data-org' -%}
+
+    {{ content_for_header }}
+  </head>
+
+  <body class="sf-body sf-template-{{ template.name | handleize }}">
+    <a class="sf-skip-link" href="#MainContent">{{ 'accessibility.skip_to_content' | t }}</a>
+
+    {% sections 'header-group' %}
+
+    <main id="MainContent" class="sf-main" role="main" tabindex="-1">
+      {{ content_for_layout }}
+    </main>
+
+    {% sections 'footer-group' %}
+
+    {%- if settings.cart_type == 'drawer' -%}
+      {% section 'sf-cart-drawer' %}
+    {%- endif -%}
+    {%- render 'sf-search-overlay' -%}
+    {%- render 'sf-quick-view-shell' -%}
+    {%- render 'sf-live-regions' -%}
+  </body>
+</html>

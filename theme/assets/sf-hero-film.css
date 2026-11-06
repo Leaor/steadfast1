@@ -1,0 +1,396 @@
+/* STEADFAST · Section A · Hero film (HOME). Spec: DESIGN §8.3 A, §9 A; ARCHITECTURE §5.
+   States come from <sf-hero-film data-state> + .is-beat-8 / .is-beat-9 / .is-cut (set by sf-hero-film.js);
+   the first frame comes from html[data-sf-intro="play"|"skip"] (set inline by the section).
+   Media query for desktop vs mobile MEDIA is MOBILE_MQ (ARCHITECTURE §5.1); the 990 px breakpoint only moves layout. */
+
+/* Registered so the Web Animations API can interpolate the light sweep (DESIGN §8.2 device 3).
+   @property is not a style rule, so it sits outside the layers. */
+@property --sweep {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 130%;
+}
+
+@layer sf.sections {
+  .sf-section.sf-hero-film {
+    position: relative;
+    padding: 0;
+    background: var(--sf-bg-sunken);
+  }
+
+  .sf-hero {
+    --_h: max(100svh, 560px);
+    --_logo-w: min(84vw, var(--_logo-max, 640px));
+    --_logo-lift: calc(var(--_h) * -0.08);
+    --_d-film: calc(var(--sf-dur-cinematic) * var(--sf-motion, 1));
+    --_d-cut: calc(var(--sf-dur-base) * var(--sf-motion, 1));
+    position: relative;
+    display: block;
+    height: 100vh;
+    height: 100svh;
+    min-height: 560px;
+    overflow: hidden;
+    isolation: isolate;
+    color: var(--sf-fg);
+    background: #000;
+  }
+
+  /* ---------- Stage: end still (always painted, LCP) < loop < intro < scrim ---------- */
+  .sf-hero__stage {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: #000;
+    pointer-events: none;
+  }
+
+  .sf-hero__end,
+  .sf-hero__end img,
+  .sf-hero__loop,
+  .sf-hero__intro {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    object-fit: contain;
+    object-position: 50% 50%;
+    background: #000;
+  }
+
+  .sf-hero__end { z-index: 0; }
+  .sf-hero__end img { border: 0; }
+
+  .sf-hero__loop {
+    z-index: 1;
+    opacity: 0;
+    background: transparent;
+    transition: opacity var(--_d-film) var(--sf-ease-in-out);
+  }
+
+  .sf-hero.is-loop-on .sf-hero__loop { opacity: 1; }
+  /* Not eligible for the intro: the loop fades in over 600 ms (DESIGN §8.3 A). */
+  .sf-hero[data-state='static'] .sf-hero__loop,
+  .sf-hero[data-state='fallback'] .sf-hero__loop {
+    transition-duration: calc(600ms * var(--sf-motion, 1));
+  }
+
+  .sf-hero__intro {
+    z-index: 2;
+    opacity: 0;
+    transition: opacity var(--_d-film) var(--sf-ease-in-out);
+  }
+
+  html[data-sf-intro='play'] .sf-hero:not(.is-beat-9) .sf-hero__intro { opacity: 1; }
+  .sf-hero.is-cut .sf-hero__intro { transition-duration: var(--_d-cut); }
+
+  .sf-hero__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: linear-gradient(to top, rgb(0 0 0 / 0.75) 0%, rgb(0 0 0 / 0) 45%);
+  }
+
+  /* ---------- Content ---------- */
+  .sf-hero__content {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* width, max-width and gutters come from .sf-container */
+    /* Mobile: wordmark centre at 58 % of the hero height. */
+    padding-top: calc(var(--_h) * 0.58 - var(--_logo-w) * 411 / 1210 / 2);
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .sf-hero__content > * { pointer-events: auto; }
+
+  .sf-hero__title {
+    position: relative;
+    width: var(--_logo-w);
+    margin: 0;
+    line-height: 0;
+    font-size: inherit;
+    transition: transform calc(900ms * var(--sf-motion, 1)) var(--sf-ease-out);
+  }
+
+  .sf-hero__mark {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1210 / 411;
+  }
+
+  .sf-hero__mark .sf-logo,
+  .sf-hero__mark .sf-logo img,
+  .sf-hero__mark img {
+    display: block;
+    width: 100%;
+    max-width: none;
+    height: auto;
+  }
+
+  .sf-hero__copy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: var(--sf-space-4);
+  }
+
+  .sf-hero__eyebrow {
+    margin: 0;
+    font-family: var(--sf-font-label);
+    font-weight: var(--sf-weight-medium);
+    font-size: calc(var(--sf-text-2xs) * var(--sf-type-scale, 1));
+    line-height: var(--sf-leading-snug);
+    letter-spacing: var(--sf-tracking-label);
+    text-transform: uppercase;
+    color: var(--sf-fg-muted);
+  }
+
+  .sf-hero__sub {
+    display: none;
+    margin: var(--sf-space-3) 0 0;
+    font-family: var(--sf-font-display);
+    font-weight: 300;
+    font-style: italic;
+    font-size: calc(var(--sf-text-xl) * var(--sf-type-scale, 1));
+    line-height: var(--sf-leading-snug);
+    letter-spacing: var(--sf-tracking-normal);
+    color: var(--sf-fg);
+    text-wrap: balance;
+  }
+
+  .sf-hero__ctas {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sf-space-1);
+    width: 100%;
+    max-width: 480px;
+    margin-top: var(--sf-space-5);
+  }
+
+  .sf-hero__ctas .sf-btn--primary { width: 100%; }
+  .sf-hero__cta--secondary { align-self: center; min-height: 44px; }
+
+  /* ---------- Control: SKIP INTRO → PAUSE / PLAY ---------- */
+  .sf-hero__dock {
+    position: absolute;
+    z-index: 5;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--sf-space-5) + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    justify-content: flex-end;
+    pointer-events: none;
+  }
+
+  .sf-hero__control {
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sf-space-2);
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 0 0 var(--sf-space-2);
+    border: 0;
+    background: none;
+    color: var(--sf-fg-muted);
+    font-family: var(--sf-font-label);
+    font-weight: var(--sf-weight-medium);
+    font-size: calc(var(--sf-text-2xs) * var(--sf-type-scale, 1));
+    line-height: 1;
+    letter-spacing: var(--sf-tracking-label);
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color calc(var(--sf-dur-instant) * var(--sf-motion, 1)) linear,
+      opacity calc(var(--sf-dur-slow) * var(--sf-motion, 1)) var(--sf-ease-in-out);
+  }
+
+  .sf-hero__control[hidden] { display: none; }
+  .sf-hero__control-icon { display: none; line-height: 0; }
+  .sf-hero__control[data-mode='pause'] .sf-hero__control-icon--pause,
+  .sf-hero__control[data-mode='play'] .sf-hero__control-icon--play { display: inline-flex; }
+
+  @media (hover: hover) and (pointer: fine) {
+    .sf-hero__control:hover { color: var(--sf-fg); }
+  }
+
+  /* Before the intro is playing the control waits; SKIP INTRO fades in at t = 0.8 s. */
+  html[data-sf-intro='play'] .sf-hero:is([data-state='idle'], [data-state='loading']) .sf-hero__control { opacity: 0; }
+  .sf-hero[data-state='playing'] .sf-hero__control { transition-delay: 0s, 800ms; }
+  .sf-hero__control:focus-visible { opacity: 1 !important; }
+
+  /* ---------- Intro: content in the DOM and focusable, visually at opacity 0 ---------- */
+  html[data-sf-intro='play'] .sf-hero:not(.is-beat-9) .sf-hero__title {
+    transform: translateY(var(--_logo-lift));
+  }
+
+  html[data-sf-intro='play'] .sf-hero:not(.is-beat-9):not(.is-beat-8) .sf-hero__mark { opacity: 0; }
+
+  html[data-sf-intro='play'] .sf-hero:not(.is-beat-9) .sf-hero__reveal {
+    opacity: 0;
+    transform: translateY(var(--sf-reveal-distance, 12px));
+  }
+
+  /* Beat 8: the wordmark appears centred; opacity over 500 ms, scale 1.035 → 1 over 1600 ms. The sweep is WAAPI. */
+  .sf-hero.is-beat-8:not(.is-cut) .sf-hero__mark {
+    animation:
+      sf-hero-mark-in calc(500ms * var(--sf-motion, 1)) var(--sf-ease-in-out) both,
+      sf-hero-mark-settle calc(1600ms * var(--sf-motion, 1)) var(--sf-ease-out) both;
+  }
+
+  .sf-hero__mark.is-sweeping {
+    -webkit-mask-image: linear-gradient(105deg, #000 0%, #000 calc(var(--sweep) - 15%), transparent calc(var(--sweep) + 15%));
+    mask-image: linear-gradient(105deg, #000 0%, #000 calc(var(--sweep) - 15%), transparent calc(var(--sweep) + 15%));
+  }
+
+  /* Beat 9: wordmark glides to rest; eyebrow, line and CTAs reveal from D + 0.9 s, 80 ms stagger. */
+  .sf-hero.is-beat-9 .sf-hero__mark {
+    opacity: 1;
+    transition: opacity calc(700ms * var(--sf-motion, 1)) var(--sf-ease-out);
+  }
+
+  .sf-hero.is-beat-9 .sf-hero__reveal {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity calc(700ms * var(--sf-motion, 1)) var(--sf-ease-out) calc((300ms + var(--_i, 0) * 80ms) * var(--sf-motion, 1)),
+      transform calc(700ms * var(--sf-motion, 1)) var(--sf-ease-out) calc((300ms + var(--_i, 0) * 80ms) * var(--sf-motion, 1)),
+      color calc(var(--sf-dur-instant) * var(--sf-motion, 1)) linear,
+      background-color calc(var(--sf-dur-instant) * var(--sf-motion, 1)) linear,
+      text-decoration-color calc(var(--sf-dur-instant) * var(--sf-motion, 1)) linear;
+  }
+
+  /* Ending early jumps to the end of beat 9 in --sf-dur-base. */
+  .sf-hero.is-cut .sf-hero__title,
+  .sf-hero.is-cut .sf-hero__mark,
+  .sf-hero.is-cut .sf-hero__reveal {
+    animation: none;
+    transition-duration: var(--_d-cut);
+    transition-delay: 0s;
+  }
+
+  /* Static (not eligible) and first paint after a decision: no transitions at all. */
+  .sf-hero.is-instant,
+  .sf-hero.is-instant * { transition: none !important; animation: none !important; }
+
+  /* JS failed to arrive: never leave the hero blank. */
+  html[data-sf-intro='play'] sf-hero-film:not(:defined) :is(.sf-hero__mark, .sf-hero__reveal) {
+    animation: sf-hero-failsafe 0s linear 6s both;
+  }
+
+  html[data-sf-intro='play'] sf-hero-film:not(:defined) .sf-hero__title {
+    animation: sf-hero-failsafe-lift 0s linear 6s both;
+  }
+
+  html[data-sf-intro='play'] sf-hero-film:not(:defined) .sf-hero__intro {
+    animation: sf-hero-failsafe-out 0s linear 6s both;
+  }
+
+  @keyframes sf-hero-mark-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes sf-hero-mark-settle { from { transform: scale(1.035); } to { transform: scale(1); } }
+  @keyframes sf-hero-failsafe { to { opacity: 1; transform: none; } }
+  @keyframes sf-hero-failsafe-lift { to { transform: none; } }
+  @keyframes sf-hero-failsafe-out { to { opacity: 0; } }
+
+  .sf-hero__sentinel {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+  }
+
+  /* ---------- Campaign film dialog (merchant upload only) ---------- */
+  .sf-hero-film__dialog {
+    width: 100vw;
+    max-width: none;
+    height: 100svh;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: #000;
+    color: var(--sf-fg);
+  }
+
+  .sf-hero-film__film {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+  }
+
+  .sf-hero-film__close {
+    position: absolute;
+    top: var(--sf-space-4);
+    right: var(--sf-gutter);
+    min-height: 44px;
+  }
+
+  /* ---------- Desktop media: the aperture (16:9, contain on black); mobile media: 9:16 cover ---------- */
+  @media (max-width: 749px), (orientation: portrait) and (max-width: 1100px) {
+    .sf-hero__end,
+    .sf-hero__end img,
+    .sf-hero__loop,
+    .sf-hero__intro { object-fit: cover; }
+  }
+
+  /* ---------- Desktop layout (≥ 990 px) ---------- */
+  @media (min-width: 990px) {
+    .sf-hero {
+      --_logo-w: min(44vw, var(--_logo-max, 640px));
+      --_logo-lift: calc(var(--_h) * -0.16);
+    }
+
+    .sf-hero__scrim { display: none; }
+
+    .sf-hero__content {
+      display: block;
+      padding-top: 0;
+      text-align: start;
+    }
+
+    .sf-hero__title {
+      position: absolute;
+      left: 50%;
+      top: 66%;
+      translate: -50% -50%;
+    }
+
+    .sf-hero__copy {
+      position: absolute;
+      left: var(--sf-gutter);
+      top: 44%;
+      align-items: flex-start;
+      width: calc((100% - 2 * var(--sf-gutter) - 11 * var(--sf-grid-gap)) / 12 * 3 + 2 * var(--sf-grid-gap));
+      margin: 0;
+    }
+
+    .sf-hero__sub { display: block; }
+
+    .sf-hero__ctas {
+      position: absolute;
+      left: var(--sf-gutter);
+      bottom: var(--sf-space-8);
+      flex-direction: row;
+      align-items: center;
+      gap: var(--sf-space-6);
+      width: auto;
+      max-width: none;
+      margin: 0;
+    }
+
+    .sf-hero__ctas .sf-btn--primary { width: auto; }
+    .sf-hero__cta--secondary { align-self: auto; }
+
+    .sf-hero__dock { bottom: calc(var(--sf-space-8) + 4px); }
+  }
+}

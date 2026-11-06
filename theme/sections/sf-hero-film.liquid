@@ -1,0 +1,182 @@
+{{ 'sf-hero-film.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign s = section.settings
+  assign has_intro = false
+  if s.use_bundled_film or s.intro_video_desktop != blank or s.intro_video_mobile != blank
+    assign has_intro = true
+  endif
+  assign may_play = false
+  if s.intro_enabled and has_intro
+    assign may_play = true
+  endif
+  assign has_campaign_film = false
+  if s.campaign_film_desktop != blank or s.campaign_film_mobile != blank
+    assign has_campaign_film = true
+  endif
+  assign secondary_action = s.cta_secondary_action
+  if secondary_action == 'film' and has_campaign_film == false
+    assign secondary_action = 'link'
+  endif
+  assign primary_url = s.cta_primary_link | default: routes.all_products_collection_url
+  assign secondary_url = s.cta_secondary_link | default: '#campaign'
+  assign title_tag = 'h2'
+  if template.name == 'index'
+    assign title_tag = 'h1'
+  endif
+  assign title_id = 'sf-hero-title-' | append: section.id
+  assign logo_sizes = '(min-width: 990px) min(44vw, ' | append: s.logo_width | append: 'px), min(84vw, ' | append: s.logo_width | append: 'px)'
+-%}
+<section class="sf-section sf-hero-film sf-tone-ink" data-sf-section="hero-film" aria-labelledby="{{ title_id }}">
+  <script>(function(h){try{var d=h.dataset,p={{ may_play }};if(d.sfMotion==='reduced'||'sfSaveData' in d)p=false;{% if s.intro_frequency == 'once_per_session' and request.design_mode != true %}if('sfIntroSeen' in d)p=false;{% endif %}d.sfIntro=p?'play':'skip'}catch(e){}})(document.documentElement)</script>
+  <sf-hero-film
+    class="sf-hero"
+    data-state="idle"
+    data-section-id="{{ section.id }}"
+    data-intro-enabled="{{ s.intro_enabled }}"
+    data-frequency="{{ s.intro_frequency }}"
+    data-logo-reveal="{{ s.logo_reveal }}"
+    data-show-skip="{{ s.show_skip }}"
+    data-label-skip="{{ 'home.hero.skip' | t | escape }}"
+    data-label-pause="{{ 'home.hero.pause' | t | escape }}"
+    data-label-play="{{ 'home.hero.play' | t | escape }}"
+    {% render 'sf-hero-film-sources', settings: s, part: 'attrs' %}
+    style="--_logo-max: {{ s.logo_width }}px"
+  >
+    <div class="sf-hero__stage" aria-hidden="true">
+      {% render 'sf-hero-film-sources', settings: s, part: 'end' %}
+      <video class="sf-hero__loop" muted playsinline loop preload="none" disablepictureinpicture disableremoteplayback tabindex="-1"></video>
+      <video class="sf-hero__intro" muted playsinline preload="none" disablepictureinpicture disableremoteplayback tabindex="-1"></video>
+      <div class="sf-hero__scrim"></div>
+    </div>
+
+    <div class="sf-hero__content sf-container">
+      <{{ title_tag }} class="sf-hero__title" id="{{ title_id }}">
+        {%- if s.show_logo -%}
+          <span class="sf-hero__mark" data-sf-hero-mark>
+            {%- render 'sf-logo', variant: 'textured', width: s.logo_width, loading: 'eager', alt: shop.name, sizes: logo_sizes -%}
+          </span>
+        {%- else -%}
+          <span class="sf-visually-hidden">{{ shop.name }}</span>
+        {%- endif -%}
+      </{{ title_tag }}>
+
+      {%- if s.eyebrow != blank or s.subheading != blank -%}
+        <div class="sf-hero__copy">
+          {%- if s.eyebrow != blank -%}
+            <p class="sf-hero__eyebrow sf-hero__reveal" style="--_i: 0">{{ s.eyebrow | escape }}</p>
+          {%- endif -%}
+          {%- if s.subheading != blank -%}
+            <p class="sf-hero__sub sf-hero__reveal" style="--_i: 1">{{ s.subheading | escape }}</p>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      {%- if s.cta_primary_label != blank or s.cta_secondary_label != blank -%}
+        <div class="sf-hero__ctas">
+          {%- if s.cta_primary_label != blank -%}
+            <a class="sf-btn sf-btn--primary sf-hero__cta sf-hero__reveal" style="--_i: 2" href="{{ primary_url }}" data-sf-hero-primary>
+              <span class="sf-btn__label">{{ s.cta_primary_label | escape }}</span>
+            </a>
+          {%- endif -%}
+          {%- if s.cta_secondary_label != blank -%}
+            <a
+              class="sf-btn sf-btn--text sf-hero__cta sf-hero__cta--secondary sf-hero__reveal"
+              style="--_i: 3"
+              href="{{ secondary_url }}"
+              data-sf-hero-secondary
+              data-action="{{ secondary_action }}"
+              {%- if secondary_action == 'film' %}
+                data-sf-open="campaign-film-{{ section.id }}" aria-haspopup="dialog"
+              {%- endif -%}
+            >
+              <span class="sf-btn__label">{{ s.cta_secondary_label | escape }}</span>
+            </a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="sf-hero__dock sf-container">
+      <button type="button" class="sf-hero__control" data-sf-hero-control data-mode="skip"{% unless s.show_skip %} hidden{% endunless %}>
+        <span class="sf-hero__control-icon sf-hero__control-icon--pause">{% render 'sf-icon', name: 'pause', size: 12 %}</span>
+        <span class="sf-hero__control-icon sf-hero__control-icon--play">{% render 'sf-icon', name: 'play', size: 12 %}</span>
+        <span class="sf-hero__control-label" data-sf-hero-label>{{ 'home.hero.skip' | t }}</span>
+      </button>
+    </div>
+    <span class="sf-hero__sentinel" data-sf-header-sentinel aria-hidden="true"></span>
+  </sf-hero-film>
+
+  {%- if has_campaign_film -%}
+    <sf-dialog id="sf-campaign-film-{{ section.id }}" data-sf-dialog-type="fullscreen">
+      <dialog class="sf-hero-film__dialog" aria-label="{{ 'home.hero.campaign_film' | t | escape }}">
+        <video class="sf-hero-film__film" controls playsinline preload="none" data-sf-campaign-film {% render 'sf-hero-film-sources', settings: s, part: 'campaign' %}></video>
+        <button type="button" class="sf-btn sf-btn--text sf-hero-film__close" data-sf-close>
+          <span class="sf-btn__label">{{ 'general.close' | t }}</span>
+        </button>
+      </dialog>
+    </sf-dialog>
+  {%- endif -%}
+
+  <noscript><style>.sf-hero__intro,.sf-hero__loop,.sf-hero__control{display:none}.sf-hero__content,.sf-hero__content *{opacity:1}</style></noscript>
+  <script src="{{ 'sf-hero-film.js' | asset_url }}" defer></script>
+</section>
+
+{% schema %}
+{
+  "name": "Hero film",
+  "tag": "div",
+  "class": "sf-shopify-section--hero-film",
+  "limit": 1,
+  "enabled_on": { "templates": ["index", "page"] },
+  "settings": [
+    { "type": "header", "content": "Intro" },
+    { "type": "checkbox", "id": "intro_enabled", "label": "Play the intro", "default": true, "info": "The intro plays once, then the loop runs behind the shopping interface. It never plays for visitors who prefer reduced motion or save data." },
+    {
+      "type": "select",
+      "id": "intro_frequency",
+      "label": "Intro frequency",
+      "options": [
+        { "value": "once_per_session", "label": "Once per session" },
+        { "value": "every_visit", "label": "Every visit" }
+      ],
+      "default": "once_per_session"
+    },
+    { "type": "video", "id": "intro_video_desktop", "label": "Intro video, desktop (16:9)", "info": "Must end on at least 0.4 s of black and be 14 s or shorter. Blank uses the bundled edit." },
+    { "type": "video", "id": "intro_video_mobile", "label": "Intro video, mobile (9:16)", "info": "Blank uses the bundled mobile edit. A desktop video is never shown on phones." },
+    { "type": "video", "id": "loop_video_desktop", "label": "Loop video, desktop (16:9)", "info": "A seamless loop. Blank uses the bundled loop." },
+    { "type": "video", "id": "loop_video_mobile", "label": "Loop video, mobile (9:16)" },
+    { "type": "checkbox", "id": "use_bundled_film", "label": "Use the bundled film when a video slot is blank", "default": true },
+    { "type": "image_picker", "id": "end_image_desktop", "label": "Still image, desktop", "info": "The loop's first frame, without a logo. Shown for reduced motion and save data, and while the loop loads." },
+    { "type": "image_picker", "id": "end_image_mobile", "label": "Still image, mobile" },
+    { "type": "header", "content": "Campaign film" },
+    { "type": "video", "id": "campaign_film_desktop", "label": "Campaign film, desktop", "info": "Optional. Plays in a full-screen player when the secondary button is set to open it." },
+    { "type": "video", "id": "campaign_film_mobile", "label": "Campaign film, mobile", "info": "Blank uses the desktop film." },
+    { "type": "header", "content": "Logo and controls" },
+    { "type": "checkbox", "id": "logo_reveal", "label": "Reveal the logo at the end of the intro", "default": true },
+    { "type": "checkbox", "id": "show_skip", "label": "Show skip and pause control", "default": true },
+    { "type": "checkbox", "id": "show_logo", "label": "Show logo", "default": true },
+    { "type": "range", "id": "logo_width", "label": "Logo width", "min": 240, "max": 640, "step": 10, "unit": "px", "default": 640, "info": "Width of the textured wordmark box on desktop. Capped at 640 to stay sharp." },
+    { "type": "header", "content": "Text" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "FIXED POINT", "info": "Proposed campaign name. Approve or replace." },
+    { "type": "text", "id": "subheading", "label": "Campaign line", "default": "The figure stays. The light moves.", "info": "Desktop only. One short line. No claims." },
+    { "type": "header", "content": "Buttons" },
+    { "type": "text", "id": "cta_primary_label", "label": "Primary button label", "default": "Explore collection" },
+    { "type": "url", "id": "cta_primary_link", "label": "Primary button link", "info": "Blank links to all products." },
+    { "type": "text", "id": "cta_secondary_label", "label": "Secondary button label", "default": "View the campaign" },
+    {
+      "type": "select",
+      "id": "cta_secondary_action",
+      "label": "Secondary button action",
+      "options": [
+        { "value": "link", "label": "Go to link" },
+        { "value": "film", "label": "Open the campaign film" },
+        { "value": "replay", "label": "Replay the intro" }
+      ],
+      "default": "link",
+      "info": "Open the campaign film needs an uploaded campaign film; otherwise the link is used."
+    },
+    { "type": "url", "id": "cta_secondary_link", "label": "Secondary button link", "info": "Blank scrolls to the campaign section." }
+  ],
+  "presets": [{ "name": "Hero film" }]
+}
+{% endschema %}

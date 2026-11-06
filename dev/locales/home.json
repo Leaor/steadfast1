@@ -1,0 +1,29 @@
+{
+  "home": {
+    "hero": {
+      "skip": "Skip intro",
+      "pause": "Pause",
+      "play": "Play",
+      "campaign_film": "Campaign film"
+    },
+    "featured": {
+      "rail_label": "{{ heading }}, scrollable list",
+      "previous": "Previous pieces",
+      "next": "Next pieces",
+      "progress": "Scroll position"
+    },
+    "signature": {
+      "label": "Signature piece: {{ title }}",
+      "front": "Front",
+      "back": "Back",
+      "view": "View",
+      "details": "Details"
+    },
+    "category": {
+      "count": {
+        "one": "{{ count }} piece",
+        "other": "{{ count }} pieces"
+      }
+    }
+  }
+}

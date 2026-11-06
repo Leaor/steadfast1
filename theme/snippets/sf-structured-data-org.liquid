@@ -1,0 +1,44 @@
+{%- doc -%}
+  Organization JSON-LD: name, url, logo and sameAs from the social link settings. Rendered on the
+  homepage only (once per site is enough for search engines).
+
+  @example
+  {% render 'sf-structured-data-org' %}
+{%- enddoc -%}
+{%- if request.page_type == 'index' -%}
+  {%- liquid
+    if settings.logo != blank
+      assign org_logo = settings.logo | image_url: width: 600
+    else
+      assign org_logo = 'sf-logo-textured-1200.png' | asset_url
+    endif
+    assign org_prefix = org_logo | slice: 0, 2
+    if org_prefix == '//'
+      assign org_logo = 'https:' | append: org_logo
+    elsif org_prefix contains '/'
+      assign org_logo = request.origin | append: org_logo
+    endif
+    assign same_as = ''
+    assign networks = 'instagram,tiktok,youtube,x,facebook' | split: ','
+    for key in networks
+      assign setting_key = 'social_' | append: key | append: '_link'
+      assign link = settings[setting_key]
+      if link != blank
+        assign same_as = same_as | append: link | append: '|'
+      endif
+    endfor
+    assign same_as_list = same_as | split: '|' | compact
+  -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": {{ shop.name | json }},
+      "url": {{ request.origin | append: routes.root_url | json }},
+      "logo": {{ org_logo | json }}
+      {%- if same_as_list.size > 0 -%},
+      "sameAs": {{ same_as_list | json }}
+      {%- endif %}
+    }
+  </script>
+{%- endif -%}

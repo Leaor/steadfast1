@@ -1,0 +1,52 @@
+/* STEADFAST · Section G · Newsletter band (HOME). Spec: DESIGN §7.10. No scroll motion.
+   The form itself (sf-newsletter-form) is CORE's and styled in sf-base.css. */
+@layer sf.sections {
+  .sf-newsletter {
+    border-top: var(--sf-hairline) solid var(--sf-line);
+    scroll-margin-top: var(--sf-header-h, 56px);
+  }
+
+  .sf-newsletter__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--sf-space-6);
+  }
+
+  .sf-newsletter__eyebrow {
+    margin: 0 0 var(--sf-space-3);
+    font-family: var(--sf-font-label);
+    font-weight: var(--sf-weight-medium);
+    font-size: var(--sf-text-2xs);
+    letter-spacing: var(--sf-tracking-label);
+    text-transform: uppercase;
+    color: var(--sf-fg-subtle);
+  }
+
+  .sf-newsletter__heading {
+    margin: 0;
+    font-family: var(--sf-font-display);
+    font-weight: 300;
+    font-size: calc(var(--sf-text-xl) * var(--sf-type-scale, 1));
+    line-height: var(--sf-leading-snug);
+    color: var(--sf-fg);
+  }
+
+  .sf-newsletter__text {
+    max-width: 46ch;
+    margin: var(--sf-space-3) 0 0;
+    font-size: var(--sf-text-sm);
+    line-height: 1.5;
+    color: var(--sf-fg-muted);
+  }
+
+  @media (min-width: 990px) {
+    .sf-newsletter__inner {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--sf-grid-gap);
+      align-items: start;
+    }
+
+    .sf-newsletter__intro { grid-column: 1 / span 5; padding-top: 10px; }
+    .sf-newsletter__form { grid-column: 7 / span 6; }
+  }
+}

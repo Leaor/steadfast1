@@ -1,0 +1,170 @@
+{{ 'sf-category-grid.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign s = section.settings
+  assign heading_id = 'sf-category-title-' | append: section.id
+  assign hide_heading = false
+  if s.layout == 'index'
+    assign hide_heading = true
+  endif
+-%}
+<section
+  class="sf-section sf-category-grid sf-category-grid--{{ s.layout }} sf-tone-{{ s.tone }} sf-space-{{ s.spacing }}"
+  data-sf-section="category-grid"
+  aria-labelledby="{{ heading_id }}"
+>
+  <div class="sf-container">
+    {%- render 'sf-section-heading', heading: s.heading, eyebrow: s.eyebrow, id: heading_id, visually_hidden: hide_heading -%}
+
+    <sf-category-index class="sf-category-grid__body" data-layout="{{ s.layout }}">
+      <ul class="sf-category-grid__list" role="list">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign b = block.settings
+            assign c = b.collection
+            assign title = b.title
+            if title == blank and c != blank
+              assign title = c.title
+            endif
+            assign url = b.link
+            if url == blank
+              if c != blank
+                assign url = c.url
+              else
+                assign url = routes.collections_url
+              endif
+            endif
+            assign img = b.image
+            if img == blank and c != blank and c.image != blank
+              assign img = c.image
+            endif
+            assign asset = 'sf-category-' | append: b.asset
+            assign count = nil
+            if s.show_counts and c != blank
+              assign count = c.products_count
+            endif
+          -%}
+          <li class="sf-category-grid__item{% if forloop.first %} is-active{% endif %}" data-sf-cat-item="{{ forloop.index0 }}" {{ block.shopify_attributes }}>
+            <a class="sf-category-grid__link" href="{{ url }}">
+              <span class="sf-category-grid__tile" aria-hidden="true">
+                {%- render 'sf-image', image: img, asset: asset, sizes: '(min-width: 990px) 19vw, (min-width: 750px) 50vw, 100vw', widths: '540,720,900,1200', ratio: 0.8, crop: 'center', class: 'sf-category-grid__img', alt: '' -%}
+              </span>
+              <span class="sf-category-grid__label">
+                <span class="sf-category-grid__name">{{ title | escape }}</span>
+                {%- if count != nil -%}
+                  <span class="sf-category-grid__count">{{ 'home.category.count' | t: count: count }}</span>
+                {%- endif -%}
+              </span>
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+
+      {%- if s.layout == 'index' and section.blocks.size > 0 -%}
+        <div class="sf-category-grid__stage-col" aria-hidden="true">
+          <div class="sf-category-grid__stage">
+            {%- for block in section.blocks -%}
+              {%- liquid
+                assign b = block.settings
+                assign c = b.collection
+                assign img = b.image
+                if img == blank and c != blank and c.image != blank
+                  assign img = c.image
+                endif
+                assign asset = 'sf-category-' | append: b.asset
+              -%}
+              <div class="sf-category-grid__slide{% if forloop.first %} is-active{% endif %}" data-sf-cat-slide="{{ forloop.index0 }}">
+                {%- render 'sf-image', image: img, asset: asset, sizes: '(min-width: 990px) 42vw, 1px', widths: '540,720,900,1200', ratio: 0.8, crop: 'center', class: 'sf-category-grid__img', alt: '' -%}
+              </div>
+            {%- endfor -%}
+          </div>
+        </div>
+      {%- endif -%}
+    </sf-category-index>
+  </div>
+  <script src="{{ 'sf-category-grid.js' | asset_url }}" defer></script>
+</section>
+
+{% schema %}
+{
+  "name": "Shop by category",
+  "tag": "div",
+  "class": "sf-shopify-section--category-grid",
+  "limit": 2,
+  "max_blocks": 6,
+  "disabled_on": { "groups": ["header", "footer"] },
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Shop by category", "info": "In the index layout the heading is read by screen readers only; the list of names is the visible heading." },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        { "value": "index", "label": "Index: name list and image stage" },
+        { "value": "row", "label": "Row of tiles" }
+      ],
+      "default": "index"
+    },
+    { "type": "checkbox", "id": "show_counts", "label": "Show piece counts", "default": true },
+    {
+      "type": "select",
+      "id": "tone",
+      "label": "Tone",
+      "options": [
+        { "value": "ink", "label": "Ink" },
+        { "value": "charcoal", "label": "Charcoal" }
+      ],
+      "default": "ink"
+    },
+    {
+      "type": "select",
+      "id": "spacing",
+      "label": "Vertical spacing",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "compact", "label": "Compact" },
+        { "value": "standard", "label": "Standard" },
+        { "value": "generous", "label": "Generous" }
+      ],
+      "default": "standard"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category",
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "Collection" },
+        { "type": "text", "id": "title", "label": "Title", "info": "Blank uses the collection title." },
+        { "type": "image_picker", "id": "image", "label": "Image (4:5)", "info": "Blank uses the collection image, then the bundled still below." },
+        {
+          "type": "select",
+          "id": "asset",
+          "label": "Bundled still",
+          "options": [
+            { "value": "hoodies", "label": "Hoodies" },
+            { "value": "tracksuits", "label": "Tracksuits" },
+            { "value": "tops", "label": "Tops" },
+            { "value": "bottoms", "label": "Bottoms" },
+            { "value": "new-arrivals", "label": "New arrivals" }
+          ],
+          "default": "hoodies"
+        },
+        { "type": "url", "id": "link", "label": "Link", "info": "Blank links to the collection." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shop by category",
+      "blocks": [
+        { "type": "category", "settings": { "title": "Hoodies", "asset": "hoodies" } },
+        { "type": "category", "settings": { "title": "Tracksuits", "asset": "tracksuits" } },
+        { "type": "category", "settings": { "title": "Tops", "asset": "tops" } },
+        { "type": "category", "settings": { "title": "Bottoms", "asset": "bottoms" } },
+        { "type": "category", "settings": { "title": "New arrivals", "asset": "new-arrivals" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

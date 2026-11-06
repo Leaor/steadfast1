@@ -1,0 +1,62 @@
+{%- doc -%}
+  Product card (ARCHITECTURE §4.6, DESIGN §7.5). One stretched link on the title; swatches and
+  actions are separate controls layered above it, so nothing interactive is nested. Renders the
+  honest placeholder card when `product` is blank.
+
+  @param {object} [product] - The product. Blank renders sf-product-card-placeholder.
+  @param {number} [placeholder_index] - 1–5, used when product is blank.
+  @param {string} [sizes] - sizes for the image. Default '(min-width: 990px) 24vw, (min-width: 750px) 45vw, 78vw'.
+  @param {string} [loading] - 'lazy' (default) | 'eager'.
+  @param {string} [fetchpriority] - 'high' for the first card of a collection.
+  @param {number} [heading_level] - Default 3.
+  @param {boolean} [show_actions] - Default true.
+
+  @example
+  {% render 'sf-product-card', product: product, sizes: '(min-width: 990px) 27vw, 78vw', loading: 'eager' %}
+{%- enddoc -%}
+{%- liquid
+  assign card_level = heading_level | default: 3
+  assign card_sizes = sizes | default: '(min-width: 990px) 24vw, (min-width: 750px) 45vw, 78vw'
+  assign card_loading = loading | default: 'lazy'
+  assign card_actions = true
+  if show_actions == false
+    assign card_actions = false
+  endif
+  assign card_widths = '360,540,720,900,1080'
+  assign has_secondary = false
+  if settings.card_show_secondary_image and product.media[1] and product.media[1].media_type == 'image'
+    assign has_secondary = true
+  endif
+-%}
+{%- if product == blank -%}
+  {%- render 'sf-product-card-placeholder', index: placeholder_index, heading_level: card_level -%}
+{%- else -%}
+<sf-product-card class="sf-card{% unless product.available %} is-sold-out{% endunless %}{% if has_secondary %} sf-card--has-secondary{% endif %}" data-product-id="{{ product.id }}" data-product-handle="{{ product.handle }}" data-product-url="{{ product.url }}">
+  <div class="sf-card__media" style="--sf-ratio: var(--sf-ratio-card)">
+    {%- if product.featured_media != blank -%}
+      {%- render 'sf-image', image: product.featured_media, sizes: card_sizes, loading: card_loading, fetchpriority: fetchpriority, widths: card_widths, class: 'sf-card__img sf-card__img--primary' -%}
+    {%- else -%}
+      {{- 'product-apparel-1' | placeholder_svg_tag: 'sf-placeholder sf-img sf-card__img sf-card__img--primary' -}}
+    {%- endif -%}
+    {%- if has_secondary -%}
+      {%- render 'sf-image', image: product.media[1], sizes: card_sizes, loading: 'lazy', widths: card_widths, class: 'sf-card__img sf-card__img--secondary', alt: '' -%}
+    {%- endif -%}
+    {%- capture card_badges -%}
+      {%- if product.tags contains 'new' -%}<span class="sf-card__badge">{{ 'product_card.new' | t }}</span>{%- endif -%}
+      {%- if product.tags contains 'pre-order' -%}<span class="sf-card__badge">{{ 'product_card.pre_order' | t }}</span>{%- endif -%}
+      {%- unless product.available -%}<span class="sf-card__badge">{{ 'product_card.sold_out' | t }}</span>{%- endunless -%}
+    {%- endcapture -%}
+    {%- if card_badges != blank -%}<div class="sf-card__badges">{{ card_badges }}</div>{%- endif -%}
+  </div>
+  <div class="sf-card__info">
+    <h{{ card_level }} class="sf-card__title"><a class="sf-card__link" href="{{ product.url }}">{{ product.title | escape }}</a></h{{ card_level }}>
+    {%- render 'sf-price', product: product, show_from: true, class: 'sf-card__price' -%}
+    {%- if settings.card_show_colorways -%}{%- render 'sf-colorways', product: product -%}{%- endif -%}
+  </div>
+  {%- if card_actions -%}
+    {%- capture card_quick_add -%}{%- render 'sf-quick-add', product: product -%}{%- endcapture -%}
+    {%- if card_quick_add != blank -%}<div class="sf-card__actions">{{ card_quick_add }}</div>{%- endif -%}
+  {%- endif -%}
+  <p class="sf-card__error" role="alert" data-sf-card-error hidden></p>
+</sf-product-card>
+{%- endif -%}

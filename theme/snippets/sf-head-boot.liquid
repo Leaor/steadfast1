@@ -1,0 +1,17 @@
+{%- doc -%}
+  Inline boot script, the first thing in <head> (ARCHITECTURE §4.3). Synchronously sets the html
+  classes and data attributes CSS needs for its first paint: js, data-sf-motion, data-sf-intro-seen,
+  data-sf-save-data and data-sf-pointer. Wrapped in try/catch; storage access may throw.
+
+  @example
+  {% render 'sf-head-boot' %}
+{%- enddoc -%}
+<script>
+(function(d,w){var h=d.documentElement,l='{{ settings.motion_level | default: "full" }}';h.className=h.className.replace(/\bno-js\b/,'js');
+try{if(w.matchMedia('(prefers-reduced-motion: reduce)').matches){l='reduced'}else if(w.localStorage.getItem('sf:motion')==='reduced'){l='reduced'}}catch(e){}
+h.setAttribute('data-sf-motion',l);
+try{if({{ request.design_mode | json }}!==true&&w.sessionStorage.getItem('sf:intro-seen')==='1'){h.setAttribute('data-sf-intro-seen','')}}catch(e){}
+try{var c=navigator.connection;if(c&&(c.saveData||/2g/.test(c.effectiveType||''))){h.setAttribute('data-sf-save-data','')}}catch(e){}
+try{h.setAttribute('data-sf-pointer',w.matchMedia('(pointer: fine)').matches?'fine':'coarse')}catch(e){}
+})(document,window);
+</script>

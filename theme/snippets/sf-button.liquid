@@ -1,0 +1,38 @@
+{%- doc -%}
+  Link or button in one of DESIGN §6.2's four styles. Renders <a> when `url` is set, otherwise
+  <button>. The label sits in .sf-btn__label; icons are never placed inside a primary button.
+
+  @param {string} label - Visible label (sentence case; CSS uppercases it).
+  @param {string} [url] - Link target. Blank renders a <button>.
+  @param {string} style - 'primary' | 'secondary' | 'text' | 'icon'.
+  @param {string} [size] - 'sm' | 'md' | 'lg'. Default 'md'.
+  @param {string} [icon] - sf-icon name (ignored for primary).
+  @param {string} [attrs] - Raw attribute string, e.g. 'data-sf-open="cart" aria-haspopup="dialog"'.
+  @param {string} [type] - Button type. Default 'button'.
+
+  @example
+  {% render 'sf-button', label: 'Explore collection', url: routes.all_products_collection_url, style: 'primary' %}
+  {% render 'sf-button', label: 'Close', style: 'icon', icon: 'close', attrs: 'data-sf-close' %}
+{%- enddoc -%}
+{%- liquid
+  assign btn_style = style | default: 'primary'
+  assign btn_size = size | default: 'md'
+  assign btn_class = 'sf-btn sf-btn--' | append: btn_style | append: ' sf-btn--' | append: btn_size
+  assign btn_icon = icon
+  if btn_style == 'primary'
+    assign btn_icon = blank
+  endif
+-%}
+{%- capture inner -%}
+  {%- if btn_icon != blank -%}{% render 'sf-icon', name: btn_icon, size: 20, class: 'sf-btn__icon' %}{%- endif -%}
+  {%- if btn_style == 'icon' -%}
+    <span class="sf-visually-hidden">{{ label }}</span>
+  {%- else -%}
+    <span class="sf-btn__label">{{ label }}</span>
+  {%- endif -%}
+{%- endcapture -%}
+{%- if url != blank -%}
+  <a class="{{ btn_class }}" href="{{ url }}"{% if attrs != blank %} {{ attrs }}{% endif %}>{{ inner }}</a>
+{%- else -%}
+  <button class="{{ btn_class }}" type="{{ type | default: 'button' }}"{% if attrs != blank %} {{ attrs }}{% endif %}>{{ inner }}</button>
+{%- endif -%}

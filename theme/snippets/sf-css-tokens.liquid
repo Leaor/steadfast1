@@ -1,0 +1,65 @@
+{%- doc -%}
+  Critical inline CSS: the cascade-layer order, @font-face (DESIGN §3.2) and the :root tokens
+  (ARCHITECTURE §3.4 names, DESIGN §13 values). Palette, type scale, page width, rhythm and card
+  ratio come from theme settings. Rendered once, in <head>, by layout/theme.liquid and password.liquid.
+
+  @example
+  {% render 'sf-css-tokens' %}
+{%- enddoc -%}
+{%- liquid
+  assign page_max = settings.page_width | append: 'px'
+  if settings.page_width == 'full'
+    assign page_max = 'none'
+  endif
+  case settings.card_image_ratio
+    when 'portrait'
+      assign card_ratio = '3 / 4'
+    when 'natural'
+      assign card_ratio = 'auto'
+    else
+      assign card_ratio = '4 / 5'
+  endcase
+  case settings.section_spacing
+    when 'compact'
+      assign rhythm = '0.75'
+    when 'generous'
+      assign rhythm = '1.25'
+    else
+      assign rhythm = '1'
+  endcase
+  assign type_scale = settings.type_scale | default: 100 | divided_by: 100.0
+-%}
+<style data-sf-tokens>
+@layer sf.reset, sf.tokens, sf.base, sf.layout, sf.components, sf.sections, sf.utilities, sf.state;
+@font-face{font-family:"Spectral";src:url("{{ 'sf-font-display-300.woff2' | asset_url }}") format("woff2");font-weight:300;font-style:normal;font-display:swap}
+@font-face{font-family:"Spectral";src:url("{{ 'sf-font-display-300-italic.woff2' | asset_url }}") format("woff2");font-weight:300;font-style:italic;font-display:swap}
+@font-face{font-family:"Archivo";src:url("{{ 'sf-font-text-400.woff2' | asset_url }}") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Archivo";src:url("{{ 'sf-font-text-500.woff2' | asset_url }}") format("woff2");font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:"Archivo Label";src:url("{{ 'sf-font-label-500.woff2' | asset_url }}") format("woff2");font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:"Archivo Fallback";src:local("Arial"),local("Liberation Sans");size-adjust:101%;ascent-override:87%;descent-override:21%;line-gap-override:0%}
+@font-face{font-family:"Archivo Label Fallback";src:local("Arial"),local("Liberation Sans");size-adjust:110%;ascent-override:80%;descent-override:19%;line-gap-override:0%}
+@font-face{font-family:"Spectral Fallback";src:local("Times New Roman"),local("Liberation Serif");size-adjust:106%;ascent-override:100%;descent-override:44%;line-gap-override:0%}
+@layer sf.tokens{
+:root{
+--sf-ink:{{ settings.color_ink | default: '#000000' }};--sf-charcoal:{{ settings.color_charcoal | default: '#141619' }};--sf-graphite:{{ settings.color_graphite | default: '#24272B' }};--sf-washed-grey:{{ settings.color_washed_grey | default: '#8B9096' }};--sf-steel:{{ settings.color_steel | default: '#7C91A5' }};--sf-silver:{{ settings.color_silver | default: '#C3C8CD' }};--sf-bone:{{ settings.color_bone | default: '#F1E9DA' }};
+--sf-bg:var(--sf-ink);--sf-bg-raised:var(--sf-charcoal);--sf-bg-sunken:#000;--sf-fg:var(--sf-bone);--sf-fg-muted:var(--sf-silver);--sf-fg-subtle:var(--sf-washed-grey);--sf-line:var(--sf-graphite);--sf-line-strong:#3A3E43;--sf-accent:var(--sf-steel);--sf-accent-fg:var(--sf-bone);--sf-focus:#A9BBCB;--sf-scrim:rgb(0 0 0 / .6);--sf-error:#E06C75;--sf-success:#8DB39B;--sf-selection:#2C3A47;
+--sf-font-display:"Spectral","Spectral Fallback",Georgia,serif;--sf-font-text:"Archivo","Archivo Fallback",Arial,sans-serif;--sf-font-label:"Archivo Label","Archivo Label Fallback",Arial,sans-serif;
+--sf-type-scale:{{ type_scale }};
+--sf-text-2xs:calc(.6875rem * var(--sf-type-scale));--sf-text-xs:calc(.75rem * var(--sf-type-scale));--sf-text-sm:calc(.875rem * var(--sf-type-scale));--sf-text-base:calc(clamp(.9375rem,.9rem + .15vw,1rem) * var(--sf-type-scale));--sf-text-lg:calc(clamp(1.125rem,1rem + .5vw,1.375rem) * var(--sf-type-scale));--sf-text-xl:calc(clamp(1.375rem,1.2rem + .8vw,1.875rem) * var(--sf-type-scale));
+--sf-display-sm:calc(clamp(1.75rem,1.4rem + 1.6vw,2.5rem) * var(--sf-type-scale));--sf-display-md:calc(clamp(2rem,1.5rem + 2.2vw,3.5rem) * var(--sf-type-scale));--sf-display-lg:calc(clamp(2.25rem,1.6rem + 2.8vw,4.5rem) * var(--sf-type-scale));--sf-display-xl:calc(clamp(2.75rem,1.8rem + 4.2vw,6rem) * var(--sf-type-scale));
+--sf-leading-tight:1.04;--sf-leading-snug:1.2;--sf-leading-body:1.55;--sf-tracking-tight:-.02em;--sf-tracking-normal:0;--sf-tracking-wide:.04em;--sf-tracking-label:.16em;--sf-weight-regular:400;--sf-weight-medium:500;--sf-display-transform:none;
+--sf-space-1:4px;--sf-space-2:8px;--sf-space-3:12px;--sf-space-4:16px;--sf-space-5:24px;--sf-space-6:32px;--sf-space-7:48px;--sf-space-8:64px;--sf-space-9:96px;--sf-space-10:128px;--sf-space-11:192px;--sf-space-12:256px;
+--sf-gutter:16px;--sf-grid-gap:12px;--sf-page-max:{{ page_max }};--sf-measure:62ch;--_rhythm:{{ rhythm }};--sf-section-pad-y:calc(clamp(96px,10vw + 40px,176px) * var(--_rhythm));
+--sf-header-h:56px;--sf-announcement-h:0px;--sf-vh:1svh;
+--sf-ratio-card:{{ card_ratio }};--sf-ratio-hero-desktop:16 / 9;--sf-ratio-hero-mobile:9 / 16;
+--sf-ease-out:cubic-bezier(.19,1,.22,1);--sf-ease-in-out:cubic-bezier(.445,.05,.55,.95);--sf-ease-standard:cubic-bezier(.215,.61,.355,1);--sf-dur-instant:120ms;--sf-dur-fast:240ms;--sf-dur-base:320ms;--sf-dur-slow:480ms;--sf-dur-cinematic:1200ms;--sf-stagger:40ms;--sf-reveal-distance:12px;--sf-motion:1;
+--sf-radius:0;--sf-radius-input:0;--sf-hairline:1px;--sf-shadow-drawer:none;
+--sf-z-base:1;--sf-z-intro:5;--sf-z-sticky:10;--sf-z-header:50;--sf-z-dropdown:60;--sf-z-drawer:100;--sf-z-modal:110;--sf-z-toast:120;--sf-z-skip:200;
+color-scheme:dark}
+@media (min-width:750px){:root{--sf-gutter:32px;--sf-grid-gap:16px}}
+@media (min-width:990px){:root{--sf-gutter:clamp(40px,4vw,64px);--sf-grid-gap:24px;--sf-header-h:72px}}
+@media (min-width:1200px){:root{--sf-gutter:64px}}
+@media (min-width:1600px){:root{--sf-grid-gap:32px}}
+html[data-sf-motion="subtle"]{--sf-motion:.5}
+}
+</style>

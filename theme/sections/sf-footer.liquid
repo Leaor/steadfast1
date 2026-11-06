@@ -1,0 +1,184 @@
+{{ 'sf-footer.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign ft = section.settings
+  assign social_any = false
+  assign networks = 'instagram,tiktok,youtube,x,facebook' | split: ','
+  for network in networks
+    assign key = 'social_' | append: network | append: '_link'
+    if settings[key] != blank
+      assign social_any = true
+    endif
+  endfor
+-%}
+{%- capture legal_group -%}
+  {%- if ft.show_policies and shop.policies.size > 0 -%}
+    <details class="sf-footer__group" open data-sf-footer-group>
+      <summary class="sf-footer__title">
+        <span>{{ 'footer.legal' | t }}</span>
+        {%- render 'sf-icon', name: 'plus', size: 16, class: 'sf-footer__toggle' -%}
+      </summary>
+      <ul class="sf-footer__links" role="list">
+        {%- for policy in shop.policies -%}
+          {%- if policy != blank -%}
+            <li><a class="sf-footer__link" href="{{ policy.url }}">{{ policy.title | escape }}</a></li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </details>
+  {%- endif -%}
+{%- endcapture -%}
+<footer class="sf-footer sf-tone-{{ ft.tone | default: 'ink' }}">
+  <div class="sf-footer__top sf-container">
+    {%- if ft.show_logo -%}
+      <div class="sf-footer__brand">
+        <a class="sf-footer__logo" href="{{ routes.root_url }}" aria-label="{{ 'header.home_label' | t: shop: shop.name }}">
+          {%- render 'sf-logo', variant: 'flat', width: 148 -%}
+        </a>
+      </div>
+    {%- endif -%}
+
+    <nav class="sf-footer__nav" aria-label="{{ 'accessibility.footer_nav' | t }}">
+      {%- assign legal_done = false -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'social' and legal_done == false -%}
+          {{ legal_group }}
+          {%- assign legal_done = true -%}
+        {%- endif -%}
+        {%- case block.type -%}
+          {%- when 'menu' -%}
+            {%- assign block_menu = block.settings.menu -%}
+            {%- if block_menu != blank and block_menu.links.size > 0 -%}
+              <details class="sf-footer__group" open data-sf-footer-group {{ block.shopify_attributes }}>
+                <summary class="sf-footer__title">
+                  <span>{{ block.settings.heading | default: block_menu.title | escape }}</span>
+                  {%- render 'sf-icon', name: 'plus', size: 16, class: 'sf-footer__toggle' -%}
+                </summary>
+                <ul class="sf-footer__links" role="list">
+                  {%- for link in block_menu.links -%}
+                    <li><a class="sf-footer__link" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>{{ link.title | escape }}</a></li>
+                  {%- endfor -%}
+                </ul>
+              </details>
+            {%- endif -%}
+          {%- when 'text' -%}
+            {%- if block.settings.heading != blank or block.settings.text != blank -%}
+              <details class="sf-footer__group" open data-sf-footer-group {{ block.shopify_attributes }}>
+                <summary class="sf-footer__title">
+                  <span>{{ block.settings.heading | escape }}</span>
+                  {%- render 'sf-icon', name: 'plus', size: 16, class: 'sf-footer__toggle' -%}
+                </summary>
+                <div class="sf-footer__text sf-rte">{{ block.settings.text }}</div>
+              </details>
+            {%- endif -%}
+          {%- when 'social' -%}
+            {%- if social_any -%}
+              <details class="sf-footer__group" open data-sf-footer-group {{ block.shopify_attributes }}>
+                <summary class="sf-footer__title">
+                  {%- assign follow_heading = block.settings.heading -%}
+                  {%- if follow_heading == blank -%}{%- assign follow_heading = 'footer.follow' | t -%}{%- endif -%}
+                  <span>{{ follow_heading | escape }}</span>
+                  {%- render 'sf-icon', name: 'plus', size: 16, class: 'sf-footer__toggle' -%}
+                </summary>
+                {%- render 'sf-social-links', show_labels: true, class: 'sf-footer__social' -%}
+              </details>
+            {%- endif -%}
+          {%- when '@app' -%}
+            <div class="sf-footer__app">{% render block %}</div>
+        {%- endcase -%}
+      {%- endfor -%}
+      {%- unless legal_done -%}{{ legal_group }}{%- endunless -%}
+    </nav>
+  </div>
+
+  <div class="sf-footer__bottom sf-container">
+    <div class="sf-footer__bottom-start">
+      {%- if ft.show_localization -%}
+        {%- render 'sf-localization-form', id_suffix: 'footer', class: 'sf-footer__localization' -%}
+      {%- endif -%}
+    </div>
+    <div class="sf-footer__bottom-end">
+      <p class="sf-footer__copyright">
+        {%- if ft.copyright_text != blank -%}
+          {{ ft.copyright_text | escape }}
+        {%- else -%}
+          {%- assign year = 'now' | date: '%Y' -%}
+          {{ 'footer.copyright' | t: year: year, shop: shop.name }}
+        {%- endif -%}
+      </p>
+      {%- if settings.show_motion_toggle -%}
+        {%- render 'sf-motion-toggle' -%}
+      {%- endif -%}
+    </div>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "class": "sf-shopify-section--footer",
+  "tag": "div",
+  "enabled_on": { "groups": ["footer"] },
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "select",
+      "id": "tone",
+      "label": "Tone",
+      "options": [
+        { "value": "ink", "label": "Ink" },
+        { "value": "charcoal", "label": "Charcoal" }
+      ],
+      "default": "ink"
+    },
+    { "type": "checkbox", "id": "show_logo", "label": "Show wordmark", "default": true },
+    {
+      "type": "checkbox",
+      "id": "show_policies",
+      "label": "Show legal links",
+      "default": true,
+      "info": "Lists the store policies (privacy, refund, shipping, terms) from Settings > Policies."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_localization",
+      "label": "Show country selector",
+      "default": true,
+      "info": "Appears when the store sells to more than one country."
+    },
+    {
+      "type": "text",
+      "id": "copyright_text",
+      "label": "Copyright text",
+      "info": "Leave blank for © year and store name."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "menu",
+      "name": "Menu",
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading" },
+        { "type": "link_list", "id": "menu", "label": "Menu" }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading" },
+        { "type": "richtext", "id": "text", "label": "Text" }
+      ]
+    },
+    {
+      "type": "social",
+      "name": "Social links",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Follow" },
+        { "type": "paragraph", "content": "Set the links in Theme settings > Social media." }
+      ]
+    },
+    { "type": "@app" }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,38 @@
+{%- doc -%}
+  List of the social profiles set in theme settings (blank ones are skipped). Each link opens in
+  a new window and says so to assistive technology. Renders nothing when none are set.
+
+  @param {string} [class] - Extra classes on the <ul>.
+  @param {boolean} [show_labels] - Show the network name as visible text next to the icon. Default false.
+
+  @example
+  {% render 'sf-social-links', show_labels: true %}
+{%- enddoc -%}
+{%- liquid
+  assign networks = 'instagram,tiktok,youtube,x,facebook' | split: ','
+  assign any_social = false
+  for network in networks
+    assign key = 'social_' | append: network | append: '_link'
+    if settings[key] != blank
+      assign any_social = true
+    endif
+  endfor
+-%}
+{%- if any_social -%}
+  <ul class="sf-social{% if show_labels %} sf-social--labels{% endif %}{% if class != blank %} {{ class }}{% endif %}" role="list">
+    {%- for network in networks -%}
+      {%- assign key = 'social_' | append: network | append: '_link' -%}
+      {%- assign url = settings[key] -%}
+      {%- if url != blank -%}
+        {%- assign label_key = 'social.' | append: network -%}
+        <li>
+          <a class="sf-social__link" href="{{ url | escape }}" target="_blank" rel="noopener">
+            {%- render 'sf-icon', name: network, size: 18 -%}
+            <span class="{% unless show_labels %}sf-visually-hidden{% else %}sf-social__label{% endunless %}">{{ label_key | t }}</span>
+            <span class="sf-visually-hidden"> ({{ 'accessibility.opens_new_window' | t }})</span>
+          </a>
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+{%- endif -%}

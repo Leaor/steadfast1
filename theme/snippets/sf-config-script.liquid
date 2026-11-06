@@ -1,0 +1,81 @@
+{%- doc -%}
+  Inline window.Steadfast config object (ARCHITECTURE §4.2): routes, settings, translated strings
+  and asset URLs. sf-core.js adds the behaviour on top of this data.
+
+  @example
+  {% render 'sf-config-script' %}
+{%- enddoc -%}
+<script>
+window.Steadfast = window.Steadfast || {};
+(function (S) {
+  /* Interpolated strings carry [name] placeholders; use Steadfast.t(key, { name: value }). */
+  S.version = '1.0.0';
+  S.modules = S.modules || {};
+  S.routes = {
+    root: {{ routes.root_url | json }},
+    cart: {{ routes.cart_url | json }},
+    cart_add: {{ routes.cart_add_url | json }},
+    cart_change: {{ routes.cart_change_url | json }},
+    cart_update: {{ routes.cart_update_url | json }},
+    cart_clear: {{ routes.cart_clear_url | json }},
+    search: {{ routes.search_url | json }},
+    predictive_search: {{ routes.predictive_search_url | json }},
+    product_recommendations: {{ routes.product_recommendations_url | json }},
+    account: {{ routes.account_url | json }},
+    all_products: {{ routes.all_products_collection_url | json }}
+  };
+  S.settings = {
+    cartType: {{ settings.cart_type | default: 'drawer' | json }},
+    motionLevel: {{ settings.motion_level | default: 'full' | json }},
+    quickView: {{ settings.card_show_quick_view | json }},
+    quickAdd: {{ settings.card_show_quick_add | json }},
+    predictiveSearch: {{ settings.predictive_search_enabled | json }},
+    designMode: {{ request.design_mode | json }},
+    pageType: {{ request.page_type | json }},
+    templateName: {{ template.name | json }}
+  };
+  S.strings = {
+    'general.close': {{ 'general.close' | t | json }},
+    'general.open': {{ 'general.open' | t | json }},
+    'general.loading': {{ 'general.loading' | t | json }},
+    'general.error': {{ 'general.error' | t | json }},
+    'accessibility.loading': {{ 'accessibility.loading' | t | json }},
+    'header.menu_open': {{ 'header.menu_open' | t | json }},
+    'header.menu_close': {{ 'header.menu_close' | t | json }},
+    'header.cart': {{ 'header.cart' | t | json }},
+    'cart.title': {{ 'cart.title' | t | json }},
+    'cart.empty': {{ 'cart.empty' | t | json }},
+    'cart.error': {{ 'cart.error' | t | json }},
+    'cart.quantity_error_html': {{ 'cart.quantity_error_html' | t: quantity: '[quantity]' | json }},
+    'cart.item_added': {{ 'cart.item_added' | t: title: '[title]' | json }},
+    'cart.item_removed': {{ 'cart.item_removed' | t: title: '[title]' | json }},
+    'cart.count': { one: {{ 'cart.count' | t: count: 1 | replace_first: '1', '[count]' | json }}, other: {{ 'cart.count' | t: count: 2 | replace_first: '2', '[count]' | json }} },
+    'products.add_to_cart': {{ 'products.add_to_cart' | t | json }},
+    'products.adding': {{ 'products.adding' | t | json }},
+    'products.sold_out': {{ 'products.sold_out' | t | json }},
+    'products.unavailable': {{ 'products.unavailable' | t | json }},
+    'products.value_unavailable': {{ 'products.value_unavailable' | t: value: '[value]' | json }},
+    'products.size_guide': {{ 'products.size_guide' | t | json }},
+    'product_card.add_to_cart': {{ 'product_card.add_to_cart' | t | json }},
+    'product_card.sold_out': {{ 'product_card.sold_out' | t | json }},
+    'quick_add.added': {{ 'quick_add.added' | t: title: '[title]' | json }},
+    'quick_view.title': {{ 'quick_view.title' | t | json }},
+    'quick_view.full_details': {{ 'quick_view.full_details' | t | json }},
+    'search.no_results_html': {{ 'search.no_results_html' | t: terms: '[terms]' | json }},
+    'collections.empty_filtered': {{ 'collections.empty_filtered' | t | json }},
+    'newsletter.error_email': {{ 'newsletter.error_email' | t | json }},
+    'motion.reduce': {{ 'motion.reduce' | t | json }},
+    'motion.reduced_on': {{ 'motion.reduced_on' | t | json }}
+  };
+  S.assets = {
+    gsap: {{ 'gsap.min.js' | asset_url | json }},
+    scrollTrigger: {{ 'ScrollTrigger.min.js' | asset_url | json }},
+    product: {{ 'sf-product.js' | asset_url | json }},
+    quickView: {{ 'sf-quick-view.js' | asset_url | json }},
+    predictiveSearch: {{ 'sf-predictive-search.js' | asset_url | json }},
+    facets: {{ 'sf-facets.js' | asset_url | json }},
+    customer: {{ 'sf-customer.js' | asset_url | json }}
+  };
+  S.breakpoints = { md: 750, lg: 990, xl: 1200 };
+})(window.Steadfast);
+</script>

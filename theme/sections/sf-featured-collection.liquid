@@ -1,0 +1,181 @@
+{{ 'sf-featured-collection.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign s = section.settings
+  assign heading_id = 'sf-featured-title-' | append: section.id
+  assign col = s.collection
+  assign has_products = false
+  if col != blank and col.products_count > 0
+    assign has_products = true
+  endif
+  assign count = nil
+  if s.show_count and has_products
+    assign count = col.products_count
+  endif
+  assign view_all_url = nil
+  if s.show_view_all and s.view_all_label != blank
+    if has_products
+      assign view_all_url = col.url
+    else
+      assign view_all_url = routes.all_products_collection_url
+    endif
+  endif
+  if s.layout == 'grid'
+    case s.columns_desktop
+      when 3
+        assign card_sizes = '(min-width: 990px) 31vw, 50vw'
+      when 5
+        assign card_sizes = '(min-width: 990px) 19vw, 50vw'
+      else
+        assign card_sizes = '(min-width: 990px) 24vw, 50vw'
+    endcase
+  else
+    assign card_sizes = '(min-width: 990px) 27vw, 78vw'
+  endif
+  assign teaser = section.blocks | where: 'type', 'drop_teaser' | first
+-%}
+<section
+  class="sf-section sf-featured-collection sf-tone-{{ s.tone }} sf-space-{{ s.spacing }}"
+  data-sf-section="featured-collection"
+  aria-labelledby="{{ heading_id }}"
+>
+  <div class="sf-container sf-featured-collection__head">
+    {%- render 'sf-section-heading',
+      heading: s.heading,
+      eyebrow: s.eyebrow,
+      id: heading_id,
+      count: count,
+      link_label: s.view_all_label,
+      link_url: view_all_url
+    -%}
+  </div>
+
+  <sf-product-rail class="sf-featured-collection__body sf-featured-collection__body--{{ s.layout }}" data-layout="{{ s.layout }}" style="--_cols: {{ s.columns_desktop }}">
+    <ul class="sf-featured-collection__track" role="list" data-sf-rail-track>
+      {%- if has_products -%}
+        {%- for product in col.products limit: s.products_to_show -%}
+          <li class="sf-featured-collection__item" data-sf-rail-item>
+            {%- render 'sf-product-card', product: product, sizes: card_sizes, heading_level: 3 -%}
+          </li>
+        {%- endfor -%}
+      {%- else -%}
+        {%- for i in (1..5) -%}
+          <li class="sf-featured-collection__item" data-sf-rail-item>
+            {%- render 'sf-product-card', placeholder_index: i, sizes: card_sizes, heading_level: 3 -%}
+          </li>
+        {%- endfor -%}
+      {%- endif -%}
+
+      {%- if teaser -%}
+        {%- assign t = teaser.settings -%}
+        <li class="sf-featured-collection__item sf-featured-collection__item--teaser" data-sf-rail-item {{ teaser.shopify_attributes }}>
+          <div class="sf-drop-tile{% if t.image != blank %} sf-drop-tile--image{% endif %}">
+            <div class="sf-drop-tile__well">
+              {%- if t.image != blank -%}
+                {%- render 'sf-image', image: t.image, sizes: card_sizes, widths: '360,540,720,900,1080', class: 'sf-drop-tile__img', alt: '' -%}
+              {%- else -%}
+                <span class="sf-drop-tile__mark" aria-hidden="true">{%- render 'sf-logo', variant: 'flat', width: 160, alt: '' -%}</span>
+              {%- endif -%}
+              <div class="sf-drop-tile__text">
+                {%- if t.label != blank -%}<p class="sf-drop-tile__label">{{ t.label | escape }}</p>{%- endif -%}
+                {%- if t.text != blank -%}<p class="sf-drop-tile__line">{{ t.text | escape }}</p>{%- endif -%}
+                {%- if t.link_label != blank -%}
+                  <a class="sf-btn sf-btn--text sf-btn--sm sf-drop-tile__link" href="{{ t.link | default: '#newsletter' }}">
+                    <span class="sf-btn__label">{{ t.link_label | escape }}</span>
+                  </a>
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+        </li>
+      {%- endif -%}
+    </ul>
+
+    {%- if s.layout == 'rail' -%}
+      <div class="sf-container sf-featured-collection__controls">
+        <div class="sf-featured-collection__progress" aria-hidden="true"><span data-sf-rail-progress></span></div>
+        <div class="sf-featured-collection__buttons" data-sf-rail-buttons hidden>
+          <button type="button" class="sf-btn sf-btn--icon sf-featured-collection__btn" data-sf-rail-prev aria-label="{{ 'home.featured.previous' | t }}" disabled>
+            {%- render 'sf-icon', name: 'arrow-left', size: 20 -%}
+          </button>
+          <button type="button" class="sf-btn sf-btn--icon sf-featured-collection__btn" data-sf-rail-next aria-label="{{ 'home.featured.next' | t }}">
+            {%- render 'sf-icon', name: 'arrow-right', size: 20 -%}
+          </button>
+        </div>
+      </div>
+    {%- endif -%}
+  </sf-product-rail>
+  <script src="{{ 'sf-featured-collection.js' | asset_url }}" defer></script>
+</section>
+
+{% schema %}
+{
+  "name": "Featured collection",
+  "tag": "div",
+  "class": "sf-shopify-section--featured-collection",
+  "limit": 2,
+  "max_blocks": 1,
+  "disabled_on": { "groups": ["header", "footer"] },
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "The collection" },
+    { "type": "collection", "id": "collection", "label": "Collection", "info": "Blank or empty shows five sample garment stills with no price or buy button." },
+    { "type": "range", "id": "products_to_show", "label": "Products to show", "min": 4, "max": 16, "step": 1, "default": 8 },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        { "value": "rail", "label": "Horizontal rail" },
+        { "value": "grid", "label": "Grid" }
+      ],
+      "default": "rail"
+    },
+    { "type": "range", "id": "columns_desktop", "label": "Grid columns on desktop", "min": 3, "max": 5, "step": 1, "default": 4 },
+    { "type": "checkbox", "id": "show_count", "label": "Show piece count", "default": true },
+    { "type": "checkbox", "id": "show_view_all", "label": "Show view all link", "default": true },
+    { "type": "text", "id": "view_all_label", "label": "View all label", "default": "View all" },
+    {
+      "type": "select",
+      "id": "tone",
+      "label": "Tone",
+      "options": [
+        { "value": "ink", "label": "Ink" },
+        { "value": "charcoal", "label": "Charcoal" }
+      ],
+      "default": "ink"
+    },
+    {
+      "type": "select",
+      "id": "spacing",
+      "label": "Vertical spacing",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "compact", "label": "Compact" },
+        { "value": "standard", "label": "Standard" },
+        { "value": "generous", "label": "Generous" }
+      ],
+      "default": "standard"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "drop_teaser",
+      "name": "Next drop tile",
+      "limit": 1,
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image", "info": "Optional. Blank shows the typographic tile with the wordmark." },
+        { "type": "text", "id": "label", "label": "Label", "default": "Next drop" },
+        { "type": "text", "id": "text", "label": "Text", "default": "Details to be announced.", "info": "No dates or quantities until they are confirmed." },
+        { "type": "text", "id": "link_label", "label": "Link label", "default": "Get notified" },
+        { "type": "url", "id": "link", "label": "Link", "info": "Blank links to the newsletter sign-up." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured collection",
+      "blocks": [{ "type": "drop_teaser" }]
+    }
+  ]
+}
+{% endschema %}

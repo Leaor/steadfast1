@@ -1,0 +1,49 @@
+{{ 'sf-newsletter.css' | asset_url | stylesheet_tag }}
+{%- liquid
+  assign s = section.settings
+  assign heading_id = 'sf-newsletter-title-' | append: section.id
+-%}
+<section
+  id="newsletter"
+  class="sf-section sf-newsletter sf-tone-{{ s.tone }} sf-space-compact"
+  data-sf-section="newsletter"
+  {% if s.heading != blank %}aria-labelledby="{{ heading_id }}"{% endif %}
+>
+  <div class="sf-container sf-newsletter__inner">
+    <div class="sf-newsletter__intro">
+      {%- if s.eyebrow != blank -%}<p class="sf-newsletter__eyebrow">{{ s.eyebrow | escape }}</p>{%- endif -%}
+      {%- if s.heading != blank -%}<h2 class="sf-newsletter__heading" id="{{ heading_id }}">{{ s.heading | escape }}</h2>{%- endif -%}
+      {%- if s.text != blank -%}<p class="sf-newsletter__text">{{ s.text | escape }}</p>{%- endif -%}
+    </div>
+    <div class="sf-newsletter__form">
+      {%- render 'sf-newsletter-form', id_suffix: section.id, button_label: s.button_label, show_consent: s.show_consent -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Newsletter",
+  "tag": "div",
+  "class": "sf-shopify-section--newsletter",
+  "limit": 1,
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "New pieces, by email." },
+    { "type": "text", "id": "text", "label": "Text", "info": "Hidden when blank. No discount promise unless you offer one." },
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Subscribe" },
+    { "type": "checkbox", "id": "show_consent", "label": "Show consent line", "default": true, "info": "Edit the consent text in Theme settings, Newsletter." },
+    {
+      "type": "select",
+      "id": "tone",
+      "label": "Tone",
+      "options": [
+        { "value": "ink", "label": "Ink" },
+        { "value": "charcoal", "label": "Charcoal" }
+      ],
+      "default": "ink"
+    }
+  ],
+  "presets": [{ "name": "Newsletter" }]
+}
+{% endschema %}

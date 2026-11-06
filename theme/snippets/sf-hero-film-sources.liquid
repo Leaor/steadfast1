@@ -1,0 +1,211 @@
+{%- doc -%}
+  Resolves the hero film media for sf-hero-film (ARCHITECTURE §5.1). One media query decides
+  desktop vs mobile media everywhere: MOBILE_MQ = (max-width: 749px), (orientation: portrait) and (max-width: 1100px).
+
+  Video slots pick, in order: the merchant's Shopify-hosted video (the mp4 rendition with the largest
+  height ≤ 1080 desktop / ≤ 1920 mobile), then the bundled H.264 file if `use_bundled_film` is on, then nothing.
+  A desktop override is never used on mobile. The campaign film has no bundled fallback.
+
+  Parts:
+  - 'attrs': the data-* attributes for <sf-hero-film> (data-mq-mobile, data-intro-*, data-loop-*, data-source).
+  - 'end': the end-still <picture> (loop frame 0, no logo). Always painted; the LCP element.
+  - 'campaign': the data-* attributes for the campaign-film <video> (data-src-desktop, data-src-mobile).
+
+  @param {object} settings - The sf-hero-film section.settings.
+  @param {string} part - 'attrs' | 'end' | 'campaign'.
+
+  @example
+  <sf-hero-film {% render 'sf-hero-film-sources', settings: section.settings, part: 'attrs' %}>
+  {% render 'sf-hero-film-sources', settings: section.settings, part: 'end' %}
+{%- enddoc -%}
+{%- liquid
+  assign mq = '(max-width: 749px), (orientation: portrait) and (max-width: 1100px)'
+  assign s = settings
+-%}
+{%- case part -%}
+  {%- when 'attrs' -%}
+    {%- liquid
+      assign n_shopify = 0
+      assign n_bundled = 0
+
+      assign intro_d = ''
+      if s.intro_video_desktop != blank
+        assign best = 0
+        for src in s.intro_video_desktop.sources
+          if src.mime_type == 'video/mp4' and src.height <= 1080 and src.height > best
+            assign best = src.height
+            assign intro_d = src.url
+          endif
+        endfor
+      endif
+      if intro_d != ''
+        assign n_shopify = n_shopify | plus: 1
+      elsif s.use_bundled_film
+        assign intro_d = 'sf-film-desktop.mp4' | asset_url
+        assign n_bundled = n_bundled | plus: 1
+      endif
+
+      assign intro_m = ''
+      if s.intro_video_mobile != blank
+        assign best = 0
+        for src in s.intro_video_mobile.sources
+          if src.mime_type == 'video/mp4' and src.height <= 1920 and src.height > best
+            assign best = src.height
+            assign intro_m = src.url
+          endif
+        endfor
+      endif
+      if intro_m != ''
+        assign n_shopify = n_shopify | plus: 1
+      elsif s.use_bundled_film
+        assign intro_m = 'sf-film-mobile.mp4' | asset_url
+        assign n_bundled = n_bundled | plus: 1
+      endif
+
+      assign loop_d = ''
+      if s.loop_video_desktop != blank
+        assign best = 0
+        for src in s.loop_video_desktop.sources
+          if src.mime_type == 'video/mp4' and src.height <= 1080 and src.height > best
+            assign best = src.height
+            assign loop_d = src.url
+          endif
+        endfor
+      endif
+      if loop_d != ''
+        assign n_shopify = n_shopify | plus: 1
+      elsif s.use_bundled_film
+        assign loop_d = 'sf-film-loop-desktop.mp4' | asset_url
+        assign n_bundled = n_bundled | plus: 1
+      endif
+
+      assign loop_m = ''
+      if s.loop_video_mobile != blank
+        assign best = 0
+        for src in s.loop_video_mobile.sources
+          if src.mime_type == 'video/mp4' and src.height <= 1920 and src.height > best
+            assign best = src.height
+            assign loop_m = src.url
+          endif
+        endfor
+      endif
+      if loop_m != ''
+        assign n_shopify = n_shopify | plus: 1
+      elsif s.use_bundled_film
+        assign loop_m = 'sf-film-loop-mobile.mp4' | asset_url
+        assign n_bundled = n_bundled | plus: 1
+      endif
+
+      assign source = 'none'
+      if n_shopify > 0 and n_bundled > 0
+        assign source = 'mixed'
+      elsif n_shopify > 0
+        assign source = 'shopify'
+      elsif n_bundled > 0
+        assign source = 'bundled'
+      endif
+    -%}
+    data-mq-mobile="{{ mq }}" data-intro-desktop="{{ intro_d }}" data-intro-mobile="{{ intro_m }}" data-loop-desktop="{{ loop_d }}" data-loop-mobile="{{ loop_m }}" data-source="{{ source }}"
+  {%- when 'campaign' -%}
+    {%- liquid
+      assign film_d = ''
+      if s.campaign_film_desktop != blank
+        assign best = 0
+        for src in s.campaign_film_desktop.sources
+          if src.mime_type == 'video/mp4' and src.height <= 1080 and src.height > best
+            assign best = src.height
+            assign film_d = src.url
+          endif
+        endfor
+      endif
+      assign film_m = ''
+      if s.campaign_film_mobile != blank
+        assign best = 0
+        for src in s.campaign_film_mobile.sources
+          if src.mime_type == 'video/mp4' and src.height <= 1920 and src.height > best
+            assign best = src.height
+            assign film_m = src.url
+          endif
+        endfor
+      endif
+      if film_m == ''
+        assign film_m = film_d
+      endif
+    -%}
+    data-mq-mobile="{{ mq }}" data-src-desktop="{{ film_d }}" data-src-mobile="{{ film_m }}"
+  {%- when 'end' -%}
+    {%- liquid
+      # Desktop end still: merchant image, else the bundled record (sf-asset-data), else ARCHITECTURE §10.1 defaults.
+      assign d_img = s.end_image_desktop
+      assign m_img = s.end_image_mobile
+      if d_img == blank
+        capture d_rec
+          render 'sf-asset-data', asset: 'sf-film-end-desktop'
+        endcapture
+        assign d_rec = d_rec | strip
+        if d_rec == blank
+          assign d_rec = '960,1600,1920|1600|jpg|1600|900|'
+        endif
+        assign d_parts = d_rec | split: '|'
+        assign d_widths = d_parts[0] | split: ','
+        assign d_fallback = 'sf-film-end-desktop-' | append: d_parts[1] | append: '.' | append: d_parts[2]
+        assign d_w = d_parts[3]
+        assign d_h = d_parts[4]
+      else
+        assign d_w = d_img.width | at_most: 1920
+        assign d_h = d_w | divided_by: d_img.aspect_ratio | round
+      endif
+      if m_img == blank
+        capture m_rec
+          render 'sf-asset-data', asset: 'sf-film-end-mobile'
+        endcapture
+        assign m_rec = m_rec | strip
+        if m_rec == blank
+          assign m_rec = '480,720|720|jpg|720|1280|'
+        endif
+        assign m_parts = m_rec | split: '|'
+        assign m_widths = m_parts[0] | split: ','
+        assign m_w = m_parts[3]
+        assign m_h = m_parts[4]
+      else
+        assign m_w = m_img.width | at_most: 1080
+        assign m_h = m_w | divided_by: m_img.aspect_ratio | round
+      endif
+    -%}
+    <picture class="sf-hero__end">
+      {%- if m_img != blank -%}
+        <source media="{{ mq }}" sizes="100vw" width="{{ m_w }}" height="{{ m_h }}" srcset="
+          {%- for w in (1..3) -%}
+            {%- assign rw = 360 | times: w -%}
+            {%- if rw <= m_img.width -%}{% unless forloop.first %}, {% endunless %}{{ m_img | image_url: width: rw }} {{ rw }}w{%- endif -%}
+          {%- endfor -%}
+        ">
+      {%- else -%}
+        <source media="{{ mq }}" type="image/webp" sizes="100vw" width="{{ m_w }}" height="{{ m_h }}" srcset="
+          {%- for w in m_widths -%}
+            {%- assign f = 'sf-film-end-mobile-' | append: w | append: '.webp' -%}
+            {{ f | asset_url }} {{ w }}w{% unless forloop.last %}, {% endunless %}
+          {%- endfor -%}
+        ">
+      {%- endif -%}
+      {%- if d_img != blank -%}
+        {%- assign d_max = d_img.width | at_most: 1920 -%}
+        <source sizes="100vw" width="{{ d_w }}" height="{{ d_h }}" srcset="
+          {%- assign d_set = '960,1600,1920' | split: ',' -%}
+          {%- for w in d_set -%}
+            {%- assign rw = w | plus: 0 -%}
+            {%- if rw <= d_img.width -%}{% unless forloop.first %}, {% endunless %}{{ d_img | image_url: width: rw }} {{ rw }}w{%- endif -%}
+          {%- endfor -%}
+        ">
+        <img src="{{ d_img | image_url: width: d_max }}" width="{{ d_w }}" height="{{ d_h }}" alt="" loading="eager" fetchpriority="high" decoding="async">
+      {%- else -%}
+        <source type="image/webp" sizes="100vw" width="{{ d_w }}" height="{{ d_h }}" srcset="
+          {%- for w in d_widths -%}
+            {%- assign f = 'sf-film-end-desktop-' | append: w | append: '.webp' -%}
+            {{ f | asset_url }} {{ w }}w{% unless forloop.last %}, {% endunless %}
+          {%- endfor -%}
+        ">
+        <img src="{{ d_fallback | asset_url }}" width="{{ d_w }}" height="{{ d_h }}" alt="" loading="eager" fetchpriority="high" decoding="async">
+      {%- endif -%}
+    </picture>
+{%- endcase -%}

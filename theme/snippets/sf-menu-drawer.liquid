@@ -1,0 +1,99 @@
+{%- doc -%}
+  Mobile navigation (DESIGN §7.3): a fullscreen <sf-dialog> that repeats the 56 px header row
+  (close in the menu button's place, the flat wordmark, search and cart), so the header reads as
+  persistent while the panel opens beneath it. Links in Spectral; nested levels slide over with a
+  back button. Below a hairline: secondary links, Account, Search, Instagram, localization.
+
+  @param {object} menu - The main linklist.
+  @param {object} [secondary_menu] - Optional linklist shown below the hairline.
+  @param {number} [logo_width] - Wordmark box width in px. Default 112.
+
+  @example
+  {% render 'sf-menu-drawer', menu: section.settings.menu, secondary_menu: section.settings.secondary_menu, logo_width: settings.logo_width_mobile %}
+{%- enddoc -%}
+{%- assign menu_logo_w = logo_width | default: 112 -%}
+<sf-dialog id="sf-menu-drawer" data-sf-dialog-type="fullscreen">
+  <dialog class="sf-menu" aria-label="{{ 'accessibility.mobile_nav' | t }}">
+    <sf-menu-drawer class="sf-menu__frame">
+      <div class="sf-menu__bar">
+        <button type="button" class="sf-menu__close sf-header__icon-btn" data-sf-close aria-label="{{ 'header.menu_close' | t }}" data-sf-initial-focus>
+          {%- render 'sf-icon', name: 'close', size: 20 -%}
+        </button>
+        <a class="sf-menu__logo" href="{{ routes.root_url }}" aria-label="{{ 'header.home_label' | t: shop: shop.name }}">
+          {%- render 'sf-logo', variant: 'flat', width: menu_logo_w -%}
+        </a>
+        <div class="sf-menu__bar-actions">
+          <a class="sf-header__icon-btn" href="{{ routes.search_url }}" data-sf-menu-switch="search">
+            {%- render 'sf-icon', name: 'search', size: 20 -%}<span class="sf-visually-hidden">{{ 'header.search' | t }}</span>
+          </a>
+          <a class="sf-header__icon-btn sf-header__cart-icon" href="{{ routes.cart_url }}"{% if settings.cart_type == 'drawer' %} data-sf-menu-switch="cart"{% endif %}>
+            {%- render 'sf-icon', name: 'bag', size: 20 -%}<span class="sf-visually-hidden">{{ 'header.cart' | t }}</span>
+            <sf-cart-count class="sf-header__count" data-count="{{ cart.item_count }}">{{ cart.item_count }}</sf-cart-count>
+          </a>
+        </div>
+      </div>
+
+      <div class="sf-menu__body">
+        <nav class="sf-menu__nav" aria-label="{{ 'accessibility.mobile_nav' | t }}">
+          {%- if menu != blank -%}
+            <ul class="sf-menu__list" role="list">
+              {%- for link in menu.links -%}
+                {%- assign stagger_index = forloop.index0 | at_most: 7 -%}
+                <li class="sf-menu__item" style="--i: {{ stagger_index }}">
+                  {%- if link.links.size > 0 -%}
+                    <details class="sf-menu__sub" data-sf-menu-sub>
+                      <summary class="sf-menu__link">
+                        <span>{{ link.title | escape }}</span>
+                        {%- render 'sf-icon', name: 'chevron-right', size: 20, class: 'sf-menu__chev' -%}
+                      </summary>
+                      <div class="sf-menu__panel">
+                        <button type="button" class="sf-menu__back" data-sf-menu-back>
+                          {%- render 'sf-icon', name: 'chevron-left', size: 16 -%}
+                          <span>{{ link.title | escape }}</span>
+                        </button>
+                        <ul class="sf-menu__list sf-menu__list--sub" role="list">
+                          {%- for child in link.links -%}
+                            <li class="sf-menu__item" style="--i: {{ forloop.index0 | at_most: 7 }}">
+                              <a class="sf-menu__link" href="{{ child.url }}"{% if child.current %} aria-current="page"{% endif %}>{{ child.title | escape }}</a>
+                              {%- if child.links.size > 0 -%}
+                                <ul class="sf-menu__sublinks" role="list">
+                                  {%- for grandchild in child.links -%}
+                                    <li><a class="sf-menu__sublink" href="{{ grandchild.url }}"{% if grandchild.current %} aria-current="page"{% endif %}>{{ grandchild.title | escape }}</a></li>
+                                  {%- endfor -%}
+                                </ul>
+                              {%- endif -%}
+                            </li>
+                          {%- endfor -%}
+                        </ul>
+                      </div>
+                    </details>
+                  {%- else -%}
+                    <a class="sf-menu__link" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>{{ link.title | escape }}</a>
+                  {%- endif -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+        </nav>
+
+        <div class="sf-menu__secondary">
+          <ul class="sf-menu__utility" role="list">
+            {%- if secondary_menu != blank -%}
+              {%- for link in secondary_menu.links -%}
+                <li><a class="sf-navlink" href="{{ link.url }}">{{ link.title | escape }}</a></li>
+              {%- endfor -%}
+            {%- endif -%}
+            {%- if shop.customer_accounts_enabled -%}
+              <li><a class="sf-navlink" href="{{ routes.account_url }}">{{ 'header.account' | t }}</a></li>
+            {%- endif -%}
+            <li><a class="sf-navlink" href="{{ routes.search_url }}" data-sf-menu-switch="search">{{ 'header.search' | t }}</a></li>
+            {%- if settings.social_instagram_link != blank -%}
+              <li><a class="sf-navlink" href="{{ settings.social_instagram_link }}" target="_blank" rel="noopener">{{ 'social.instagram' | t }}<span class="sf-visually-hidden"> ({{ 'accessibility.opens_new_window' | t }})</span></a></li>
+            {%- endif -%}
+          </ul>
+          {%- render 'sf-localization-form', id_suffix: 'menu', class: 'sf-menu__localization' -%}
+        </div>
+      </div>
+    </sf-menu-drawer>
+  </dialog>
+</sf-dialog>

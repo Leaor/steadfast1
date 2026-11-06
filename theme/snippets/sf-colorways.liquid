@@ -1,0 +1,84 @@
+{%- doc -%}
+  Card colour swatches (DESIGN §6.6, ARCHITECTURE §1.3). Finds the colour option; shows up to
+  `max` square swatches, then "+N". A swatch whose variant has its own media is a button that
+  swaps the card image; otherwise it links to the variant. Renders nothing without a colour option.
+
+  @param {object} product - The product.
+  @param {number} [max] - Visible swatches before "+N". Default 4.
+
+  @example
+  {% render 'sf-colorways', product: product %}
+{%- enddoc -%}
+{%- liquid
+  assign cw_max = max | default: 4
+  assign color_option = nil
+  for option in product.options_with_values
+    assign option_name = option.name | downcase | strip
+    if option_name == 'color' or option_name == 'colour' or option_name == 'colorway' or option_name == 'colourway'
+      assign color_option = option
+      break
+    endif
+  endfor
+-%}
+{%- if color_option != nil and color_option.values.size > 0 -%}
+  {%- assign cw_count = color_option.values.size -%}
+  <ul class="sf-colorways" role="list" aria-label="{{ 'product_card.colorways' | t: count: cw_count }}">
+    {%- for value in color_option.values limit: cw_max -%}
+      {%- liquid
+        assign fill = value.swatch.color
+        if fill == blank
+          assign vname = value.name | default: value | downcase
+          if vname contains 'blue-grey' or vname contains 'blue grey' or vname contains 'steel'
+            assign fill = '#6F7E8C'
+          elsif vname contains 'charcoal' or vname contains 'graphite'
+            assign fill = '#2E3034'
+          elsif vname contains 'grey' or vname contains 'gray'
+            assign fill = '#8B9096'
+          elsif vname contains 'stone' or vname contains 'sand'
+            assign fill = '#9C948A'
+          elsif vname contains 'bone' or vname contains 'cream' or vname contains 'ecru' or vname contains 'off-white'
+            assign fill = '#E9E1D2'
+          elsif vname contains 'white'
+            assign fill = '#F2F2F0'
+          elsif vname contains 'navy'
+            assign fill = '#1B2633'
+          elsif vname contains 'blue'
+            assign fill = '#4F6479'
+          elsif vname contains 'black'
+            assign fill = '#0B0B0C'
+          elsif vname contains 'olive' or vname contains 'green'
+            assign fill = '#4D5143'
+          elsif vname contains 'brown'
+            assign fill = '#4A3C33'
+          elsif vname contains 'red'
+            assign fill = '#6E2A2E'
+          else
+            assign fill = '#5A5F66'
+          endif
+        endif
+        assign v_media = value.variant.featured_media
+      -%}
+      <li class="sf-colorways__item">
+        {%- if v_media != blank and v_media.media_type == 'image' -%}
+          {%- capture v_srcset -%}
+            {%- for w in (1..5) -%}
+              {%- assign sw = w | times: 180 | plus: 180 -%}
+              {%- if sw <= v_media.width or forloop.first -%}{%- unless forloop.first -%}, {% endunless -%}{{ v_media | image_url: width: sw }} {{ sw }}w{%- endif -%}
+            {%- endfor -%}
+          {%- endcapture -%}
+          <button type="button" class="sf-swatch" data-sf-swatch data-src="{{ v_media | image_url: width: 720 }}" data-srcset="{{ v_srcset | strip }}" data-alt="{{ v_media.alt | default: product.title | escape }}" aria-label="{{ value.name | default: value | escape }}" aria-pressed="false" style="--sf-swatch: {{ fill }}">
+            <span class="sf-swatch__fill" aria-hidden="true"></span>
+          </button>
+        {%- else -%}
+          <a class="sf-swatch" href="{{ value.variant.url | default: product.url }}" aria-label="{{ value.name | default: value | escape }}" style="--sf-swatch: {{ fill }}">
+            <span class="sf-swatch__fill" aria-hidden="true"></span>
+          </a>
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+    {%- if cw_count > cw_max -%}
+      {%- assign cw_more = cw_count | minus: cw_max -%}
+      <li class="sf-colorways__more"><span aria-hidden="true">+{{ cw_more }}</span><span class="sf-visually-hidden">{{ 'product_card.more_colorways' | t: count: cw_more }}</span></li>
+    {%- endif -%}
+  </ul>
+{%- endif -%}
