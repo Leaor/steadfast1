@@ -1,5 +1,5 @@
 // Product pages (BRIEF §7, §12; ARCHITECTURE §9 row 04, §2.4 sf-main-product, §4.7; DESIGN §7.8).
-import { test, expect, fx, gotoOk, assertNoTemplateErrors, expectDialogOpen, visibleText } from './helpers/base.mjs';
+import { test, expect, fx, gotoOk, assertNoTemplateErrors, expectDialogOpen, visibleText, chooseSizeIfRequired } from './helpers/base.mjs';
 
 const handles = fx.fixturesReady() ? fx.products().map((p) => p.handle) : [];
 if (!handles.length) test('fixtures available', () => { throw new Error('dev/preview/fixtures/products.json missing'); });
@@ -37,6 +37,11 @@ for (const handle of handles) {
 
       // Buy button: "Add to cart" (or "Sold out" when nothing is available); no dynamic checkout by default.
       const buy = main.locator('sf-product-form button[type="submit"]').first();
+      // Size is never pre-selected: with several sizes the button first asks for one, then reads "Add to cart".
+      if (fx.isAvailable(p) && (await buy.getAttribute('data-state')) === 'select') {
+        await expect(buy).toHaveText(/^\s*select a size\s*$/i);
+        await chooseSizeIfRequired(main, p);
+      }
       await expect(buy).toHaveText(fx.isAvailable(p) ? /^\s*add to cart\s*$/i : /^\s*sold out\s*$/i);
       await expect(main.locator('.shopify-payment-button, [data-shopify="payment-button"], shopify-accelerated-checkout')).toHaveCount(0);
 
@@ -116,3 +121,17 @@ for (const handle of handles) {
     });
   });
 }
+
+// Ruling §15.11: dynamic checkout is opt-in (show_dynamic_checkout, default false) and, on the preview,
+// renders only the harness's inert payment_button placeholder: never a working or fake checkout.
+test('dynamic checkout: off by default; when enabled renders one inert payment_button container in the product form', async ({ page }) => {
+  const handle = fx.sizeCellProduct().handle;
+  await gotoOk(page, `/products/${handle}`);
+  await expect(page.locator('main [data-shopify="payment-button"]'), 'default: no dynamic checkout').toHaveCount(0);
+  const ps = encodeURIComponent(JSON.stringify({ main: { blocks: { buy_buttons: { show_dynamic_checkout: true } } } }));
+  await gotoOk(page, `/products/${handle}?preview_sections=${ps}`);
+  await assertNoTemplateErrors(page);
+  const pb = page.locator('main sf-product-form [data-shopify="payment-button"], main form[action$="/cart/add"] [data-shopify="payment-button"]');
+  await expect(pb, 'show_dynamic_checkout → {{ form | payment_button }} inside the product form').toHaveCount(1);
+  await expect(pb.locator('button')).toBeDisabled();
+});

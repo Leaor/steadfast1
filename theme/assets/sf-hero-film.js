@@ -1,5 +1,5 @@
 /* STEADFAST · Section A · <sf-hero-film> (HOME). ARCHITECTURE §5, DESIGN §8.3 A.
-   Video + CSS + WAAPI, no GSAP. Scroll, keys and focus work from t = 0 and end the intro. */
+   Video + CSS + WAAPI, no GSAP. Scroll, keys, focus end the intro. Control label = action, no aria-pressed. */
 (() => {
   const S = (window.Steadfast = window.Steadfast || {});
   S.modules = S.modules || {};
@@ -15,7 +15,7 @@
   };
   const design = () => Boolean((window.Shopify || {}).designMode || (S.settings || {}).designMode);
   const play = (v, onErr) => { const p = v.play(); if (p && p.catch) p.catch(onErr || (() => {})); };
-  const focus = (el) => { if (el) try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } };
+  const focus = (el) => el && el.focus({ preventScroll: true });
   const noData = () => 'sfSaveData' in html.dataset;
   class SfHeroFilm extends HTMLElement {
     connectedCallback() {
@@ -69,12 +69,11 @@
     setControl(mode) {
       const c = this.$ctl;
       if (!c) return;
-      if (!mode || this.dataset.showSkip === 'false') { c.hidden = true; return; }
+      // show_skip hides SKIP only; PAUSE stays (2.2.2)
+      if (!mode || (mode === 'skip' && this.dataset.showSkip === 'false')) { c.hidden = true; return; }
       c.hidden = false;
       c.dataset.mode = mode;
       if (this.$label) this.$label.textContent = this.dataset['label' + mode[0].toUpperCase() + mode.slice(1)] || '';
-      if (mode === 'skip') c.removeAttribute('aria-pressed');
-      else c.setAttribute('aria-pressed', String(mode === 'play'));
     }
     start() {
       const d = html.dataset;
@@ -102,7 +101,7 @@
       this.mode = 'intro';
       this.beat8 = this.ending = false;
       this.introVariant = this.variant();
-      this.classList.remove('is-beat-8', 'is-beat-9', 'is-cut', 'is-instant');
+      this.classList.remove('is-beat-8', 'is-beat-9', 'is-cut', 'is-instant', 'is-ui');
       html.dataset.sfIntro = 'play';
       this.setState('loading');
       this.setControl('skip');
@@ -150,6 +149,7 @@
       const tick = () => {
         if (w !== this._w || this.mode !== 'intro') return;
         const t = v.currentTime;
+        if (t >= 2.2) this.classList.add('is-ui'); // CTAs from the first cut
         if (!this.beat8 && t >= this.duration() - 0.4) this.onBeat8();
         if (t >= CAP || v.ended) return this.onEnd();
         if (!v.paused) next(tick);

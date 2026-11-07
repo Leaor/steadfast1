@@ -1,6 +1,8 @@
 {%- doc -%}
   Sort select styled as a text control ("SORT: FEATURED"). Associated with the facets form by
-  id; without JS a noscript submit applies it.
+  id; without JS a noscript submit applies it. The compact caps value is an aria-hidden <span>;
+  the real <select> is laid over it, transparent, at 16px so iOS never zooms on focus (the same
+  pattern as sf-localization-form). sf-facets.js keeps the span in sync.
 
   @param {object} results - collection or search.
   @param {string} form_id - The facets form id.
@@ -12,10 +14,15 @@
 {%- assign sort_current = results.sort_by | default: results.default_sort_by -%}
 <div class="sf-sort">
   <label class="sf-sort__label" for="{{ id_prefix }}">{{ 'facets.sort' | t }}:</label>
-  <select class="sf-sort__select" id="{{ id_prefix }}" name="sort_by" form="{{ form_id }}" data-sf-sort>
-    {%- for option in results.sort_options -%}
-      <option value="{{ option.value | escape }}"{% if option.value == sort_current %} selected{% endif %}>{{ option.name | escape }}</option>
-    {%- endfor -%}
-  </select>
+  <span class="sf-sort__control">
+    {%- assign sort_label = results.sort_options.first.name -%}
+    {%- for option in results.sort_options -%}{%- if option.value == sort_current -%}{%- assign sort_label = option.name -%}{%- endif -%}{%- endfor -%}
+    <span class="sf-sort__value" aria-hidden="true" data-sf-sort-value>{{ sort_label | escape }}</span>
+    <select class="sf-sort__select" id="{{ id_prefix }}" name="sort_by" form="{{ form_id }}" data-sf-sort>
+      {%- for option in results.sort_options -%}
+        <option value="{{ option.value | escape }}"{% if option.value == sort_current %} selected{% endif %}>{{ option.name | escape }}</option>
+      {%- endfor -%}
+    </select>
+  </span>
   <noscript><button type="submit" form="{{ form_id }}" class="sf-btn sf-btn--text sf-btn--sm"><span class="sf-btn__label">{{ 'facets.apply' | t }}</span></button></noscript>
 </div>

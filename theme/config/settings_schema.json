@@ -150,7 +150,7 @@
         "type": "text",
         "id": "cart_note_text",
         "label": "Note under the subtotal",
-        "default": "Taxes and shipping calculated at checkout."
+        "info": "Optional. The tax and shipping line follows your store's tax settings, so leave this blank unless you need an extra note."
       },
       {
         "type": "collection",

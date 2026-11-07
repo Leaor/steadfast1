@@ -35,7 +35,7 @@ const SIZES = (soldOut = [], low = {}) => ['S', 'M', 'L', 'XL'].map((s) => ({
 const PRODUCTS = [
   {
     id: 1001, handle: 'zip-hoodie-washed-blue-grey', title: 'Zip hoodie, washed blue-grey', product_type: 'Hoodies',
-    tags: ['hoodie', 'zip-up'], created_at: '2026-10-20T10:00:00Z', best_selling_rank: 1, price: 18000,
+    tags: ['hoodie', 'zip-up'], created_at: '2026-10-28T10:00:00Z', best_selling_rank: 1, price: 18000,
     colors: [{ name: 'Washed blue-grey', swatch: '#6f7e8c' }], sizes: SIZES(['XL'], { M: 2 }),
   },
   {
@@ -138,7 +138,7 @@ const collections = [
   { id: 4002, handle: 'tracksuits', title: 'Tracksuits', products: [1002, 1003], image: stillRef('sf-category-tracksuits', 'Tracksuits') },
   { id: 4003, handle: 'tops', title: 'Tops', products: [], image: null },
   { id: 4004, handle: 'bottoms', title: 'Bottoms', products: [1006], image: stillRef('sf-category-bottoms', 'Bottoms') },
-  { id: 4005, handle: 'new-arrivals', title: 'New arrivals', products: [1004, 1001, 1002], image: stillRef('sf-category-new-arrivals', 'New arrivals') },
+  { id: 4005, handle: 'new-arrivals', title: 'New arrivals', products: [1001, 1004, 1002], image: stillRef('sf-category-new-arrivals', 'New arrivals') },
   { id: 4006, handle: 'zip-ups', title: 'Zip-ups', products: [1001, 1005], image: null },
 ].map((c) => ({
   id: c.id, handle: c.handle, title: c.title, description_html: '',

@@ -57,7 +57,12 @@
     var recover = doc.getElementById('recover');
     if (!recover) return;
     var show = window.location.hash === '#recover' || !!recover.querySelector('[data-sf-recover-success], [data-sf-recover-error]');
-    recover.closest('.sf-login').classList.toggle('is-recovering', show);
+    setView(recover.closest('.sf-login'), show);
+  }
+  /* The section is labelled by the visible view's h1. */
+  function setView(login, recovering) {
+    login.classList.toggle('is-recovering', recovering);
+    login.setAttribute('aria-labelledby', recovering ? 'sf-recover-title' : 'sf-login-title');
   }
   doc.addEventListener('click', function (e) {
     var open = e.target.closest && e.target.closest('[data-sf-recover-open]');
@@ -66,7 +71,7 @@
     e.preventDefault();
     var login = doc.querySelector('.sf-login');
     if (!login) return;
-    login.classList.toggle('is-recovering', !!open);
+    setView(login, !!open);
     if (window.history.replaceState) window.history.replaceState(null, '', open ? '#recover' : window.location.pathname);
     var target = open ? doc.getElementById('RecoverEmail') : doc.getElementById('CustomerEmail');
     if (target) target.focus();
@@ -74,11 +79,21 @@
 
   function ready() {
     syncRecover();
-    var focusTarget = doc.querySelector('[data-sf-error-summary]') || doc.querySelector('[data-sf-form-status]');
-    if (focusTarget) {
-      focusTarget.focus({ preventScroll: true });
-      focusTarget.scrollIntoView({ block: 'center', behavior: 'auto' });
-    }
+    var target = doc.querySelector('[data-sf-error-summary]') || doc.querySelector('[data-sf-form-status]');
+    if (!target) return;
+    var focusTarget = function () {
+      if (doc.activeElement === target) return;
+      target.focus({ preventScroll: true });
+      target.scrollIntoView({ block: 'center', behavior: 'auto' });
+    };
+    focusTarget();
+    // A post-redirect fragment (#contact_form) is applied after load and moves focus to the document:
+    // re-apply after load and after the fragment navigation, as sf-core does for the newsletter.
+    var refocus = function () { requestAnimationFrame(function () { setTimeout(focusTarget, 0); }); };
+    if (doc.readyState === 'complete') refocus();
+    else window.addEventListener('load', refocus, { once: true });
+    var onHash = function () { if (doc.activeElement === doc.body || !doc.activeElement) refocus(); };
+    window.addEventListener('hashchange', onHash, { once: true });
   }
   window.addEventListener('hashchange', syncRecover);
   if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', ready, { once: true });

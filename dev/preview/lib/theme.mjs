@@ -247,9 +247,18 @@ export class Renderer {
     const order = (t.order || Object.keys(t.sections || {})).filter((k) => t.sections?.[k] && !t.sections[k].disabled);
     return order.map((key, i) => {
       const s = t.sections[key];
+      // preview_sections={"<key>":{...settings, "blocks":{"<block id | block type>":{...settings}}}}
+      const { blocks: blockOv = null, ...settingsOv } = overrides[key] || {};
+      let blocks = s.blocks || {};
+      if (blockOv && typeof blockOv === 'object') {
+        blocks = Object.fromEntries(Object.entries(blocks).map(([bid, b]) => {
+          const ov = blockOv[bid] || blockOv[b.type];
+          return [bid, ov ? { ...b, settings: { ...(b.settings || {}), ...ov } } : b];
+        }));
+      }
       return {
-        key, id: `template--preview__${key}`, type: s.type, settings: { ...(s.settings || {}), ...(overrides[key] || {}) },
-        blocks: s.blocks || {}, block_order: s.block_order, index: i + 1, location: 'template',
+        key, id: `template--preview__${key}`, type: s.type, settings: { ...(s.settings || {}), ...settingsOv },
+        blocks, block_order: s.block_order, index: i + 1, location: 'template',
       };
     });
   }

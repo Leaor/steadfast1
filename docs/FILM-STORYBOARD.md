@@ -25,7 +25,7 @@ The brief's 9 camera beats are the spine of both parts.
 | `IMG_4374-night-profile-car.MOV` | 720×1280, 30fps, HEVC HLG | **1.40–2.10** side profile, locked off (0.4px jitter); focus has settled (it is still settling before 1.3) | Fuel-canopy signage top-left (x < 0.30, y < 0.22, growing to x < 0.45 by 3s). Operator reflection below y 0.78. "S7" monogram on the patterned goggles is legible in tight framings. SUV fills the right half |
 | `IMG_4376-night-back-grey-embossed-hoodie.MOV` | 720×1280, 30fps, HEVC HLG | **3.40–4.80** the most stable span (jitter < 2px at 3.7–4.6), the head turns slightly, the back panel and shoulder lettering hold. Stabilise | Red car **tail-lights on the RIGHT** (x > 0.78 from ~2.7s; x > 0.80 in 3.3–5.1). A light pole enters the left edge of the plate from ~4.85s. Teal bag x > 0.85 at 4.5–5.0. 0–1.1 lit forecourt and fuel-brand sign |
 | `IMG_4409-night-red-pump-hoodie.MOV` | 540×960, 30fps, H.264 SDR | none | Fuel-brand signage in every frame, red cast, low resolution. **Not used.** |
-| `zip-hoodie-blue-grey-front.png` | 2752×1536 | Zip, neck label, chest logo, shoulder embellishment | n/a |
+| `zip-hoodie-blue-grey-front.png` | 2752×1536 | Zip, neck label, chest logo, shoulder embellishment | A white lattice **hanger** sits in the hood cavity (x 1250–1500, y 275–386). It is a prop, so MEDIA paints it out before any use (`process_stills.remove_hanger`, diffusion fill from the hood interior, grain-matched, 6px feather; before/after in `_qa/hanger-retouch-*.jpg`). The same retouch runs in S2's still pre stage. |
 | `black-tracksuit-night.jpg` | 1450×2576 | Black zip hoodie and wide sweatpants with cream drawcords | Car door at x > 0.61 (y 0.32–0.62); parking lot; sneaker side marks at y 0.80–0.86; patterned goggles at y 0.27–0.33 |
 | `campaign-back-embossed-set.png` | 3840×2160 | Figure under the overhead spot in a void, on a reflective cracked black floor, at x 0.42–0.58 | The balaclava swoosh is retouched in MEDIA's derivative (`_qa/campaign-balaclava-retouch.png`; client to approve, see DEPLOYMENT). Never zoom past the S7 start framing |
 | `steadfast-wordmark.png` | 1561×1007 | Logo reveal (beat 8). **Letters x 242–1358, y 448–603 (1115×154, 7.24:1).** Textured crop x 188–1398, y 315–726 (1210×411, 2.944:1) | n/a |
@@ -34,8 +34,8 @@ The brief's 9 camera beats are the spine of both parts.
 
 **Mobile (9:16, master 720×1280, 30fps).** Every shot is a native 9:16 window ("plate"). Footage stays near native resolution (plates 367–518px wide, upscaled 1.4–2.0×; the grain hides it). Display: `object-fit: cover`.
 
-**Desktop (16:9, master 1920×1080, 30fps): "the Aperture."** Each 9:16 plate sits **centred in a black 1920×1080 field as a vertical shaft of light**: plate scaled to **608×1080** at x = 656, left and right edges feathered into black over **72px**. It reads as one spotlight in a dark studio, not as pillarboxing.
-- **Beat 7 opens the aperture.** The campaign still is native 16:9 4K. The shot starts inside the same 608px shaft and the black side masks slide outward to full frame while the framing pulls back.
+**Desktop (16:9, master 1920×1080, 30fps): "the Aperture."** Each 9:16 plate sits **centred in a black 1920×1080 field as a vertical shaft of light**: plate scaled to **608×1080** at x = 656, left and right edges feathered into black over **120px**, and the **top 6 % and bottom 14 %** of the plate faded to black (CD-04: a 16:9 file `contain`ed in a 16:10 viewport is cut at the letterbox line, so the plate's own bottom row must already be black there). Within 60px of each shaft edge, luma below 30 is crushed to black so lit paving or a kerb dissolves into the feather instead of reading as a bar. It reads as one spotlight in a dark studio, not as pillarboxing.
+- **Beat 7 opens the aperture.** The campaign still is native 16:9 4K. The shot starts inside the same 608px shaft and the black side masks slide outward to full frame while the framing pulls back. The full frame keeps the same top 6 % / bottom 14 % fade, so no edge shows at any aspect ratio.
 - Display: `object-fit: contain` on a black container. Every edge of the frame is black, so bars are invisible at any aspect ratio.
 - **File selection** uses ARCHITECTURE's single constant `MOBILE_MQ = (max-width: 749px), (orientation: portrait) and (max-width: 1100px)`: mobile file when it matches, desktop file otherwise.
 - **The field must stay exactly #000.** Grain is applied to each plate before it is composited (A4), so the black field and the feathered edges carry no noise and merge with the page.
@@ -51,7 +51,7 @@ There are **two dips** (into S5 and into S7) and four hard cuts. No dissolves be
 | Shot | Beat | Record in–out | Dur | Source | Source in–out | Speed | Plate crop (x0, y0, x1, y1): start → end | In / Out |
 |---|---|---|---|---|---|---|---|---|
 | **S1** | 1. Extreme close-up of fabric (hood ornament and lettering) | 0.00–2.20 | 2.20 | IMG_4913 | 0.50–1.60 | 0.5× | (0.000, 0.240, 0.560, 0.800) → (0.021, 0.261, 0.539, 0.779) (push 1.00→1.08 about (0.28, 0.52)) | **Exposure fade from black, 1.20s** / hard cut |
-| **S2** | 2. Slow reveal of zipper and texture | 2.20–4.00 | 1.80 | zip-hoodie-blue-grey-front.png | still | n/a | (0.4137, 0.10, 0.5863, 0.65) → (0.4137, 0.36, 0.5863, 0.91) (tilt **down** the zip: neck label and pull → logo → pocket) | hard cut / hard cut |
+| **S2** | 2. Slow reveal of zipper and texture | 2.20–4.00 | 1.80 | zip-hoodie-blue-grey-front.png (hanger painted out, A1) | still | n/a | (0.4137, **0.30**, 0.5863, 0.85) → (0.4137, **0.40**, 0.5863, 0.95) (tilt **down** the zip: it **opens on the neck label and pull**, not on the hood cavity, → logo → pocket; CD-01) | hard cut / hard cut |
 | **S3** | 3. Close-up of branding (the camera passes across "steadfast") | 4.00–5.00 | 1.00 | IMG_4913 | **3.15–3.65** (vidstab) | 0.5× | (0.000, 0.180, 0.700, 0.880), static; the clip's own move is the move | hard cut / hard cut |
 | **S4** | 4. Side profile | 5.00–6.40 | 1.40 | IMG_4374 | **1.40–2.10** | 0.5× | (0.220, 0.230, 0.760, 0.770) → (0.250, 0.250, 0.760, 0.760) (push 1.00→1.06 **toward the hood and shoulder**, never toward the head) | hard cut / **dip 0.30** |
 | **S5** | 5. Slow reveal of the full tracksuit (wide pants, cream drawcords, black zip hoodie) | 6.40–8.00 | 1.60 | black-tracksuit-night.jpg | still | n/a | (0.250, 0.400, 0.650, 0.800) → (0.250, 0.320, 0.650, 0.720) (tilt **up** from the drawcords and pant break to the hood; the head stays out of frame) | **dip-in 0.30** / hard cut |
@@ -76,17 +76,17 @@ There are **two dips** (into S5 and into S7) and four hard cuts. No dissolves be
 The SHOTLOG chain is the pipeline. Order per footage shot:
 
 1. **Decode** with `-map 0:v:0 -an` (drop audio and Apple data tracks). ffmpeg autorotates; never add `transpose`.
-2. **pre** (`steadfast_pre <clip>`): **HLG → BT.709 tone-map first** for the three HEVC clips (`zscale` → linear → `tonemap=hable` → BT.709), then the per-clip exposure curve and the near-mono channel mix.
+2. **pre** (`steadfast_pre <clip>`): **HLG → BT.709 tone-map first** for the three HEVC clips (`zscale` → linear → `tonemap=hable:desat=0` → BT.709, `STEADFAST_HLG_TO_SDR`), then the per-clip exposure curve and the near-mono channel mix. (The still pipeline's frame picker, `process_stills.best_frame`, tone-maps with `mobius` only to score sharpness; the graded stills it emits use grade.sh's pre stage.)
 3. **vidstab** (two-pass) for IMG_4913 and IMG_4376 only, on the full upright frame before any crop: `vidstabdetect=shakiness=6:accuracy=15`, then `vidstabtransform=smoothing=20:optzoom=1:interpol=bicubic`.
 4. **denoise** `STEADFAST_DENOISE` (`hqdn3d=2:1.5:4:4`), at source resolution.
 5. **slow-motion** `setpts=2.0*PTS,minterpolate=fps=30:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1` (A5).
-6. **crop + scale** to the plate (lanczos), per A3 (crop moves rendered per frame, see A5).
+6. **crop + scale** to the plate (Pillow `resize(box=…)`, Lanczos, sub-pixel box), per A3 (crop moves rendered per frame, see A5).
 7. **LOOK** `STEADFAST_LOOK`: luma clarity, crush/rolloff S-curve (white cap 0.92), cold split-tone `bs=0.045`, `vignette=angle=0.5`.
 8. **Per-shot layer** (below): burns and extra crush, as fixed masks multiplied over the plate.
 9. **Grain** last, luma only, on YUV: `format=yuv420p,noise=c0s=3:c0f=t` (`steadfast_grain 3`). On desktop it is applied to the plate **before** the aperture composite.
 
-Stills (S2, S5, S7) are rendered as per-frame sub-pixel moves in Python (A5), piped to ffmpeg as raw RGB, and then run through steps 6–9 with a still pre stage (no tone-map, no vidstab, no minterpolate):
-- S2: mono mix 0.30/0.55/0.15 at amount **0.80**, so the hoodie keeps a faint steel-blue cast.
+Stills (S2, S5, S7) are rendered as per-frame sub-pixel moves in Python (A5), piped to ffmpeg as raw RGB, and then run through steps 6–9 with a still pre stage (no tone-map, no vidstab, no minterpolate). The still pre stage first applies MEDIA's recorded retouches (`build_film.load_still` imports them from `process_stills.py`, so film and stills can't drift): the balaclava mark (S7) and the hanger (S2).
+- S2: hanger painted out (A1), then mono mix 0.30/0.55/0.15 at amount **0.80**, so the hoodie keeps a faint steel-blue cast.
 - S5 (flash still): `curves=m='0/0 0.3/0.18 0.6/0.46 1/0.82'` + mono mix at 0.92, plus `vignette=angle=PI/3.4` in its per-shot layer (kills the bright asphalt).
 - S7: mono mix at 0.92 only (the campaign still is already graded).
 
@@ -95,15 +95,15 @@ This replaces the v1 master grade (`eq` + `colorbalance bs=0.07` + `curves` + `v
 **Per-shot layer** (on top of grade.sh; plate coordinates unless noted):
 | Shot | Layer |
 |---|---|
-| S1 | Top-right corner burn: black for plate x > 0.75 and y < 0.20, 30% feather (residual sky); extra crush `curves=m='0/0 0.08/0 1/1'` |
-| S2 | none |
+| S1 | Top-right corner burn: black for plate x > 0.75 and y < 0.20, 30% feather (residual sky); extra crush as a **monotone toe** `y = x − 0.1027·(1 − x)³` (`lutrgb`; 0.08 → 0, 1 → 1, mids within 2 %). The earlier `curves=m='0/0 0.08/0 1/1'` is **not** used: that 3-point natural spline overshoots and took the S1 plate from mean luma 31 to 4 (black) |
+| S2 | none (the hanger retouch happens in the still pre stage, not as a burn) |
 | S3 | Top-right corner burn: plate x > 0.78 and y < 0.30, 30% feather (sky, trees); extra crush as S1 |
 | S4 | **Plate-top burn**: black above plate y 0.20, linear feather to 0.32 (head and goggles in shadow, no legible "S7"). **Top-left corner burn** in source coordinates x < 0.30, y < 0.22 (fuel canopy; a safety even though the window starts at y 0.23) |
 | S5 | **Right burn**: black for plate x > 0.85, feather 0.10 (the car door at source x > 0.61); `vignette=angle=PI/3.4` |
-| S6 / loop | `eq=gamma=1.15` in the pre stage (the clip is underexposed). Safety burns: left 6% and top 6% of the plate |
+| S6 / loop | `eq=gamma=1.15` in the pre stage (the clip is underexposed). Safety burns: **left** black to plate x 0.07, smooth feather to 0.20 (vidstab reframing brings lit paving, a kerb and a post into the left ~15 % at 3.9–4.8 s; CD-04), and **top** 6 % |
 | S7 | Exposure collapse and vignette tightening (A3) |
 
-**Desktop composite:** `color=c=black:s=1920x1080:r=30` base; plate `scale=608:1080` (already grained); alpha from a static mask PNG (608×1080, white with 72px linear ramps at left and right); `overlay=x=656:y=0`. For S7, the side masks are two black 640×1080 rects with 72px feathered inner edges animated outward (x from 16→−640 and 1264→1920 over 0.9s, `power3.out`). Grain on S7 is applied to the image layer under the masks.
+**Desktop composite** (in Python on the graded, grained plate; `build_film.composite`): black 1920×1080 canvas; plate 608×1080 at x = 656; alpha = horizontal smoothstep ramps of **120px** at left and right × the vertical fade (top 6 %, bottom 14 %); edge crush (luma < 30 → 0 within 60px of the shaft edges, smooth from 15); then the DESIGN §5.3 black-point clamp (luma ≤ 6 → 0, smooth to 12) on the whole frame. For S7, the side masks are smoothstep edges with the same 120px feather, animated outward from the 608px shaft (L 656 → −120, R 1264 → 2040 over 0.9s, `power3.out`), multiplied by the same vertical fade. Grain on S7 is applied to the image layer under the masks. The end stills are loop frame 0 through the same composite, so they carry the same feathers.
 
 No LUT files, no film-emulation plugins, no light leaks, no flicker.
 
@@ -111,7 +111,7 @@ No LUT files, no film-emulation plugins, no light leaks, no flicker.
 
 - Footage is slowed to **exactly 0.5×** (S1, S3, S4, S6, loop). Never slower, no speed ramps, no reverse in the intro.
 - `mci` is safe where pan ≤ ~5px/frame (SHOTLOG §6): S1, S4, S6 and the loop. **S3 (3.15–3.65) pans 10–16px/frame**, so QA it frame by frame. If the lettering warps or smears, switch S3 to frame blending: `setpts=2.0*PTS,framerate=fps=30:interp_start=0:interp_end=255:scene=100`.
-- Still moves (S2, S5, S7) and footage crop moves (S1, S4) use **sub-pixel resampling**: a per-frame affine crop in Python/Pillow (`Image.transform(..., Image.Transform.AFFINE, resample=BICUBIC)`) piped to ffmpeg as raw frames. Don't use ffmpeg `zoompan` on the original, which jitters from integer rounding.
+- Still moves (S2, S5, S7) and footage crop moves (S1, S4) use **sub-pixel resampling**: a per-frame float crop box in Python/Pillow (`Image.resize(size, LANCZOS, box=(x0, y0, x1, y1))`; zooms interpolate as a homothety about their fixed point with the scale eased geometrically) piped to ffmpeg as raw frames. Don't use ffmpeg `zoompan` on the original, which jitters from integer rounding.
 - All moves are slow and monotonic: one direction per shot, ≤ 8% scale change, no rotation.
 
 ## A6. Logo reveal (beat 8) using the wordmark artwork
@@ -264,10 +264,11 @@ Examples: `steadfast_fp_intro_desktop_1920x1080_24p_v01.mp4`, `steadfast_fp_loop
 
 1. **Shopify admin → Content → Files → Upload** the H.264 intro and loop files (desktop and mobile) and the still JPEGs.
 2. **Online Store → Themes → Customize → Home page → Hero film (Section A).** Setting IDs are ARCHITECTURE's (§2.4 A):
-   - `video_desktop`, `video_mobile` (the intro)
-   - `loop_video_desktop`, `loop_video_mobile` (the loop; settings pending ARCH, `DESIGN.md` §14 #7)
+   - `intro_video_desktop`, `intro_video_mobile` (the intro)
+   - `loop_video_desktop`, `loop_video_mobile` (the loop)
    - `end_image_desktop`, `end_image_mobile` (the end stills; also the reduced-motion and save-data still)
-   - `use_bundled_film` (fallback to Part A when a slot is empty), `play_once_per_session`, `show_skip`, `show_logo`
+   - `campaign_film_desktop`, `campaign_film_mobile` (optional full film, opened by VIEW THE CAMPAIGN with `cta_secondary_action: film`)
+   - `use_bundled_film` (fallback to Part A when a slot is empty), `intro_enabled`, `intro_frequency`, `show_skip`, `show_logo`
    - `cta_primary_label` = `EXPLORE COLLECTION`, `cta_primary_link`; `cta_secondary_label` = `VIEW THE CAMPAIGN`, `cta_secondary_action` (`link` → `#campaign` by default, or `replay`), `cta_secondary_link`
 3. Rules the theme relies on, which any replacement film must meet:
    - The intro **ends on ≥ 0.4s of pure black**. The theme starts the logo reveal at `duration − 0.4s`, read from the video metadata.

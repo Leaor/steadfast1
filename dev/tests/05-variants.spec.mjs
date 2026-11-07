@@ -1,5 +1,5 @@
 // Variant selection (BRIEF §12; ARCHITECTURE §9 row 05, §4.7 <sf-variant-picker>/<sf-product-form>, §7.6).
-import { test, expect, fx, gotoOk, chooseOption, optionFieldset } from './helpers/base.mjs';
+import { test, expect, fx, gotoOk, chooseOption, optionFieldset, chooseSizeIfRequired } from './helpers/base.mjs';
 
 const ready = fx.fixturesReady();
 const idInput = (page) => page.locator('main sf-product-form input[name="id"]').first();
@@ -69,6 +69,7 @@ test('colour change (garment 4) swaps the gallery to the variant media and updat
   const otherColor = fx.optionValues(p.options[ci]).find((c) => c !== startColor);
   await gotoOk(page, `/products/${p.handle}`);
   const main = page.locator('main');
+  await chooseSizeIfRequired(main, p, start);   // a full variant needs a size (never pre-selected)
   await chooseOption(main, fx.optName(p.options[ci]), otherColor);
   const sel = fx.variantOptions(start).map((x, i) => (i === ci ? otherColor : x));
   const want = p.variants.find((v) => fx.variantOptions(v).every((x, i) => x === sel[i]));

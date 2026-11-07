@@ -4,9 +4,12 @@
   - textured: the cream raster with streaks (1210 × 411 box, 2.944:1) from sf-asset-data.
   - lockup: textured raster below 990 px; at ≥ 990 px the streak-only raster with the crisp SVG
     letters layered on top (Section F).
-  A merchant logo (settings.logo) overrides all three.
+  - sprite: emits the SVG letters ONCE per page as a hidden definition (#sf-wordmark), rendered by the
+    layouts at the top of <body>; every flat/lockup use is then a tiny <use> reference (PERF-03).
+    Pages without the layouts' sprite (the gift card, layout none) get the SVG inlined instead.
+  A merchant logo (settings.logo) overrides all of them.
 
-  @param {string} variant - 'flat' | 'textured' | 'lockup'.
+  @param {string} variant - 'flat' | 'textured' | 'lockup' | 'sprite'.
   @param {number} width - CSS width of the asset box in px.
   @param {string} [class] - Extra classes on the root.
   @param {string} [loading] - 'lazy' (default) or 'eager'.
@@ -15,6 +18,7 @@
   @param {string} [sizes] - sizes attribute for the rasters. Default 'min(100vw, {width}px)'.
 
   @example
+  {% render 'sf-logo', variant: 'sprite', width: 1115 %}
   {% render 'sf-logo', variant: 'flat', width: 148 %}
   {% render 'sf-logo', variant: 'textured', width: 640, loading: 'eager', alt: shop.name %}
 {%- enddoc -%}
@@ -27,7 +31,7 @@
   if logo_sizes == blank
     assign logo_sizes = 'min(100vw, ' | append: logo_w | append: 'px)'
   endif
-  if logo_variant != 'flat' and settings.logo == blank
+  if logo_variant != 'flat' and logo_variant != 'sprite' and settings.logo == blank
     capture textured_rec
       render 'sf-asset-data', asset: 'sf-logo-textured'
     endcapture
@@ -36,8 +40,21 @@
       assign logo_variant = 'flat'
     endif
   endif
+  capture logo_letters
+    if template.name == 'gift_card'
+      echo 'sf-logo-wordmark.svg' | inline_asset_content
+    else
+      echo '<svg viewBox="0 0 1115 154" fill="currentColor" aria-hidden="true" focusable="false"><use href="#sf-wordmark" width="1115" height="154"></use></svg>'
+    endif
+  endcapture
 -%}
-{%- if settings.logo != blank -%}
+{%- if logo_variant == 'sprite' -%}
+  {%- if settings.logo == blank -%}
+    <svg class="sf-logo-sprite" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden"><defs>
+      {{- 'sf-logo-wordmark.svg' | inline_asset_content | replace_first: '<svg ', '<svg id="sf-wordmark" ' -}}
+    </defs></svg>
+  {%- endif -%}
+{%- elsif settings.logo != blank -%}
   {%- liquid
     assign w1 = logo_w
     assign w2 = logo_w | times: 2
@@ -58,7 +75,7 @@
   </span>
 {%- elsif logo_variant == 'flat' -%}
   <span class="sf-logo sf-logo--flat{% if class != blank %} {{ class }}{% endif %}" role="img" aria-label="{{ logo_alt | escape }}" style="--sf-logo-w:{{ logo_w }}px">
-    {{- 'sf-logo-wordmark.svg' | inline_asset_content -}}
+    {{- logo_letters -}}
   </span>
 {%- else -%}
   {%- liquid
@@ -100,7 +117,7 @@
         <img src="{{ tex_fallback | asset_url }}" width="{{ tex_w }}" height="{{ tex_h }}" alt="" loading="{{ logo_loading }}" decoding="async"{% if fetchpriority != blank %} fetchpriority="{{ fetchpriority }}"{% endif %}>
       </picture>
       {%- if streak_webp != '' -%}
-        <span class="sf-logo__letters">{{ 'sf-logo-wordmark.svg' | inline_asset_content }}</span>
+        <span class="sf-logo__letters">{{ logo_letters }}</span>
       {%- endif -%}
     </span>
   {%- else -%}

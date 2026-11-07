@@ -54,7 +54,7 @@
       <button type="submit" class="sf-btn sf-btn--primary sf-newsletter-form__submit"><span class="sf-btn__label">{{ nl_button | escape }}</span></button>
     </div>
     {%- if form.errors -%}
-      <p class="sf-form-error sf-newsletter-form__error" id="{{ nl_error_id }}">
+      <p class="sf-form-error sf-newsletter-form__error" id="{{ nl_error_id }}" role="alert">
         {%- render 'sf-icon', name: 'error', size: 16 -%}
         <span>{{ 'newsletter.error_email' | t }}</span>
       </p>

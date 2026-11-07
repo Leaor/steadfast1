@@ -145,6 +145,22 @@
           if (self.openItem === item && !item.contains(e.relatedTarget)) self.closeMega();
         }, sig);
       });
+      // Stage: the hovered / focused category's frame crossfades in (Section E device, DESIGN §8.3 E).
+      this.querySelectorAll('[data-sf-mega-panel]').forEach(function (panel) {
+        var show = function (e) {
+          var a = e.target.closest && e.target.closest('.sf-mega__link');
+          if (!a || !panel.contains(a)) return;
+          panel.querySelectorAll('.sf-mega__link.is-active').forEach(function (el) { if (el !== a) el.classList.remove('is-active'); });
+          a.classList.add('is-active');
+          var idx = a.getAttribute('data-sf-mega-show');
+          if (idx === null) return;
+          panel.querySelectorAll('[data-sf-mega-frame]').forEach(function (f) {
+            f.classList.toggle('is-active', f.getAttribute('data-sf-mega-frame') === idx);
+          });
+        };
+        panel.addEventListener('pointerover', show, sig);
+        panel.addEventListener('focusin', show, sig);
+      });
       doc.addEventListener('keydown', function (e) {
         if (e.key !== 'Escape' || !self.openItem) return;
         var btn = self.openItem.querySelector('[data-sf-mega-trigger]');
@@ -298,6 +314,9 @@
       this.addEventListener('change', function (e) {
         var select = e.target.closest('[data-sf-localization-select]');
         if (!select || !select.form) return;
+        var value = select.parentNode.querySelector('[data-sf-localization-value]');
+        var opt = select.options[select.selectedIndex];
+        if (value && opt) value.textContent = opt.textContent.trim();
         if (select.form.requestSubmit) select.form.requestSubmit();
         else select.form.submit();
       }, { signal: this._ac.signal });

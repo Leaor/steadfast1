@@ -16,7 +16,6 @@
     "section_spacing": "standard",
     "cart_type": "drawer",
     "cart_show_note": false,
-    "cart_note_text": "Taxes and shipping calculated at checkout.",
     "card_image_ratio": "tall",
     "card_show_secondary_image": true,
     "card_show_colorways": true,

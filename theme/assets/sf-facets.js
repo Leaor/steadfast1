@@ -40,6 +40,7 @@
         if (e.target.matches('[data-sf-price-input]')) self._debounced(isDesktop());
       }, sig);
       this.addEventListener('click', this._onClick.bind(this), sig);
+      this._syncSort(); // a restored (back/forward) select value
       if (this.form) {
         this.form.addEventListener('submit', function (e) {
           e.preventDefault();
@@ -64,9 +65,17 @@
       var qs = params.toString();
       return base + (qs ? '?' + qs : '');
     }
+    /* The visible sort value is a span under the transparent native select (sf-sort). */
+    _syncSort() {
+      this.querySelectorAll('[data-sf-sort]').forEach(function (sel) {
+        var out = sel.parentNode.querySelector('[data-sf-sort-value]');
+        var opt = sel.options[sel.selectedIndex];
+        if (out && opt) out.textContent = opt.textContent;
+      });
+    }
     _onChange(e) {
       var t = e.target;
-      if (t.matches('[data-sf-sort]')) { this.render(this.formURL(), { apply: true, push: true }); return; }
+      if (t.matches('[data-sf-sort]')) { this._syncSort(); this.render(this.formURL(), { apply: true, push: true }); return; }
       if (t.matches('[data-sf-price-input]')) return; // handled by 'input'
       if (t.closest('[data-sf-facets-form]')) this._debounced(isDesktop());
     }
@@ -117,10 +126,13 @@
           swapAll(parsed, self, '[data-sf-facets-results]');
           swapAll(parsed, self, '.sf-facets__active-row');
           swapAll(parsed, self, '[data-sf-facets-count]');
+          // Counts outside <sf-facets> (the search header) must follow the filters too.
+          swapAll(parsed, self.closest('.shopify-section') || doc, '[data-sf-facets-count-header]');
           swapAll(parsed, self, '[data-sf-facets-filter-label]');
           var sortSrc = parsed.querySelector('[data-sf-sort]');
           var sortDst = self.querySelector('[data-sf-sort]');
           if (sortSrc && sortDst && doc.activeElement !== sortDst) sortDst.value = sortSrc.value;
+          self._syncSort();
           if (results) results.classList.remove('is-loading');
           if (opts.push && window.history.pushState) {
             var clean = new URL(url, window.location.origin);

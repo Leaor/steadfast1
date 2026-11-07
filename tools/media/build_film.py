@@ -62,7 +62,11 @@ COMMENT = "Edit of client-supplied phone footage and photography. Not a commissi
 
 VARIANTS = {"d": dict(name="desktop", W=1920, H=1080, plate=(608, 1080), plate_x=656),
             "m": dict(name="mobile", W=720, H=1280, plate=(720, 1280), plate_x=0)}
-FEATHER = 72                     # aperture edge feather, px (FILM A2)
+FEATHER = 120                    # aperture edge feather, px (FILM A2; 72 -> 120, CD-04)
+# CD-04: the 16:9 desktop video is contained in 16:10 viewports, so the plate's bottom row was cut at the
+# letterbox line. Desktop plates (shaft + S7 full frame) fade to black over the top 6 % and bottom 14 %.
+V_FEATHER_TOP, V_FEATHER_BOTTOM = 0.06, 0.14
+EDGE_CRUSH_PX, EDGE_CRUSH_LUMA = 60, 30   # within 60 px of the shaft edges, luma < 30 is crushed to black
 BLACK_HOLD = 12                  # 0.40 s black tail (handoff to the DOM logo reveal)
 
 # Weight budgets, bytes (ARCHITECTURE §6.1 / §10.1; FILM A8). 1 MB = 1,000,000 B (conservative vs MiB).
@@ -77,8 +81,10 @@ SHOTS = [
     dict(id="S1", beat=1, kind="clip", clip="IMG_4913", src=(0.50, 1.60), dur=2.20, stab=True, win=(0.00, 3.00),
          crop={"*": ((0.000, 0.240, 0.560, 0.800), (0.021, 0.261, 0.539, 0.779))},
          head=("fade", 1.20), tail=("cut",), desc="Extreme close-up: hood ornament and lettering"),
+    # CD-01: the hanger is painted out of the still (process_stills.remove_hanger) and the tilt opens on the
+    # neck label and pull (y 0.30), not on the hood cavity; it ends on the pocket (0.40-0.95).
     dict(id="S2", beat=2, kind="still", still="zip-hoodie-blue-grey-front.png", dur=1.80,
-         crop={"*": ((0.4137, 0.10, 0.5863, 0.65), (0.4137, 0.36, 0.5863, 0.91))},
+         crop={"*": ((0.4137, 0.30, 0.5863, 0.85), (0.4137, 0.40, 0.5863, 0.95))},
          head=("cut",), tail=("cut",), desc="Tilt down the zip: neck label and pull, logo, pocket"),
     dict(id="S3", beat=3, kind="clip", clip="IMG_4913", src=(3.15, 3.65), dur=1.00, stab=True, win=(2.60, 3.75),
          crop={"*": ((0.000, 0.180, 0.700, 0.880),) * 2},
@@ -278,21 +284,25 @@ def stage_prep():
 
 
 # ----------------------------------------------------------------------------- stills pre stage
+STILL_RETOUCH_REV = "|retouch:balaclava+hanger-v1"   # bump to invalidate cached still pre stages
 def load_still(shot) -> Image.Image:
     """Still pre stage (no tone-map, no vidstab, no minterpolate), cached as PNG in the work dir."""
     out = WORK / f"still_{shot['id']}.png"
-    if out.exists() and (WORK / f"still_{shot['id']}.ok").exists():
+    ok = WORK / f"still_{shot['id']}.ok"
+    if out.exists() and ok.exists() and ok.read_text() == still_pre(shot["id"]) + STILL_RETOUCH_REV:
         return Image.open(out).convert("RGB")
     sys.path.insert(0, str(ROOT / "tools/media"))
-    from process_stills import load_srgb, retouch_balaclava_logo  # same sRGB conversion + the recorded retouch
+    from process_stills import load_srgb, retouch_balaclava_logo, HANGERS, remove_hanger  # same conversion + retouches
     im = load_srgb(PHOTOS / shot["still"])
     if shot["id"] == "S7":
         im, _ = retouch_balaclava_logo(im)        # MEDIA's derivative: third-party balaclava mark toned down
+    for _name, poly, boundary in HANGERS.get(shot["still"], []):
+        im, _ = remove_hanger(im, poly, boundary)  # CD-01: the hanger is painted out (same retouch as the stills)
     tmp = WORK / f"still_{shot['id']}_src.png"
     im.save(tmp)
     run(["ffmpeg", "-nostdin", "-v", "error", "-y", "-i", str(tmp), "-vf", still_pre(shot["id"]) + ",format=rgb24",
          str(out)])
-    (WORK / f"still_{shot['id']}.ok").write_text(still_pre(shot["id"]))
+    ok.write_text(still_pre(shot["id"]) + STILL_RETOUCH_REV)
     return Image.open(out).convert("RGB")
 
 
@@ -317,10 +327,10 @@ def plate_mask(shot_id, w, h):
         m *= np.clip((Y - 0.20) / 0.12, 0, 1)
     elif shot_id == "S5":                # right burn (car door): black for x > 0.85, feather 0.10
         m *= 1 - smoothstep(0.75, 0.85, X)
-    elif shot_id in ("S6", "LOOP"):      # safety burns: left 6 %, top 6 %
-        # left: the vidstab reframe and the camera float bring lit paving and a post into the left ~12 % of the
-        # plate (3.9-4.8 s); black to 0.05, feather to 0.15. Top 6 % as specified.
-        m *= smoothstep(0.05, 0.15, X) * smoothstep(0.0, 0.06, Y)
+    elif shot_id in ("S6", "LOOP"):      # safety burns: left, top 6 %
+        # left: the vidstab reframe and the camera float bring lit paving, a kerb and a post into the left ~15 % of
+        # the plate (3.9-4.8 s); black to 0.07, feather to 0.20 (CD-04: the kerb at 0.08-0.15 read as a bar).
+        m *= smoothstep(0.07, 0.20, X) * smoothstep(0.0, 0.06, Y)
     return m
 
 
@@ -488,16 +498,35 @@ def aperture_alpha(L, R, W=1920):
     return smoothstep(L, L + FEATHER, x) * (1 - smoothstep(R - FEATHER, R, x))
 
 
-PLATE_ALPHA = aperture_alpha(0, 608, 608)          # 72 px smooth ramps inside the 608 px plate
+def vertical_alpha(H=1080):
+    y = (np.arange(H, dtype=np.float32) + 0.5) / H
+    return smoothstep(0.0, V_FEATHER_TOP, y) * (1 - smoothstep(1.0 - V_FEATHER_BOTTOM, 1.0, y))
+
+
+V_ALPHA = vertical_alpha()
+# 120 px smooth ramps inside the 608 px plate (horizontal) x the top/bottom fade (vertical)
+PLATE_ALPHA = aperture_alpha(0, 608, 608)[None, :] * V_ALPHA[:, None]
+# edge crush weight: 1 at the shaft edge, 0 from 60 px inside it
+_xe = np.arange(608, dtype=np.float32) + 0.5
+EDGE_W = 1 - smoothstep(0, EDGE_CRUSH_PX, np.minimum(_xe, 608 - _xe))
+
+
+def edge_crush(plate_u8):
+    """CD-04: near the shaft edges, luma below 30 goes to black (smoothly), so lit paving or a kerb dissolves
+    into the feather instead of reading as a bar."""
+    f = plate_u8.astype(np.float32)
+    Y = f[..., 0] * 0.2126 + f[..., 1] * 0.7152 + f[..., 2] * 0.0722
+    k = 1 - EDGE_W[None, :] * (1 - smoothstep(EDGE_CRUSH_LUMA * 0.5, EDGE_CRUSH_LUMA, Y))
+    return f * k[..., None]
 
 
 def composite(plate_u8, v, alpha=None):
-    """Desktop: plate centred in the black field with feathered edges; mobile: the plate is the frame."""
+    """Desktop: plate centred in the black field with feathered edges (all four sides); mobile: the plate is the frame."""
     if v == "m":
         return plate_u8
     canvas = np.zeros((1080, 1920, 3), np.uint8)
     x0 = VARIANTS["d"]["plate_x"]
-    canvas[:, x0:x0 + 608] = (plate_u8.astype(np.float32) * PLATE_ALPHA[None, :, None] + 0.5).astype(np.uint8)
+    canvas[:, x0:x0 + 608] = (edge_crush(plate_u8) * PLATE_ALPHA[..., None] + 0.5).astype(np.uint8)
     return canvas
 
 
@@ -527,8 +556,8 @@ def build_intro_master(v):
             g = exposure(shot, i, n)
             fr = apply_gain(fr, g, burn)
             if full:
-                a = s7_masks(i)
-                fr = (fr.astype(np.float32) * a[None, :, None] + 0.5).astype(np.uint8)
+                a = s7_masks(i)[None, :] * V_ALPHA[:, None]       # the aperture also fades top and bottom
+                fr = (fr.astype(np.float32) * a[..., None] + 0.5).astype(np.uint8)
             else:
                 fr = composite(fr, v)
             wp.stdin.write(black_clamp(fr).tobytes())

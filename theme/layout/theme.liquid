@@ -58,6 +58,7 @@
   </head>
 
   <body class="sf-body sf-template-{{ template.name | handleize }}">
+    {%- render 'sf-logo', variant: 'sprite', width: 1115 -%}
     <a class="sf-skip-link" href="#MainContent">{{ 'accessibility.skip_to_content' | t }}</a>
 
     {% sections 'header-group' %}

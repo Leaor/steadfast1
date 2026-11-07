@@ -1,5 +1,5 @@
 // Cart operations (BRIEF §5, §12; ARCHITECTURE §9 row 06, §4.6, §4.7 Steadfast.cart, §8.4).
-import { test, expect, fx, gotoOk, projectContext, cartJSON, apiAdd, expectDialogOpen, openCartFromHeader, chooseOption, visibleText, ariaLabels, markIntroSeen } from './helpers/base.mjs';
+import { test, expect, fx, gotoOk, projectContext, cartJSON, apiAdd, expectDialogOpen, openCartFromHeader, chooseOption, visibleText, ariaLabels, markIntroSeen, chooseSizeIfRequired } from './helpers/base.mjs';
 
 const ready = fx.fixturesReady();
 const drawer = (page) => page.locator('#sf-cart-drawer dialog');
@@ -36,6 +36,7 @@ test.describe('cart', () => {
     const p = fx.sizeCellProduct();
     const v = fx.firstAvailable(p);
     await gotoOk(page, `/products/${p.handle}`);
+    await chooseSizeIfRequired(page.locator('main'), p, v);
     await page.locator('main sf-product-form button[type="submit"]').first().click();
     await expectDialogOpen(page, 'sf-cart-drawer');
     await expect(drawer(page).locator('.sf-cart-line')).toHaveCount(1);
@@ -214,6 +215,7 @@ test.describe('cart', () => {
     const p = fx.sizeCellProduct();
     await gotoOk(page, `/products/${p.handle}?preview_settings=${encodeURIComponent(JSON.stringify({ cart_type: 'page' }))}`);
     await expect(page.locator('[data-sf-header] a[href$="/cart"]').first()).not.toHaveAttribute('data-sf-open', 'cart');
+    await chooseSizeIfRequired(page.locator('main'), p);
     await page.locator('main sf-product-form button[type="submit"]').first().click();
     await page.waitForURL(/\/cart(\?|$)/);
     await expect(page.locator('main')).toContainText(p.title);

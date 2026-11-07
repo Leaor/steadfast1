@@ -25,11 +25,14 @@
             <span class="sf-pagination__step is-disabled" aria-hidden="true">{% render 'sf-icon', name: 'chevron-left', size: 16 %}</span>
           {%- endif -%}
         </li>
+        {%- assign current_title = paginate.current_page | append: '' -%}
         {%- for part in paginate.parts -%}
+          {%- assign part_title = part.title | append: '' -%}
           <li>
             {%- if part.is_link -%}
               <a class="sf-pagination__page sf-tabular" href="{{ part.url }}{{ anchor }}" aria-label="{{ 'facets.page' | t: page: part.title | escape }}">{{ part.title }}</a>
-            {%- elsif part.title != '…' -%}
+            {%- elsif part_title == current_title -%}
+              {%- comment -%} Dawn's rule: only the part titled with the current page number is current; any other non-link part is the gap (Shopify titles it '&hellip;'). {%- endcomment -%}
               <span class="sf-pagination__page sf-tabular is-current" aria-current="page" aria-label="{{ 'facets.current_page' | t: page: part.title | escape }}">{{ part.title }}</span>
             {%- else -%}
               <span class="sf-pagination__gap" aria-hidden="true">{{ part.title }}</span>

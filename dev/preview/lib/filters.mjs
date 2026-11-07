@@ -19,7 +19,7 @@ export const STANDARD_FILTERS = ('abs append at_least at_most capitalize ceil co
 export const SHOPIFY_FILTERS = ('asset_url inline_asset_content shopify_asset_url stylesheet_tag script_tag image_url image_tag ' +
   'video_tag external_video_url external_video_tag model_viewer_tag placeholder_svg_tag money money_with_currency ' +
   'money_without_currency money_without_trailing_zeros t json handleize handle pluralize default_errors format_address ' +
-  'highlight structured_data time_tag url_param_escape item_count_for_variant').split(' ');
+  'highlight structured_data time_tag url_param_escape item_count_for_variant payment_button').split(' ');
 
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const v = (x) => toValue(x);
@@ -326,6 +326,19 @@ export function registerFilters(engine, { themeDir }) {
     const { kw } = splitArgs(args);
     const K = Object.fromEntries(Object.entries(kw).map(([k, x]) => [k, v(x)]));
     return `<iframe${attrs({ src: v(url), frameborder: '0', allow: 'autoplay; encrypted-media', allowfullscreen: true, title: K.title ?? null, class: K.class ?? null })}></iframe>`;
+  });
+  // `{{ form | payment_button }}` (ruling §15.11): Shopify renders the accelerated checkout buttons
+  // client-side from a `[data-shopify="payment-button"]` container. The preview has no checkout
+  // network, so it emits that container with an INERT placeholder: a disabled button whose text says
+  // it is a preview stand-in (never a working or fake checkout). Only valid on a product form.
+  engine.registerFilter('payment_button', function (form) {
+    const f = v(form);
+    if (!f || f.__type !== 'form' || f._type !== 'product') {
+      return rqOf(this).recordError('payment_button', 'payment_button must be applied to a product form object ({% form "product" %})');
+    }
+    return '<div data-shopify="payment-button" class="shopify-payment-button" data-preview-stub>'
+      + '<button type="button" class="shopify-payment-button__button shopify-payment-button__button--unbranded" disabled aria-disabled="true">'
+      + 'Accelerated checkout (renders on Shopify)</button></div>';
   });
   engine.registerFilter('model_viewer_tag', (media) => `<model-viewer data-preview-stub alt="${esc(media?.alt ?? '')}"></model-viewer>`);
 

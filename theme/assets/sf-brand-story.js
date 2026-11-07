@@ -1,7 +1,8 @@
 /* STEADFAST · Section F · Brand story (HOME). DESIGN §8.2 device 3, §8.3 F.
    "full": the light sweep (--sweep −30% → 130%) scrubbed from "top 75%" to "center 55%" (ScrollTrigger 1);
    the lead paragraph reveals once with a clip mask when the sweep passes 70% (ScrollTrigger 2).
-   "subtle": final state with one opacity reveal. Reduced: wordmark fully visible, static. */
+   "subtle": final state with one opacity reveal. Reduced: wordmark fully visible, static.
+   Late GSAP (section already past "top 75%"): final state, nothing re-hides. */
 (() => {
   const S = (window.Steadfast = window.Steadfast || {});
   S.modules = S.modules || {};
@@ -33,6 +34,9 @@
     const mm = S.motion.gsapMatchMedia(el, (cond, level, gsap, ScrollTrigger) => {
       if (cond.osReduce || level === 'reduced') return undefined;
       if (level !== 'full') return fadeOnce(el);
+      // Already past the sweep's start line when GSAP arrives (anchor jump, fast fling, slow network):
+      // keep the final state rather than dimming a wordmark and hiding text that are already on screen.
+      if ((mark || el).getBoundingClientRect().top < window.innerHeight * 0.75) return undefined;
 
       let revealed = false;
       const reveal = () => {

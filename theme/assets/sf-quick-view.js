@@ -81,9 +81,18 @@
       var links = parsed.querySelectorAll('link[rel="stylesheet"]');
       region.innerHTML = '';
       links.forEach(function (l) { region.appendChild(doc.importNode(l, true)); });
+      // DOMParser parses with scripting off, so <noscript> fallbacks arrive as live fields: drop them.
+      qv.querySelectorAll('noscript').forEach(function (n) { n.remove(); });
       region.appendChild(doc.importNode(qv, true));
       var target = focusTarget(detail.intent, region);
-      if (target) target.focus({ preventScroll: true });
+      if (target) {
+        target.focus({ preventScroll: true });
+        // 'add' intent: bring the options into view inside the sheet (the title is at the top already).
+        if (detail.intent === 'add') {
+          var group = target.closest('[data-sf-option]') || target;
+          group.scrollIntoView({ block: 'center', behavior: 'auto' });
+        }
+      }
       S.bus.emit('quickview:loaded', { url: detail.url, el: region });
     }).catch(function (err) {
       if (signal.aborted || (err && err.name === 'AbortError')) return;

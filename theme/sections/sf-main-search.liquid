@@ -40,7 +40,7 @@
       {%- endif -%}
     </h1>
     {%- if search.performed -%}
-      <p class="sf-search-header__count sf-micro sf-tabular">{{ 'search.results_count' | t: count: search.results_count }}</p>
+      <p class="sf-search-header__count sf-micro sf-tabular" data-sf-facets-count-header>{{ 'search.results_count' | t: count: search.results_count }}</p>
     {%- endif -%}
     <form class="sf-search-header__form" action="{{ routes.search_url }}" method="get" role="search">
       <label class="sf-visually-hidden" for="sf-search-page-input-{{ section.id }}">{{ 'search.label' | t }}</label>
@@ -58,16 +58,23 @@
           {%- if search.results_count > 0 -%}
             {%- if product_count > 0 -%}
               <ul class="sf-product-grid sf-product-grid--d4 sf-product-grid--m2" role="list" data-sf-product-grid>
+                {%- assign card_n = 0 -%}
                 {%- for item in search.results -%}
                   {%- if item.object_type != 'product' -%}{%- continue -%}{%- endif -%}
                   {%- liquid
+                    # ARCHITECTURE §6.2 (collection rule, also for search): first 4 product cards eager, the first one is the LCP.
+                    assign card_n = card_n | plus: 1
                     assign c_loading = 'lazy'
-                    if forloop.index <= 4 and paginate.current_page == 1
+                    assign c_priority = ''
+                    if card_n <= 4 and paginate.current_page == 1
                       assign c_loading = 'eager'
+                    endif
+                    if card_n == 1 and paginate.current_page == 1
+                      assign c_priority = 'high'
                     endif
                   -%}
                   <li class="sf-product-grid__item">
-                    {%- render 'sf-product-card', product: item, sizes: card_sizes, loading: c_loading, heading_level: 2 -%}
+                    {%- render 'sf-product-card', product: item, sizes: card_sizes, loading: c_loading, fetchpriority: c_priority, heading_level: 2 -%}
                   </li>
                 {%- endfor -%}
               </ul>
@@ -118,8 +125,7 @@
     { "type": "range", "id": "products_per_page", "label": "Results per page", "min": 8, "max": 48, "step": 4, "default": 24 },
     { "type": "checkbox", "id": "enable_filtering", "label": "Enable filtering", "default": true },
     { "type": "checkbox", "id": "enable_sorting", "label": "Enable sorting", "default": true },
-    { "type": "checkbox", "id": "show_density_toggle", "label": "Let visitors change the grid density", "default": true },
-    { "type": "checkbox", "id": "show_vendor", "label": "Show vendor", "default": false }
+    { "type": "checkbox", "id": "show_density_toggle", "label": "Let visitors change the grid density", "default": true }
   ]
 }
 {% endschema %}

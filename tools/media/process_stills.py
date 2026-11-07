@@ -234,6 +234,22 @@ def black_clamp(im: Image.Image) -> Image.Image:
     return Image.fromarray(np.clip(a * w[..., None] + 0.5, 0, 255).astype(np.uint8))
 
 
+def black_knee(im: Image.Image, lo: float, hi: float) -> Image.Image:
+    """Stronger black point for lifted (JPEG/phone) blacks: rgb *= smoothstep(lo, hi, Y). Hue preserved."""
+    a = np.asarray(im.convert("RGB")).astype(np.float32)
+    w = smoothstep(lo, hi, luminance(a))
+    return Image.fromarray(np.clip(a * w[..., None] + 0.5, 0, 255).astype(np.uint8))
+
+
+def plate_edge_delta(im: Image.Image, band=6) -> dict:
+    """Mean luma of the outer `band` px on each side (the fill is #000, so this is the edge-to-fill delta)."""
+    Y = luminance(np.asarray(im).astype(np.float32))
+    return {"top": round(float(Y[:band].mean()), 2), "bottom": round(float(Y[-band:].mean()), 2),
+            "left": round(float(Y[:, :band].mean()), 2), "right": round(float(Y[:, -band:].mean()), 2),
+            "max_px_row_mean": round(float(max(Y[:band].mean(1).max(), Y[-band:].mean(1).max(),
+                                                Y[:, :band].mean(0).max(), Y[:, -band:].mean(0).max())), 2)}
+
+
 def record(path: Path, *, group, base, purpose, source, crop=None, ops=(), notes="", theme_asset=False,
            extra=None):
     if path.suffix == ".svg":
@@ -508,17 +524,19 @@ def stage_logo():
         if w > TW * 1.5 or w == 1600:
             DROPPED.append({"base": "sf-logo-textured", "width": w, "native_width": TW, "max_width_allowed": int(TW * 1.5),
                             "owner": SCRIPT, "reason": ("over the 1.5x upscale limit (DESIGN §3.4)" if w > TW * 1.5
-                                                        else "not used: theme set is 600/1200/1800 (DESIGN §3.4)")})
-    for w in [400, 600, 800, 1200, 1800]:
+                                                        else "not used: theme set is 600/800/1000/1200/1800 (DESIGN §3.4, PERF-04)")})
+    # PERF-04: 800 and 1000 fill the gap between 600 and 1200 (desktop 1440 needs ~634 CSS px -> the 800;
+    # iPhone DPR 3 needs ~984 -> the 1000), so the hero no longer pulls the 1200 (106 KB) by default.
+    for w in [400, 600, 800, 1000, 1200, 1800]:
         im = textured(w)
         scale = round(w / TW, 4)
         note = (f"upscaled x{scale} from the {TW}px source crop: the hatch texture softens; prefer <= 1200 for "
                 f"crisp texture") if scale > 1.0 else ""
         p = D_LOGO / f"sf-logo-textured-{w}.webp"
-        im.save(p, "WEBP", quality=90, alpha_quality=75, method=4)
+        im.save(p, "WEBP", quality=90, alpha_quality=60, method=4)  # PERF-04: aq 60 halves the bytes; visually identical on black
         record(p, group="logo", base="sf-logo-textured", purpose="Textured transparent wordmark (hero, brand story)",
                source=rel(srcp), crop=tex_crop, ops=tex_ops + [f"resize lanczos x{scale}"], notes=note,
-               theme_asset=w in (600, 1200, 1800), extra={"scale": scale, "upscaled": scale > 1})
+               theme_asset=w in (600, 800, 1000, 1200, 1800), extra={"scale": scale, "upscaled": scale > 1})
         if w in (400, 800, 1200):
             p = D_LOGO / f"sf-logo-textured-{w}.png"
             im.save(p, "PNG", optimize=True)
@@ -622,7 +640,7 @@ def stage_logo():
         im.putalpha(Image.fromarray(np.clip(A + 0.5, 0, 255).astype(np.uint8), "L"))
         scale = round(w / TW, 4)
         p = D_LOGO / f"sf-logo-streaks-{w}.webp"
-        im.save(p, "WEBP", quality=90, alpha_quality=75, method=4)
+        im.save(p, "WEBP", quality=90, alpha_quality=60, method=4)  # PERF-04: aq 60 halves the bytes; visually identical on black
         record(p, group="logo", base="sf-logo-streaks", purpose="Streak-only raster (Section F layered lockup, >= 990px)",
                source=rel(srcp), crop=tex_crop,
                ops=tex_ops + ["letters knocked out: traced SVG mask, dilated 1px (MaxFilter 3)", f"resize lanczos x{scale}"],
@@ -745,6 +763,107 @@ def retouch_balaclava_logo(im: Image.Image):
     return Image.fromarray(np.clip(a + 0.5, 0, 255).astype(np.uint8)), info
 
 
+
+# ----------------------------------------------------------------------------- zip-hoodie hanger retouch
+# CD-01: the white lattice hanger in the zip-hoodie stills was the focal point of the signature detail
+# frames and film S2 ("a stockroom photo, not a figure in a black room"). It is a prop, not part of the
+# garment, so it is painted out: the lattice AND its holes inside a hand-traced polygon (source pixels),
+# limited to neutral/dark pixels so the blue-grey fabric is never touched, filled by diffusion from the
+# surrounding hood interior / background (Laplace fill), with grain matched to the surround and a 6px
+# feathered, anti-aliased seam. Nothing about the garment is invented: only a hanger becomes shadow.
+HANGERS = {
+    # file: [(name, polygon in source px, boundary)]  boundary 'dark' = fill from the black background only
+    "zip-hoodie-blue-grey-front.png": [
+        ("front hood cavity", [(1250, 322), (1288, 290), (1305, 278), (1330, 289), (1355, 280), (1370, 275), (1395, 282),
+                               (1430, 281), (1445, 278), (1495, 316), (1499, 325), (1480, 386), (1462, 386), (1440, 350),
+                               (1400, 306), (1370, 297), (1330, 312), (1292, 352), (1277, 386), (1259, 386), (1253, 340)], "all"),
+    ],
+    "zip-hoodie-blue-grey-front-back.png": [
+        ("front view, neck opening", [(697, 226), (712, 236), (722, 252), (733, 260), (812, 315), (815, 323), (802, 348),
+                                      (788, 378), (768, 381), (770, 366), (702, 303), (697, 302), (630, 372), (612, 384),
+                                      (596, 381), (586, 330), (584, 321)], "all"),
+        ("back view, above the hood", [(2056, 222), (2064, 224), (2074, 236), (2082, 250), (2090, 260), (2100, 262),
+                                       (2165, 318), (2160, 328), (2125, 342), (2090, 346), (2020, 347), (1985, 346),
+                                       (1950, 336), (1940, 324)], "dark"),
+    ],
+}
+
+
+def _gray_blur(ch: np.ndarray, r: float) -> np.ndarray:
+    return np.asarray(Image.fromarray(np.clip(ch, 0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(r))).astype(np.float32)
+
+
+def remove_hanger(im: Image.Image, poly, boundary="all", *, chroma_max=13, hole_luma=48, grow=2, feather=6, seed=7):
+    a = np.asarray(im).astype(np.float32)
+    H, W = a.shape[:2]
+    xs = [p[0] for p in poly]
+    ys = [p[1] for p in poly]
+    pad = feather + grow + 4
+    x0, y0 = max(0, min(xs) - pad), max(0, min(ys) - pad)
+    x1, y1 = min(W, max(xs) + pad), min(H, max(ys) + pad)
+    r = a[y0:y1, x0:x1].copy()
+    pm = Image.new("L", (x1 - x0, y1 - y0), 0)
+    ImageDraw.Draw(pm).polygon([(x - x0, y - y0) for x, y in poly], fill=255)
+    pm = np.asarray(pm) > 0
+    Y = luminance(r)
+    blue, green = r[..., 2] - r[..., 0], r[..., 1] - r[..., 0]
+    neutral = (blue < chroma_max) & (green < chroma_max)          # the hanger is neutral grey; the fabric is blue
+    m = pm & (neutral | (Y < hole_luma))                           # lattice + its holes / outline
+    mi = Image.fromarray((m * 255).astype(np.uint8))
+    for _ in range(grow):
+        mi = mi.filter(ImageFilter.MaxFilter(3))
+    m = m | ((np.asarray(mi) > 0) & ((blue < chroma_max + 8) | (Y < hole_luma)))
+    allowed = ~m if boundary == "all" else (~m) & (Y < 22)
+    v = r.copy()
+    v[m] = np.median(r[allowed], 0)
+    src = allowed | m
+    wu, wd = np.roll(src, 1, 0).astype(np.float32), np.roll(src, -1, 0).astype(np.float32)
+    wl, wr = np.roll(src, 1, 1).astype(np.float32), np.roll(src, -1, 1).astype(np.float32)
+    n = (wu + wd + wl + wr)[..., None]
+    for _ in range(1500):                                          # Jacobi iterations of the Laplace fill
+        s_ = (np.roll(v, 1, 0) * wu[..., None] + np.roll(v, -1, 0) * wd[..., None]
+              + np.roll(v, 1, 1) * wl[..., None] + np.roll(v, -1, 1) * wr[..., None])
+        nv = np.where(n > 0, s_ / np.maximum(n, 1), v)
+        v[m] = nv[m]
+    # grain matched to the surround (high-pass std in a 4px ring), scaled down in the shadows
+    mI = Image.fromarray((m * 255).astype(np.uint8))
+    ring = (np.asarray(mI.filter(ImageFilter.MaxFilter(9))) > 0) & ~m
+    hp = r - np.stack([_gray_blur(r[..., c], 1.5) for c in range(3)], -1)
+    sd = float(hp[ring].std()) if ring.any() else 1.0
+    noise = np.random.default_rng(seed).normal(0, 1, r.shape[:2]).astype(np.float32)
+    noise = (_gray_blur(noise * 20 + 128, 0.6) - 128) / 20 * sd
+    filled = v + (noise * np.clip(luminance(v) / 40, 0.3, 1))[..., None]
+    alpha = np.maximum(_gray_blur(np.asarray(mI.filter(ImageFilter.MaxFilter(3))).astype(np.float32), feather / 3) / 255,
+                       m.astype(np.float32))
+    out = r * (1 - alpha[..., None]) + np.where(m[..., None], filled, r) * alpha[..., None]
+    band = (np.asarray(mI.filter(ImageFilter.MaxFilter(5))) > 0) & ~(np.asarray(mI.filter(ImageFilter.MinFilter(5))) > 0)
+    ob = np.stack([_gray_blur(out[..., c], 0.9) for c in range(3)], -1)
+    out = np.where(band[..., None], ob, out)
+    a[y0:y1, x0:x1] = out
+    return Image.fromarray(np.clip(a + 0.5, 0, 255).astype(np.uint8)), {"box": [x0, y0, x1, y1], "pixels_changed": int(m.sum()),
+                                                                        "boundary": boundary, "grain_sd": round(sd, 2)}
+
+
+def retouch_hangers(im: Image.Image, src_name: str):
+    """Apply HANGERS[src_name]; writes before/after QA crops. Returns (image, info list, ops list)."""
+    info, ops = [], []
+    for name, poly, boundary in HANGERS.get(src_name, []):
+        before = im
+        im, inf = remove_hanger(im, poly, boundary)
+        inf["region"] = name
+        info.append(inf)
+        x0, y0, x1, y1 = inf["box"]
+        bx = (max(0, x0 - 80), max(0, y0 - 80), min(im.width, x1 + 80), min(im.height, y1 + 80))
+        pair = Image.new("RGB", ((bx[2] - bx[0]) * 2 + 8, bx[3] - bx[1]), (40, 40, 40))
+        pair.paste(before.crop(bx), (0, 0))
+        pair.paste(im.crop(bx), (bx[2] - bx[0] + 8, 0))
+        D_QA.mkdir(parents=True, exist_ok=True)
+        pair.save(D_QA / f"hanger-retouch-{Path(src_name).stem}-{len(info)}.jpg", quality=88)
+        ops.append(f"hanger painted out ({name}): diffusion fill from the {'background' if boundary == 'dark' else 'hood interior'}, "
+                   f"{inf['pixels_changed']} px, grain-matched, 6px feather")
+    return im, info, ops
+
+
 def stage_stills():
     for d in (D_STILLS, D_PROD):
         clean(d)
@@ -753,6 +872,8 @@ def stage_stills():
     # ---------------- zip hoodie: single front still
     fp = SRC / "zip-hoodie-blue-grey-front.png"
     F = load_srgb(fp)
+    F, hinfo, hops_f = retouch_hangers(F, fp.name)
+    QA_INFO["hanger_retouch_front"] = hinfo
     fbg = border_color(F)
     # garment bbox (max channel > 12): x 900-1867, y 42-1431 -> centre (1383, 736)
     box_front_alt = (743, -64, 2023, 1536)       # 1280x1600 4:5, canvas extended 64px on the photo's black
@@ -760,22 +881,24 @@ def stage_stills():
     cd = crop_dict(box_front_alt, F.size)
     emit(p_front_alt, D_PROD, "zip-hoodie-washed-blue-grey--front-alt", PRODUCT_WIDTHS, "max", group="product",
          purpose="Product image: zip hoodie front, hood up (single studio still)", source=rel(fp), crop=cd,
-         ops=["4:5 plate, black canvas extension"], sharpen=True, fixture=("zip-hoodie-washed-blue-grey", "front-alt"),
+         ops=hops_f + ["4:5 plate, black canvas extension"], sharpen=True, fixture=("zip-hoodie-washed-blue-grey", "front-alt"),
          add_cap=True)
-    emit(p_front_alt, D_STILLS, "sf-category-hoodies", [540, 900, 1200], 900, group="category",
-         purpose="Category tile: Hoodies", source=rel(fp), crop=cd, ops=["4:5 plate"], sharpen=True, theme_asset=True)
+    # sf-category-hoodies is NOT this garment (CD-18, DESIGN §5.6): the showcase already owns the zip hoodie,
+    # so Hoodies is the black heavyweight zip hoodie (night photo, upper crop), see the night block below.
 
     box_hero = (11, 0, 2741, 1536)               # 16:9
     p_hero = plate(F, box_hero, fill=fbg)
     emit(p_hero, D_STILLS, "sf-signature-hero", [960, 1600, 2400, 2730], 1600, group="signature",
          purpose="Signature showcase stage, front (16:9)", source=rel(fp), crop=crop_dict(box_hero, F.size),
-         ops=["16:9 crop"], sharpen=True, theme_asset=True)
+         ops=hops_f + ["16:9 crop"], sharpen=True, theme_asset=True)
 
     # sf-category-new-arrivals is cut from the IMG_4913 embossed close-up in stage_footage (DESIGN §5.6).
 
     # ---------------- zip hoodie: front/back side-by-side
     fbp = SRC / "zip-hoodie-blue-grey-front-back.png"
     FB = load_srgb(fbp)
+    FB, hinfo, hops_fb = retouch_hangers(FB, fbp.name)
+    QA_INFO["hanger_retouch_front_back"] = hinfo
     fbbg = border_color(FB)
     # garments (max channel > 12): front x 234-1178, back x 1593-2528; both y ~238-1412 (incl. hanger)
     box_f = (66, 25, 1346, 1625)                  # 1280x1600, centred on the front garment
@@ -786,10 +909,10 @@ def stage_stills():
         cdx = crop_dict(bx, FB.size)
         emit(pl, D_PROD, f"zip-hoodie-washed-blue-grey--{view}", PRODUCT_WIDTHS, "max", group="product",
              purpose=f"Product image: zip hoodie {view} (from the front/back still)", source=rel(fbp), crop=cdx,
-             ops=["split at x=1376", "4:5 plate, black canvas extension"], sharpen=True, add_cap=True,
+             ops=hops_fb + ["split at x=1376", "4:5 plate, black canvas extension"], sharpen=True, add_cap=True,
              fixture=("zip-hoodie-washed-blue-grey", view))
         emit(pl, D_STILLS, f"sf-signature-{hv}", [600, 900, 1200], 900, group="signature",
-             purpose=f"Signature showcase {hv} (4:5)", source=rel(fbp), crop=cdx, ops=["4:5 plate"], sharpen=True,
+             purpose=f"Signature showcase {hv} (4:5)", source=rel(fbp), crop=cdx, ops=hops_fb + ["4:5 plate"], sharpen=True,
              theme_asset=True)
     # sf-category-tops is the reflective tracksuit front, top crop (DESIGN §5.6), see the reflective block.
 
@@ -808,7 +931,7 @@ def stage_stills():
          purpose="Signature showcase stage, back aligned to the front still (16:9)", source=rel(fbp),
          crop={"from": "right half of front-back", "scale": round(s, 4),
                "align": "garment centre x and lowest edge (cuffs) to the front still"},
-         ops=[f"scale x{s:.4f} about garment centre", "hem/cuff line aligned", "16:9 crop"], sharpen=True,
+         ops=hops_fb + [f"scale x{s:.4f} about garment centre", "hem/cuff line aligned", "16:9 crop"], sharpen=True,
          theme_asset=True, notes="Back is scaled x%.3f (source pixels upsampled by that factor)." % s)
     blend = Image.blend(F, aligned, 0.5)
     resize(blend, 1376).save(D_QA / "showcase-front-back-alignment.jpg", quality=85)
@@ -826,7 +949,7 @@ def stage_stills():
     for name, im, sp, (cx, cy), size, gamma, label in details:
         bx = (cx - size // 2, cy - size // 2, cx + size // 2, cy + size // 2)
         pl = plate(im, bx, fill=border_color(im))
-        ops = [f"{size}px square crop"]
+        ops = (hops_f if im is F else hops_fb) + [f"{size}px square crop"]
         if gamma != 1.0:
             lut = [int(round(255 * (i / 255) ** gamma)) for i in range(256)]
             pl = pl.point(lut * 3)
@@ -848,14 +971,19 @@ def stage_stills():
     ry0, ry1 = int(rows.min()) + 4, int(rows.max()) - 3          # photo strip, phone UI removed
     sh_ = ry1 - ry0
     cw = int(round(sh_ * 0.8))
-    rfill = border_color(R, (0, ry0, R.width, ry1))
+    # CD-03: the strip's JPEG-lifted black (luma 8-12) read as a grey rectangle on the #000 card well. Knee the
+    # blacks first (luma <= 14 -> 0, smooth to 24, so the speckle survives), then plate on true black with a
+    # 120 px feather, so the edge-to-fill delta is <= 2 luma on every side.
+    R = black_knee(R, 14.0, 24.0)
+    rfill = (0, 0, 0)
     gap_x0, gap_x1 = 660, 690                                    # empty street between the two figures
     for view, cxr, valid in (("front", 330, (0, ry0, gap_x0, ry1)), ("back", 940, (gap_x1, ry0, R.width, ry1))):
         bx = (cxr - cw // 2, ry0, cxr - cw // 2 + cw, ry1)
-        pl = plate(R, bx, fill=rfill, valid=valid, feather=48)
+        pl = plate(R, bx, fill=rfill, valid=valid, feather=120)
         cdx = crop_dict(bx, R.size)
-        ops = ["Display P3 -> sRGB", f"phone UI removed (photo strip y {ry0}-{ry1})",
-               f"split at x {gap_x0}/{gap_x1}", "4:5 canvas on the photo's own near-black, 48px feather"]
+        ops = ["Display P3 -> sRGB", "black knee luma<=14 -> 0, smooth to 24", f"phone UI removed (photo strip y {ry0}-{ry1})",
+               f"split at x {gap_x0}/{gap_x1}", "4:5 canvas on #000, 120px feather"]
+        QA_INFO.setdefault("reflective_plate_edges", {})[view] = plate_edge_delta(pl)
         note = (f"Low-resolution source (phone screenshot of a product photo, strip {R.width}x{sh_}px, JPEG): "
                 "served <= 900px wide; soft at large sizes.")
         emit(pl, D_PROD, f"reflective-piping-tracksuit-black-speckle--{view}", PRODUCT_WIDTHS, "max",
@@ -869,7 +997,8 @@ def stage_stills():
     box_tops = (90, 760, 570, 1360)
     emit(plate(R, box_tops, fill=rfill), D_STILLS, "sf-category-tops", [400, 560], 560, group="category",
          purpose="Category tile: Tops (reflective tracksuit front, top crop)", source=rel(rp),
-         crop=crop_dict(box_tops, R.size), ops=["Display P3 -> sRGB", "phone UI excluded", "4:5 top crop (hoodie + chest script)"],
+         crop=crop_dict(box_tops, R.size), ops=["Display P3 -> sRGB", "black knee luma<=14 -> 0, smooth to 24", "phone UI excluded",
+                                                "4:5 top crop (hoodie + chest script)"],
          notes="Low-resolution source (phone screenshot): served at <= 560px.", theme_asset=True)
 
     # ---------------- campaign still
@@ -941,6 +1070,15 @@ def stage_stills():
          purpose="Lookbook: black tracksuit (graded, placeholder card 5)", source=rel(np_), crop=cdl, ops=lops,
          theme_asset=True)
     pants, cdp, pops = night_plate(0.25, 0.375, 0.65, 0.846, 0.45, bottom_burn=(0.795, 0.846))
+    # Hoodies (DESIGN §5.6, CD-18): the black heavyweight zip hoodie, upper crop (crown to mid-thigh), flash
+    # grade, SUV door burnt. 4:5 box 0.21-0.63 of the height = 864x1080 px -> 540/900 + the 1080 cap.
+    hood, cdh, hops = night_plate(0.25, 0.21, 0.65, 0.63, 0.45)
+    hood = burn(hood, 0.02, 0.21, "left", floor=0.05)     # the lit garage/fence left of the figure goes to black
+    hops = hops + ["left burn 0.02-0.21 to 5% (lit building behind the figure)"]
+    emit(hood, D_STILLS, "sf-category-hoodies", [540, 900, 1200], 900, group="category",
+         purpose="Category tile: Hoodies (black heavyweight zip hoodie, upper crop, graded)", source=rel(np_),
+         crop=cdh, ops=hops, add_cap=True, theme_asset=True,
+         notes="Not the showcase zip hoodie (DESIGN §5.6: five different garments). Source-limited to 1080 px.")
     emit(pants, D_PROD, "wide-sweatpants-black--lifestyle", PRODUCT_WIDTHS, "max", group="product",
          purpose="Product lifestyle: wide black sweatpants (night, graded)", source=rel(np_), crop=cdp, ops=pops,
          fixture=("wide-sweatpants-black", "lifestyle", "lifestyle"), add_cap=True,
@@ -999,6 +1137,23 @@ def best_frame(clip: Path, t0, t1, roi, window):
     return best, scores
 
 
+def burn_poly(im: Image.Image, poly_frac, feather=0.035) -> Image.Image:
+    """Burn a polygon (fractions of the frame) to black with a Gaussian feather of `feather` x width.
+    Used for the IMG_4913 sky + foliage behind the hood (CD-02/F6: the first card must not read as daylight)."""
+    w, h = im.size
+    m = Image.new("L", (w, h), 0)
+    ImageDraw.Draw(m).polygon([(x * w, y * h) for x, y in poly_frac], fill=255)
+    m = np.asarray(m.filter(ImageFilter.GaussianBlur(feather * w))).astype(np.float32) / 255
+    a = np.asarray(im).astype(np.float32) * (1 - m)[..., None]
+    return Image.fromarray(np.clip(a + 0.5, 0, 255).astype(np.uint8))
+
+
+# IMG_4913 crop (0,230,576,950): sky + trees right of the hood edge, down to the shoulder line; the supercar
+# below it at x > 0.86 is burnt separately. Traced on the t=3.333 s frame (frames/IMG_4913-*.png).
+SKY_4913 = [(0.645, -0.02), (1.02, -0.02), (1.02, 0.445), (0.93, 0.435), (0.80, 0.415), (0.762, 0.365),
+            (0.742, 0.22), (0.70, 0.08)]
+
+
 def desat_strong_colour(im: Image.Image, lo=0.16, hi=0.42, amount=0.85) -> Image.Image:
     """Neutralise strongly saturated background colour (supercar, foliage, tail-lights); the grey garment
     (low saturation) is unaffected."""
@@ -1018,7 +1173,7 @@ def stage_footage():
         # back-grey is a lifestyle view: the SUV + tail light (x > 0.78 of the frame) are burnt to black at the
         # right edge (crop kept at 640px so the published 400/800 renditions keep their names); graded with grade.sh.
         ("IMG_4376", "IMG_4376-night-back-grey-embossed-hoodie.MOV", (0.0, 5.4), (120, 250, 620, 900), (3.3, 5.3),
-         (40, 262, 680, 1062), ("embossed-gothic-hoodie", "back-grey"),
+         (0, 262, 640, 1062), ("embossed-gothic-hoodie", "back-grey"),
          "Back view at night (washed grey): arched back panel, embossed lettering on the shoulders"),
     ]
     for cid, fn, (t0, t1), roi, window, bx, (handle, view), purpose in clips:
@@ -1049,13 +1204,28 @@ def stage_footage():
                 f"{window[0]}-{window[1]}s, where the full lettering faces camera). Source is 720x1280 phone video "
                 f"(HEVC): soft and noisy compared with the stills; max {int((bx[2]-bx[0])*MAX_UP)}px wide.")
         kind = "studio"
+        if cid == "IMG_4913":
+            # CD-02/F6: the daylight sky + foliage (top-right) made the first card read as a park photo. The
+            # product still now gets the same film grade as the lookbook/category stills (grade.sh IMG_4913 pre
+            # + LOOK), the sky/trees burnt to black behind the hood edge and the supercar burnt at the right.
+            pl = grade(plate(frame, bx), grade_part("pre:IMG_4913"))
+            pl = burn_poly(pl, SKY_4913)
+            pl = burn(pl, 0.86, 0.98, "right", floor=0.15)
+            ops = ["HLG -> SDR tone map", f"4:5 crop {bx[2]-bx[0]}x{bx[3]-bx[1]}"] + grade_ops("IMG_4913") + \
+                  ["sky + foliage behind the hood burnt to black (traced polygon, 3.5% feather)",
+                   "right burn 0.86-0.98 (supercar)"]
+            kind = "lifestyle"
         if cid == "IMG_4376":
             # lifestyle (DESIGN §5.3): grade.sh IMG_4376 pre + LOOK; burn the SUV / tail light at the right edge
             pl = grade(plate(frame, bx), grade_part("pre:IMG_4376"))
             bw_ = bx[2] - bx[0]
-            pl = burn(pl, (540 - bx[0]) / bw_, (600 - bx[0]) / bw_, "right")
+            # CD-14: a 0.12-wide feather from x 540 px (the SUV's edge) so the sleeve fades instead of ending in a
+            # straight cut; the lit kerb in the left 10 % goes down with a soft left burn (garment starts ~0.16).
+            f0 = (540 - bx[0]) / bw_
+            pl = burn(pl, f0, f0 + 0.12, "right")
+            pl = burn(pl, 0.02, 0.16, "left", floor=0.06)
             ops = ["HLG -> SDR tone map", f"4:5 crop {bw_}x{bx[3]-bx[1]}"] + grade_ops("IMG_4376") + \
-                  ["right burn x 540-600 px (SUV + tail light)"]
+                  [f"right burn x {f0:.3f}-{f0 + 0.12:.3f} (SUV + tail light, sleeve fades)", "left burn 0.02-0.16 to 6% (kerb)"]
             kind = "lifestyle"
         emit(pl, D_PROD, f"{handle}--{view}", PRODUCT_WIDTHS, "max", group="product",
              purpose=f"Product still from footage: {purpose}", source=rel(clip),
@@ -1063,9 +1233,8 @@ def stage_footage():
              fixture=(handle, view, kind))
         if cid == "IMG_4913":
             # graded close-up (grade.sh IMG_4913 pre + LOOK), the supercar edge (x > 0.80 of the crop) burnt
-            g = grade(plate(frame, bx), grade_part("pre:IMG_4913"))
-            g = burn(g, 0.80, 0.98, "right", floor=0.15)
-            gops = ["HLG -> SDR", "4:5 crop"] + grade_ops("IMG_4913") + ["right burn 0.80-0.98 (supercar)"]
+            g = pl  # the same graded, sky-burnt still as the product image (one look for one garment)
+            gops = ops
             cdg = dict(crop_dict(bx, (720, 1280)), frame=n, t=t)
             emit(g, D_STILLS, "sf-lookbook-embossed-hoodie", [400, 720], 720, group="lookbook",
                  purpose="Lookbook: embossed lettering, washed charcoal hoodie (graded)", source=rel(clip),
@@ -1233,7 +1402,7 @@ def main(argv):
         if mp.exists():
             old = json.loads(mp.read_text()).get("stills", {})
             run_dirs = {"logo": ["logo/", "_qa/svg"], "stills": ["stills/sf-", "products/", "_qa/show", "_qa/camp"],
-                        "footage": ["frames/", "products/embossed-gothic-hoodie", "stills/sf-lookbook-embossed"],
+                        "footage": ["frames/", "products/embossed-gothic-hoodie", "stills/sf-lookbook-embossed", "stills/sf-category-new-arrivals"],
                         "grain": ["stills/sf-grain"], "sheet": ["stills/_contact"]}
             pref = [f"media/processed/{p}" for s in stages for p in run_dirs[s]]
             RECORDS.extend(r for r in old.get("files", []) if not any(r["path"].startswith(p) for p in pref))

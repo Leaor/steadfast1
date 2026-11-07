@@ -7,7 +7,11 @@
 <section class="sf-section sf-customer sf-customer--narrow sf-login sf-tone-ink sf-space-compact" aria-labelledby="sf-login-title">
   <div class="sf-container sf-customer__inner">
     <div class="sf-login__recover" id="recover" tabindex="-1">
-      <h2 class="sf-customer__title sf-display-md" id="sf-recover-title">{{ 'customer.recover.title' | t }}</h2>
+      {%- comment -%}
+        A level-1 heading for this view: only one of the two views is ever displayed, so each visible
+        view exposes exactly one level-1 heading (the document keeps a single <h1> element).
+      {%- endcomment -%}
+      <p class="sf-customer__title sf-display-md" id="sf-recover-title" role="heading" aria-level="1">{{ 'customer.recover.title' | t }}</p>
       {%- form 'recover_customer_password', class: 'sf-form', novalidate: 'novalidate' -%}
         {%- if form.posted_successfully? -%}
           <p class="sf-form__success" role="status" tabindex="-1" data-sf-form-status data-sf-recover-success>{%- render 'sf-icon', name: 'check', size: 16 -%}{{ 'customer.recover.success' | t }}</p>
@@ -42,11 +46,10 @@
           <input class="sf-input" type="email" id="CustomerEmail" name="customer[email]" autocomplete="email" autocapitalize="off" spellcheck="false" required aria-required="true"{% if form.errors contains 'email' %} aria-invalid="true"{% endif %}>
         </div>
         <div class="sf-field">
-          <div class="sf-customer__label-row">
-            <label class="sf-field__label" for="CustomerPassword">{{ 'customer.login.password' | t }}</label>
-            <a class="sf-customer__minor" href="#recover" data-sf-recover-open>{{ 'customer.login.forgot' | t }}</a>
-          </div>
+          <label class="sf-field__label" for="CustomerPassword">{{ 'customer.login.password' | t }}</label>
           <input class="sf-input" type="password" id="CustomerPassword" name="customer[password]" autocomplete="current-password" required aria-required="true"{% if form.errors contains 'password' %} aria-invalid="true"{% endif %}>
+          {%- comment -%} After the field, so the tab order is Email > Password > Forgot (WCAG 2.4.3). {%- endcomment -%}
+          <p class="sf-customer__forgot"><a class="sf-customer__minor" href="#recover" data-sf-recover-open>{{ 'customer.login.forgot' | t }}</a></p>
         </div>
         <div class="sf-form__actions">
           <button type="submit" class="sf-btn sf-btn--primary sf-btn--full"><span class="sf-btn__label">{{ 'customer.login.submit' | t }}</span></button>

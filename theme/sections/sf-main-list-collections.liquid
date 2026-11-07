@@ -45,7 +45,9 @@
             </div>
             <div class="sf-collection-tile__info">
               <h2 class="sf-collection-tile__title">{{ collection.title | escape }}</h2>
-              <span class="sf-collection-tile__count sf-micro sf-tabular">{{ 'collections.products_count' | t: count: collection.all_products_count }}</span>
+              {%- if collection.all_products_count > 0 -%}
+                <span class="sf-collection-tile__count sf-micro sf-tabular">{{ 'collections.products_count' | t: count: collection.all_products_count }}</span>
+              {%- endif -%}
             </div>
           </a>
         </li>

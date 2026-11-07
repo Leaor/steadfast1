@@ -1,9 +1,8 @@
 /* STEADFAST · Section D · Campaign editorial (HOME). Spec: DESIGN §8.3 D, §9 D.
-   The aperture (clip-path) and inner scale are scrubbed by sf-campaign-editorial.js at motion "full" only.
+   The aperture (a vertical clip-path shaft) and inner scale are scrubbed by sf-campaign-editorial.js at motion "full" only.
    Without JS, or with reduced motion, the full frame is shown as is. No parallax. */
 @layer sf.sections {
-  .sf-campaign-editorial { scroll-margin-top: var(--sf-header-h, 56px); }
-
+  /* Anchor offset: html scroll-padding-top (sf-base.css) clears the sticky header; no scroll-margin here. */
   .sf-campaign-editorial__inner { position: relative; }
 
   .sf-campaign-editorial__frame {
@@ -12,6 +11,34 @@
     aspect-ratio: 4 / 5;
     overflow: hidden;
     background: var(--sf-bg-sunken);
+  }
+
+  /* Aperture (motion "full", armed by JS): a vertical shaft only, inset(0 --_ap%) → inset(0). Two feathers
+     ride the moving side edges (translate, composited) so the shaft has soft edges, and fade out at the end. */
+  .sf-campaign-editorial.is-aperture .sf-campaign-editorial__frame {
+    --_ap: 0;
+    --_feather: 0;
+    clip-path: inset(0% calc(var(--_ap) * 1%));
+  }
+
+  .sf-campaign-editorial.is-aperture .sf-campaign-editorial__frame::before,
+  .sf-campaign-editorial.is-aperture .sf-campaign-editorial__frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    opacity: var(--_feather);
+    pointer-events: none;
+  }
+
+  .sf-campaign-editorial.is-aperture .sf-campaign-editorial__frame::before {
+    background: linear-gradient(to right, var(--sf-bg) 0, transparent 96px);
+    translate: calc(var(--_ap) * 1%) 0;
+  }
+
+  .sf-campaign-editorial.is-aperture .sf-campaign-editorial__frame::after {
+    background: linear-gradient(to left, var(--sf-bg) 0, transparent 96px);
+    translate: calc(var(--_ap) * -1%) 0;
   }
 
   .sf-campaign-editorial__media {

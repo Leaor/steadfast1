@@ -45,7 +45,23 @@
     buttons.forEach((b) => b.addEventListener('click', () => setFace(b.dataset.sfSsFace), { signal }));
     state.setFace = setFace;
 
-    // Keyboard: the CTA is reachable without scrolling the pin; focusing it moves the pin to its end.
+    // The details list (tabindex 0 in the markup, for the no-JS rail) stays a keyboard stop only while it is
+    // a horizontal scroller; in the staged layout it has no box and its captions are read in DOM order.
+    const list = el.querySelector('.sf-signature-showcase__details');
+    const syncRail = () => {
+      if (!list) return;
+      if (!state.staged && list.scrollWidth > list.clientWidth + 1) list.tabIndex = 0;
+      else list.removeAttribute('tabindex');
+    };
+    state.syncRail = syncRail;
+    if (list && 'ResizeObserver' in window) {
+      const ro = new ResizeObserver(syncRail);
+      ro.observe(list);
+      signal.addEventListener('abort', () => ro.disconnect());
+    } else syncRail();
+
+    // Keyboard: the buy block is only faded (never visibility: hidden), so its controls stay in the tab
+    // order through the pin; focusing one moves the pin to its end, where the block is shown.
     const buy = el.querySelector('[data-sf-ss-buy]');
     if (buy) {
       buy.addEventListener('focusin', () => {
@@ -75,6 +91,7 @@
         state.staged = staged;
         delete el.dataset.face;
         setFace(staged ? 'back' : 'front');
+        syncRail();
         if (!staged) return () => { state.st = null; };
         return build(el, state, gsap, ScrollTrigger);
       });
@@ -92,6 +109,8 @@
     const vign = q('[data-sf-ss-vignette]');
     const expo = q('[data-sf-ss-exposure]');
     const intro = q('[data-sf-ss-intro]');
+    const dawn = q('[data-sf-ss-dawn]');
+    const persp = q('.sf-signature-showcase__persp');
     const buy = q('[data-sf-ss-buy]');
     const details = [...el.querySelectorAll('[data-sf-ss-detail]')];
     const stage = q('[data-sf-ss-pin]');
@@ -107,9 +126,23 @@
       scale: c.z
     });
 
-    gsap.set(details, { autoAlpha: 0 });
-    gsap.set(buy, { autoAlpha: 0 });
+    // Opacity only (not autoAlpha): hidden captions stay in the accessibility tree and the CTA and
+    // FRONT / BACK stay focusable (WCAG 2.1.1); pointer events follow .is-buy-live (CSS).
+    gsap.set(details, { opacity: 0 });
+    gsap.set(buy, { opacity: 0 });
     gsap.set(back, { opacity: 0, rotationY: 6 });
+
+    // Before the pin: the exposure starts lifting as the section arrives (overlay 1 → 0.45, scale 0.86 → 0.88),
+    // so the hoodie is dimly present instead of an empty black stage. Separate elements from the pinned
+    // timeline (dawn overlay, perspective wrapper), so the two scrubs never write the same property.
+    if (dawn && persp) {
+      gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: { trigger: el, start: 'top 85%', end: 'top top', scrub: 0.8, invalidateOnRefresh: true }
+      })
+        .fromTo(dawn, { opacity: 1 }, { opacity: 0, duration: 1 }, 0)
+        .fromTo(persp, { scale: 0.86 / 0.88 }, { scale: 1, duration: 1 }, 0);
+    }
 
     const tl = gsap.timeline({
       defaults: { ease: 'none' },
@@ -124,6 +157,7 @@
         invalidateOnRefresh: true,
         // Leaving the end phase hands the faces back to the timeline.
         onUpdate: (self) => {
+          el.classList.toggle('is-buy-live', self.progress >= 0.9);
           if (self.progress < 0.9 && el.dataset.face) {
             delete el.dataset.face;
             state.setFace('back');
@@ -135,7 +169,7 @@
 
     // 0.00–0.10 Enter · 0.10–0.22 Perspective
     tl.fromTo(front, { scale: 0.88, yPercent: 4, rotationY: -6, rotationX: 2 }, { scale: 0.94, yPercent: 0, duration: 0.1 }, 0)
-      .fromTo(expo, { opacity: 1 }, { opacity: 0.15, duration: 0.1 }, 0)
+      .fromTo(expo, { opacity: 0.45 }, { opacity: 0.15, duration: 0.1 }, 0)
       .fromTo(intro, { autoAlpha: 1 }, { autoAlpha: 1, duration: 0.01 }, 0)
       .to(front, { rotationY: 3, rotationX: 0, scale: 1, duration: 0.12 }, 0.1)
       .to(expo, { opacity: 0, duration: 0.12 }, 0.1);
@@ -152,26 +186,27 @@
       if (i === 0) tl.to(front, { rotationY: 0, duration: move }, a);
       tl.to(layer, { ...zoom(c), duration: move }, a)
         .to(vign, { opacity: c.v, duration: move }, a)
-        .to(li, { autoAlpha: 1, duration: 0.03 }, a + 0.01);
-      if (i < n - 1) tl.to(li, { autoAlpha: 0, duration: 0.025 }, b - 0.025);
+        .to(li, { opacity: 1, duration: 0.03 }, a + 0.01);
+      if (i < n - 1) tl.to(li, { opacity: 0, duration: 0.025 }, b - 0.025);
     });
 
     // 0.74–0.80 Return
     tl.to(layer, { x: 0, y: 0, scale: 1, duration: 0.06 }, 0.74)
       .to(vign, { opacity: 0, duration: 0.06 }, 0.74)
       .to(front, { rotationY: 0, rotationX: 0, duration: 0.06 }, 0.74);
-    if (n) tl.to(details[n - 1], { autoAlpha: 0, duration: 0.03 }, 0.74);
+    if (n) tl.to(details[n - 1], { opacity: 0, duration: 0.03 }, 0.74);
     else tl.to(intro, { autoAlpha: 0, duration: 0.03 }, 0.74);
 
-    // 0.80–0.90 Front → back: the turn happens in the dark (crossover at 0.85)
-    tl.to(front, { rotationY: -6, opacity: 0, duration: 0.1 }, 0.8)
-      .to(back, { rotationY: 0, opacity: 1, duration: 0.1 }, 0.8)
-      .to(expo, { opacity: 0.55, duration: 0.05 }, 0.8)
+    // 0.80–0.90 Front → back: a cut in the dark, never a double exposure. The front goes out while the
+    // overlay closes (0.80–0.85); the back comes in as it opens (0.85–0.90). Both faces are 0 at 0.85.
+    tl.to(front, { rotationY: -6, opacity: 0, duration: 0.05 }, 0.8)
+      .to(expo, { opacity: 0.92, duration: 0.05 }, 0.8)
+      .to(back, { rotationY: 0, opacity: 1, duration: 0.05 }, 0.85)
       .to(expo, { opacity: 0, duration: 0.05 }, 0.85);
 
     // 0.90–1.00 CTA
     tl.to(back, { scale: 0.96, duration: 0.1 }, 0.9)
-      .fromTo(buy, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.04 }, 0.9);
+      .fromTo(buy, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.04 }, 0.9);
 
     // An anchor scroll (e.g. VIEW THE CAMPAIGN → #campaign) may be under way: the new pin spacer moved its
     // target, so refresh now; sf-core re-targets the hash after every refresh (S.anchor).
@@ -184,6 +219,7 @@
 
     return () => {
       delete el.dataset.face;
+      el.classList.remove('is-buy-live');
       state.st = null;
     };
   }

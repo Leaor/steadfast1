@@ -142,6 +142,8 @@
     object-position: 50% 30%;
   }
   .sf-media__video, .sf-media__iframe { object-fit: contain; background: #000; }
+  /* Not 4:5: shown whole, never re-cropped (see sf-product-media). */
+  .sf-media--free .sf-img { object-fit: contain; object-position: 50% 50%; }
   .sf-media__zoom { display: block; position: absolute; inset: 0; cursor: zoom-in; }
   .sf-media__zoom:focus-visible { outline-offset: -4px; box-shadow: none; }
   .sf-media__zoom-icon {
@@ -161,6 +163,8 @@
   @media (hover: hover) and (pointer: fine) { .sf-media__zoom:hover .sf-media__zoom-icon { opacity: 1; } }
   @media (hover: none) { .sf-media__zoom-icon { opacity: .9; width: 36px; height: 36px; } }
   .sf-media__deferred { position: absolute; inset: 0; }
+  .sf-media__xr { position: absolute; left: 12px; bottom: 12px; z-index: 2; background: rgb(0 0 0 / .5); padding-inline: 12px; }
+  .sf-media__xr[data-shopify-xr-hidden] { display: none; }
   .sf-media__poster { position: absolute; inset: 0; width: 100%; cursor: pointer; }
   .sf-media__play {
     position: absolute;
@@ -187,13 +191,14 @@
     transition: opacity calc(200ms * var(--sf-motion)) var(--sf-ease-in-out);
   }
   .sf-gallery__list:focus { outline: none; }
+  .sf-gallery__list:focus-visible { outline: 2px solid var(--sf-focus); outline-offset: -2px; }
   .sf-gallery__list.is-swapping { opacity: 0; }
   .sf-gallery__item { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; }
   .sf-gallery__meter {
     display: flex;
     align-items: center;
     gap: var(--sf-space-4);
-    padding: var(--sf-space-3) var(--sf-gutter) 0;
+    padding: var(--sf-space-1) var(--sf-gutter) 0;
   }
   .sf-gallery__progress { position: relative; flex: 1; height: 1px; background: var(--sf-line); overflow: hidden; }
   .sf-gallery__progress-bar {
@@ -205,15 +210,23 @@
     transition: transform calc(var(--sf-dur-base) * var(--sf-motion)) var(--sf-ease-standard);
   }
   .sf-gallery__counter { flex: none; color: var(--sf-fg-muted); }
+  .sf-gallery__nav { display: flex; flex: none; margin-right: -10px; }
+  .sf-gallery__step { width: 44px; height: 44px; color: var(--sf-fg); }
+  .sf-gallery__step:disabled { color: var(--sf-fg-subtle); opacity: .5; cursor: default; }
   .sf-gallery__empty { aspect-ratio: 4 / 5; }
 
   @media (min-width: 990px) {
+    /* Front + back lead at full column width; detail media follow two-up at their own ratio. */
     .sf-gallery--stacked .sf-gallery__list {
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: start;
       gap: 4px;
       overflow: visible;
       scroll-snap-type: none;
     }
+    .sf-gallery--stacked .sf-gallery__item:nth-child(-n+2) { grid-column: 1 / -1; }
+    .sf-gallery--stacked .sf-gallery__item:nth-child(n+3) .sf-media { aspect-ratio: var(--_ar, 4 / 5); }
     .sf-gallery--stacked .sf-gallery__meter { display: none; }
     .sf-gallery--carousel .sf-gallery__meter, .sf-gallery--quick-view .sf-gallery__meter { padding-inline: 0; }
   }
@@ -305,6 +318,48 @@
     .sf-main-product__info-inner { padding-top: var(--sf-space-8); }
     .sf-main-product--sticky .sf-main-product__info-inner { position: sticky; top: calc(var(--sf-header-h) + 32px); }
   }
+
+  /* ── dynamic checkout (Shopify payment button), kept monochrome ── */
+  .sf-product-form__dynamic:empty { display: none; }
+  .sf-product-form__dynamic .shopify-payment-button__button { border-radius: 0; min-height: 52px; }
+  .sf-product-form__dynamic .shopify-payment-button__button--unbranded {
+    background: transparent;
+    border: 1px solid var(--sf-line-strong);
+    color: var(--sf-fg);
+    font-family: var(--sf-font-label);
+    font-weight: 500;
+    font-size: var(--sf-text-xs);
+    letter-spacing: var(--sf-tracking-label);
+    text-transform: uppercase;
+  }
+  .sf-product-form__dynamic .shopify-payment-button__more-options { margin-top: var(--sf-space-3); color: var(--sf-fg-muted); font-size: var(--sf-text-sm); text-decoration: underline; text-underline-offset: 4px; }
+
+  /* ── mobile buy bar (< 990px): slides up while the main Add to cart is off-screen ── */
+  .sf-buybar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--sf-z-sticky);
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--sf-bg-raised);
+    border-top: var(--sf-hairline) solid var(--sf-line-strong);
+    transform: translateY(100%);
+    visibility: hidden;
+    transition: transform calc(var(--sf-dur-base) * var(--sf-motion)) var(--sf-ease-standard), visibility 0s linear calc(var(--sf-dur-base) * var(--sf-motion));
+  }
+  .sf-buybar.is-visible { transform: none; visibility: visible; transition-delay: 0s; }
+  .sf-buybar__inner { display: flex; align-items: center; gap: var(--sf-space-3); min-height: 56px; padding: 8px var(--sf-gutter); }
+  .sf-buybar__thumb { flex: none; width: 32px; height: 40px; overflow: hidden; background: var(--sf-bg-sunken); }
+  .sf-buybar__thumb img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
+  .sf-buybar__text { display: grid; flex: 1; min-width: 0; line-height: 1.3; }
+  .sf-buybar__title { overflow: hidden; color: var(--sf-fg); font-size: var(--sf-text-sm); text-overflow: ellipsis; white-space: nowrap; }
+  .sf-buybar__price { color: var(--sf-fg-muted); font-size: var(--sf-text-sm); }
+  .sf-buybar__btn { flex: none; min-height: 44px; padding-inline: 16px; }
+  @media (max-width: 989px) {
+    body:has(.sf-buybar) { padding-bottom: calc(56px + env(safe-area-inset-bottom)); }
+  }
+  @media (min-width: 990px) { .sf-buybar { display: none; } }
 
   /* ── related products rail ─────────────────────────────── */
   [data-sf-related-root][data-state="pending"] { padding-block: 0; min-height: 1px; }

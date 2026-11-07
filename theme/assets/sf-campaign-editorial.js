@@ -1,6 +1,9 @@
 /* STEADFAST · Section D · Campaign editorial (HOME). DESIGN §8.2 device 2 (aperture), §8.3 D.
-   "full": scrubbed aperture on the frame + inner scale 1.15 → 1 (ScrollTrigger 1) and a one-time clip-mask
-   text reveal at "top 40%" (ScrollTrigger 2). "subtle": final state, one opacity reveal. Reduced: static. */
+   "full": a scrubbed vertical shaft on the frame (--_ap 30 → 0, so no horizontal edge ever crosses the haze;
+   feathered side edges fade out at the end) + inner scale 1.15 → 1 (ScrollTrigger 1), and a one-time
+   clip-mask text reveal at "top 40%" (ScrollTrigger 2). If GSAP arrives after the section has already
+   crossed the scrub start (anchor jump, fast fling, slow network), the final state is kept: nothing that is
+   already on screen shrinks or hides. "subtle": final state, one opacity reveal. Reduced: static. */
 (() => {
   const S = (window.Steadfast = window.Steadfast || {});
   S.modules = S.modules || {};
@@ -30,12 +33,16 @@
     const mm = S.motion.gsapMatchMedia(el, (cond, level, gsap) => {
       if (cond.osReduce || level === 'reduced') return undefined;
       if (level !== 'full') return fadeOnce(el);
-      const inset = cond.desktop ? 'inset(14% 22% 14% 22%)' : 'inset(8% 10% 8% 10%)';
+      // Already past the aperture's start line: show the frame as it is, no late snap.
+      if (el.getBoundingClientRect().top < window.innerHeight * 0.9) return undefined;
+      const ap = cond.desktop ? 30 : 14;
+      el.classList.add('is-aperture');
       gsap.timeline({
         defaults: { ease: 'none' },
         scrollTrigger: { trigger: el, start: 'top 90%', end: 'top 15%', scrub: 0.8, invalidateOnRefresh: true }
       })
-        .fromTo(frame, { clipPath: inset }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1 }, 0)
+        .fromTo(frame, { '--_ap': ap, '--_feather': 1 }, { '--_ap': 0, duration: 1 }, 0)
+        .to(frame, { '--_feather': 0, duration: 0.3 }, 0.7)
         .fromTo(media, { scale: 1.15 }, { scale: 1, duration: 1 }, 0);
       if (copy) {
         gsap.fromTo(copy, { clipPath: 'inset(0% 0% 100% 0%)' }, {
@@ -45,7 +52,7 @@
           scrollTrigger: { trigger: cond.desktop ? el : copy, start: cond.desktop ? 'top 40%' : 'top 85%', once: true }
         });
       }
-      return undefined;
+      return () => el.classList.remove('is-aperture');
     });
     instances.set(el, mm);
   }

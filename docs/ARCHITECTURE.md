@@ -1,6 +1,6 @@
 # STEADFAST: Theme Architecture (engineering contract)
 
-> Status: **v1.1** (independent design review applied and reconciled with `DESIGN.md` v2 and `FILM-STORYBOARD.md` v2; the change log is §13, the points not applied as worded are §14). Written by the Shopify architect.
+> Status: **v1.2** (v1.1 = independent design review applied and reconciled with `DESIGN.md` v2 and `FILM-STORYBOARD.md` v2; the change log is §13, the points not applied as worded are §14. v1.2 = fix-pass rulings §15.10–§15.14: compressed, HTTP/2-aware budgets §6.1, brotli size caps §4.1, `payment_button` §8.6, harness and test-plan updates §8–§9). Written by the Shopify architect.
 > **Precedence.** `docs/BRIEF.md` > `docs/CONTEXT.md` > the two specialist docs, which split authority by subject (the same sentence appears in DESIGN.md):
 > - **`docs/DESIGN.md` wins on every visual and motion value**: colour values, type, sizes, spacing values, ratios, crops, grades, easing, durations, choreography, what may animate, and default copy.
 > - **This file wins on ownership, names and mechanics**: file ownership, file and asset names, setting IDs, CSS custom property *names*, Liquid/JS APIs, events, the allowed Liquid surface, the harness and the tests.
@@ -166,6 +166,7 @@ theme/
     ├── sf-product-card.css                   CORE   (render-blocking; card, price, colorways, quick-add)
     ├── sf-footer.css                         CORE   (loaded by sf-footer section; footer, localization, social, motion toggle)
     ├── sf-core.js                            CORE
+    ├── sf-dialog-history.js                  CORE   (on demand, coarse pointer only: Back closes the top dialog; loaded via S.assets.dialogHistory, ruling §15.14)
     ├── sf-header.js                          CORE
     ├── sf-product-card.js                    CORE
     ├── gsap.min.js                           CORE   (vendored, gsap@3.15.x dist, unmodified, licence header kept)
@@ -260,7 +261,7 @@ Cross-owner keys (CORE MUST provide them; others MAY use them):
 | `general.placeholder_info` | To be confirmed |
 | `general.pieces.one` / `.other` | `{{ count }} piece` / `{{ count }} pieces` (DESIGN "24 PIECES") |
 | `accessibility.skip_to_content`, `accessibility.opens_new_window`, `accessibility.close_dialog`, `accessibility.loading` | Skip to content, Opens in a new window, Close, Loading |
-| `header.search` / `header.account` / `header.cart` / `header.menu_open` / `header.menu_close` / `header.home_label` | Search / Account / Cart / Open menu / Close menu / `{{ shop }} home` (desktop actions read `SEARCH`, `ACCOUNT`, `CART (n)` via CSS uppercase) |
+| `header.search` / `header.account` / `header.cart` / `header.menu` / `header.menu_open` / `header.menu_close` / `header.home_label` | Search / Account / Cart / Menu (menu dialog label, A11Y-11) / Open menu / Close menu / `{{ shop }} home` (desktop actions read `SEARCH`, `ACCOUNT`, `CART (n)` via CSS uppercase) |
 | `price.regular`, `price.sale`, `price.from` (`From {{ price }}`), `price.sold_out`, `price.unavailable` | |
 | `product_card.quick_view` | Quick view |
 | `product_card.add_to_cart` | Add to cart |
@@ -365,7 +366,7 @@ Then these groups, in this order. Every colour default is DESIGN §2.1 / §13's 
 | | `section_spacing` | select `compact`\|`standard`\|`generous` | standard | Global vertical rhythm multiplier. |
 | **Cart** | `cart_type` | select `drawer`\|`page` | drawer | |
 | | `cart_show_note` | checkbox | false | |
-| | `cart_note_text` | text | "Taxes and shipping calculated at checkout." | Displayed under the subtotal (DESIGN §7.7; Shopify's default wording). |
+| | `cart_note_text` | text | — (blank) | Optional merchant note under the subtotal (DESIGN §7.7). Blank by default since the v1.2 fix pass: the tax/shipping line now follows the store's tax settings (PLAT-04), so a default sentence would repeat it. |
 | | `cart_empty_collection` | collection | — | Products shown on the empty cart page, up to 4. |
 | **Product cards** | `card_image_ratio` | select `portrait` (3:4) \| `tall` (4:5) \| `natural` | **`tall`** | 4:5 everywhere (DESIGN §5.1). |
 | | `card_show_secondary_image` | checkbox | true | Alternate-image crossfade on hover (pointer: fine only). |
@@ -493,7 +494,7 @@ Each section's look and motion are DESIGN's; the "Spec" line names the DESIGN se
 | `campaign_film_desktop` | video | — | Optional full campaign film, **merchant upload only** (nothing bundled). |
 | `campaign_film_mobile` | video | — | Blank → `campaign_film_desktop`. |
 | `logo_reveal` | checkbox | true | DOM beat 8 (light-sweep reveal at `duration − 0.4 s`). Off: the wordmark appears with beat 9. |
-| `show_skip` | checkbox | true | `SKIP INTRO` (it becomes the `PAUSE` toggle for the loop). |
+| `show_skip` | checkbox | true | Hides only `SKIP INTRO` during the intro (scroll, keys and focus still end it). The `PAUSE` / `PLAY` control for the loop **always** renders (WCAG 2.2.2), whatever this setting. |
 | `show_logo` | checkbox | true | Textured wordmark inside the homepage `<h1>`. Off: the `<h1>` holds a visually hidden `shop.name`. |
 | `logo_width` | range 240–640 step 10 px | 640 | Desktop **box** width cap: `min(44vw, {logo_width}px)`; mobile `min(84vw, {logo_width}px)` (DESIGN §3.4). |
 | `eyebrow` | text | "FIXED POINT" | **[PLACEHOLDER]** info: "Proposed campaign name. Approve or replace." |
@@ -528,7 +529,7 @@ Removed from v1: `content_delay` (the intro timeline decides when content appear
 
 | id | type | default |
 |---|---|---|
-| `product` | product | — (price + CTA link when set) |
+| `product` | product | — (price + CTA link when set). `index.json` binds `"zip-hoodie-washed-blue-grey"`; a store without that handle resolves it to blank. Pick the product before publishing (DEPLOYMENT). |
 | `eyebrow` | text | "Signature piece" |
 | `heading` | text | "The zip hoodie" (blank → `product.title`) |
 | `image_hero` | image_picker | img+asset `sf-signature-hero` (16:9 front stage) |
@@ -536,7 +537,7 @@ Removed from v1: `content_delay` (the intro timeline decides when content appear
 | `image_front` | image_picker | img+asset `sf-signature-front` (4:5, mobile / `subtle` / reduced) |
 | `image_back` | image_picker | img+asset `sf-signature-back` (4:5, FRONT/BACK toggle) |
 | `cta_label` | text | "Shop the zip hoodie" |
-| `cta_link` | url | — (blank → `product.url`, else `routes.all_products_collection_url`) |
+| `cta_link` | url | — (blank → `product.url`; with no product either → `routes.all_products_collection_url`, and the label becomes `home.signature.cta_fallback` "Explore the collection", so the button never names a product it does not open) |
 | `pin_on_desktop` | checkbox | true |
 | `scroll_length` | select | `standard` [`short` 200%, `standard` 300%] |
 
@@ -579,7 +580,7 @@ Removed from v1: `content_delay` (the intro timeline decides when content appear
 |---|---|---|
 | `heading` | text | "About STEADFAST" (visually hidden `h2`; the wordmark is the visible subject) |
 | `logo_display` | select | `textured` [`textured` (renders `sf-logo` `lockup`), `flat`, `none`] |
-| `text` | richtext | `<p>Steadfast. Firm in purpose, unmoved by noise.</p>` (**[PLACEHOLDER]**; info: "Replace with two or three sentences from STEADFAST. No dates, origins or claims until they are supplied.") |
+| `text` | richtext | blank (no invented brand copy: the wordmark carries the section until STEADFAST supplies two or three sentences; a client input in DEPLOYMENT) |
 | `link_label` | text | "" |
 | `link` | url | — (hidden unless both are set) |
 
@@ -749,7 +750,7 @@ Reveal utility (CORE, `sf-base.css` + `sf-core.js`): an element with `data-sf-re
 - Classic `defer` scripts and IIFEs that attach to `window.Steadfast`. **No ES module imports** between assets (CDN `?v=` versioning breaks relative module URLs). No frameworks, no build step, no Lenis, no scroll hijacking, no `ScrollTrigger.normalizeScroll`, no `scrollerProxy`.
 - Execution order is guaranteed by `defer` order in the layout: `sf-core.js` → `sf-header.js` → `sf-product-card.js` → `sf-cart.js`. Section scripts come later in document order, so they can rely on `Steadfast` core being present at execution time.
 - Components are **custom elements** that implement `connectedCallback` and `disconnectedCallback`. Cleanup in `disconnectedCallback` is mandatory: remove listeners via an `AbortController`, disconnect observers, and revert the GSAP context.
-- Raw (unminified) size caps: `sf-core.js` 24 KB, `sf-header.js` 12 KB, `sf-product-card.js` 6 KB, `sf-cart.js` 20 KB, `sf-product.js` 28 KB, `sf-facets.js` 12 KB, `sf-predictive-search.js` 8 KB, `sf-quick-view.js` 8 KB, `sf-customer.js` 6 KB, `sf-hero-film.js` 14 KB, other HOME modules 12 KB each.
+- Size caps are **brotli** (q11), the bytes Shopify's CDN actually sends (v1.2, ruling §15.10; the v1.1 raw caps are void). Always-loaded files are enforced by spec 16 (§6.1): `sf-core.js` ≤ 8 KB br and ≤ 33 KB raw (**its measured size**, ruling §15.14: no build step, so dead code is removed and rarely used features move to lazily loaded modules; a new core feature that doesn't fit ships as an on-demand module), `sf-header.js` ≤ 4 KB, `sf-product-card.js` ≤ 1.75 KB, `sf-cart.js` ≤ 5.125 KB. On-demand and section modules, measured + ~15 % (guidance, reviewed in each pass): `sf-product.js` 7.2 KB, `sf-facets.js` 3.5 KB, `sf-hero-film.js` 4.2 KB, `sf-signature-showcase.js` 4 KB, `sf-predictive-search.js` 1.75 KB, `sf-quick-view.js` 1.9 KB, `sf-customer.js` 1.7 KB, `sf-dialog-history.js` 1.4 KB, other HOME modules 1.6 KB each.
 - `console.log` is not allowed in shipped code. Use `Steadfast.debug(...)`, which logs only when `localStorage['sf:debug']==='1'`.
 
 ### 4.2 Global namespace `window.Steadfast`
@@ -1037,7 +1038,7 @@ Bundled video is **H.264 MP4 only** (decision §12.5); a Shopify-hosted override
         <a class="sf-btn sf-btn--text" href="{{ cta_secondary_link | default: '#campaign' }}" data-sf-hero-secondary data-action="link|film|replay">{{ cta_secondary_label }}</a>
       </div>
     </div>
-    <button type="button" class="sf-hero__control" data-sf-hero-control aria-pressed="false">{{ 'home.hero.skip' | t }}</button>
+    <button type="button" class="sf-hero__control" data-sf-hero-control>{{ 'home.hero.skip' | t }}</button>
     <span class="sf-hero__sentinel" data-sf-header-sentinel aria-hidden="true"></span>
   </sf-hero-film>
   {%- comment -%} only when a campaign film is set {%- endcomment -%}
@@ -1072,6 +1073,7 @@ Bundled video is **H.264 MP4 only** (decision §12.5); a Shopify-hosted override
 |---|---|
 | 0 | State `loading` → `playing` on the `playing` event. `hero:intro-start {source, variant}`. The header is already visible (transparent, logo slot empty). Hero content is focusable at `opacity: 0`. |
 | 0.8 s | `SKIP INTRO` fades in (if `show_skip`). |
+| `currentTime ≥ 2.2 s` (first cut) | `.is-ui`: the CTA row (EXPLORE COLLECTION, VIEW THE CAMPAIGN) fades to opacity 0.8 (1 on hover/focus) and becomes clickable, so a visitor who neither scrolls nor presses a key can shop during the film (BRIEF §3). Before `.is-ui` the row has `pointer-events: none`. The wordmark still waits for beat 8, eyebrow and line for beat 9. |
 | `D − 0.4 s` | `.is-beat-8` (if `logo_reveal`): the wordmark light-sweep reveal. Detected with `requestVideoFrameCallback` where available, else `timeupdate` + rAF on `currentTime`. The loop's `src` is set now so it is ready for beat 9. |
 | `D + 0.6 s` | `.is-beat-9` + state `ended`: loop fades in, wordmark glides to rest, eyebrow/subheading/CTAs reveal (starting `D + 0.9 s`), `SKIP INTRO` → `PAUSE`. `sessionStorage['sf:intro-seen']='1'` (try/catch). `hero:intro-end {reason:'ended'}`. |
 | `currentTime ≥ 14 s` | Hard cap (FILM B7): treated as the end of the film. |
@@ -1084,7 +1086,7 @@ The light sweep animates the registered property `--sweep` (`@property --sweep {
 |---|---|
 | Watchdogs | Intro: no `playing` within 4 s, `play()` rejects (iOS Low Power Mode, autoplay policy), `error`, or a stall > 4 s → end early (reason `error`) and try the loop. Loop failure → `fallback`: end still + UI, src removed and `load()` called to cancel the download, plus DESIGN's static treatment (no animated still). |
 | Source check | On `loadedmetadata`, if `matchMedia(MOBILE_MQ).matches` disagrees with the variant loaded, swap to the other variant's src and `load()` again. |
-| Pause toggle | After beat 9 (and in `static` with a loop) the control is PAUSE / PLAY: toggles `play()`/`pause()`, `aria-pressed`, label `home.hero.pause` / `home.hero.play`; state `paused`. WCAG 2.2.2: SKIP INTRO covers the intro, PAUSE the loop. |
+| Pause toggle | After beat 9 (and in `static` with a loop) the control is PAUSE / PLAY: toggles `play()`/`pause()` and swaps its label `home.hero.pause` / `home.hero.play` (the label names the action; **no `aria-pressed`**, which would announce "Play, pressed"); state `paused`. WCAG 2.2.2: SKIP INTRO covers the intro, PAUSE the loop. `show_skip` never hides PAUSE / PLAY. |
 | Off-screen | IntersectionObserver (threshold 0.25): leaving during the intro ends it (`scrolled`); the loop pauses when < 25% visible and resumes on return unless the user paused it. |
 | Tab hidden / drawer open | Pause on `visibilitychange` hidden and on `drawer:open`; resume the loop on return only if it was playing and not user-paused. |
 | Secondary CTA | `link` (default): a plain anchor to `#campaign` or the URL. `film`: opens `#sf-campaign-film-{id}`, sets the film src lazily (by MOBILE_MQ), plays with native controls and pauses the loop; closing pauses the film and resumes the loop. `replay`: a user gesture, so allowed under reduced motion and when seen; restarts the intro timeline from 0. |
@@ -1103,14 +1105,25 @@ A merchant can upload a real intro, loop, end still and campaign film later (FIL
 
 ### 6.1 Budgets (verified by `dev/tests/16-performance.spec.mjs` on the preview)
 
-The preview serves files uncompressed, so budgets are **raw bytes as served**. Brotli on the Shopify CDN is roughly 3.5–4× smaller.
+**v1.2 (fix pass, ruling §15.10).** The v1.1 budgets were raw bytes and a 25-request home cap. Both measured the wrong thing: Shopify's CDN serves text with brotli over HTTP/2, and Shopify minifies only ES5-valid JS (ours uses `class`/`const`, so raw unminified bytes are what gets compressed); and on HTTP/2 the request count matters far less than critical bytes and render-blocking work. A controlled experiment (HTTP/2 + brotli proxy, mobile DPR 3, 4× CPU, Slow 4G, median of 3) showed the per-section files cost little: dropping the five below-the-fold section scripts took home LCP from 1608 to 1492 ms, and also merging the seven section stylesheets only to 1432 ms; on Fast 4G LCP was 384–428 ms in every variant. So §3.1's per-section files stay (cacheable, theme-editor add/remove), non-critical section JS is downloaded only near its section, and the budgets below are **compressed** and **HTTP/2-aware**.
 
-| Page | Theme JS raw (excl. GSAP) | GSAP (raw) | CSS raw total | Requests before first scroll |
+**How the numbers were set.** Each is the value measured by spec 16 on 2026-11-07 (after this pass's media and logo fixes; the larger of the desktop and mobile projects; connection pinned to 4g so the lazy-load distance is a fixed 1250 px) **plus about 15 %**, rounded up. Re-derive them the same way from the spec's `*-measure.json` attachments; tighten them when a fix lands, never loosen them without a written reason here.
+
+| Page | Theme-owned requests before first scroll (measured) | Theme JS, brotli (measured) | CSS, brotli (measured) | Non-video transfer before first scroll, mobile DPR 3, compressed (measured) |
 |---|---|---|---|---|
-| Home `/` | ≤ 130 KB | ≤ 125 KB, **after scroll only** (0 bytes in initial load) | ≤ 170 KB | ≤ 25 |
-| Product | ≤ 100 KB | 0 | ≤ 120 KB | ≤ 25 |
-| Collection / search | ≤ 90 KB | 0 | ≤ 110 KB | ≤ 25 |
-| Cart page / content / customer | ≤ 80 KB | 0 | ≤ 100 KB | ≤ 20 |
+| Home `/` | ≤ **41** (36) | ≤ **33.5 KB** (29.0) | ≤ **28.5 KB** (24.7) | ≤ **465 KB** (404) |
+| Product | ≤ **29** (25) | ≤ **27.5 KB** (23.9) | ≤ **20.5 KB** (17.7) | ≤ **650 KB** (563) ⚠ |
+| Collection | ≤ **26** (22) | ≤ **24 KB** (20.6) | ≤ **20.5 KB** (17.6) | ≤ **390 KB** (339) |
+| Search | ≤ **23** (20) | ≤ **24 KB** (20.6) | ≤ **22.5 KB** (19.2) | ≤ **270 KB** (234) |
+| Cart page | ≤ **19** (16) | ≤ **20.5 KB** (17.7) | ≤ **18.75 KB** (16.2) | ≤ **117 KB** (102) |
+| Content (`/pages/contact`) | ≤ **19** (16) | ≤ **22 KB** (19.1) | ≤ **18.5 KB** (15.9) | ≤ **118 KB** (103) |
+| Customer (`/account/login`) | ≤ **20** (17) | ≤ **22 KB** (19.1) | ≤ **20 KB** (17.2) | ≤ **120 KB** (104) |
+
+- **Requests** count the document, theme assets and media; `content_for_header` platform requests are excluded (the preview has none). Video is excluded from transfer (its own rows below). KB = 1,024 bytes.
+- **Render-blocking CSS, every template:** ≤ **4** stylesheets and ≤ **14.5 KB** brotli (measured: the three global files, 12.2 KB).
+- **GSAP:** 0 bytes before the first scroll on every page; ≤ 125 KB raw after scrolling the home page.
+- ⚠ **Product transfer** is far above the reviewer's 350 KB target: at DPR 3 the second and third gallery slides and the related-product images (up to the 1200w rendition) start before the first scroll. The budget records today's number so it can't grow; COMMERCE should lazy-load slides 2+ and size the related cards (then tighten this row).
+- **Per-file caps (brotli q11; enforced for the always-loaded files):** `sf-core.js` ≤ **8 KB** br and ≤ **33 KB** raw (its measured size, ruling §15.14: 8,113 B br / 33,503 B raw), `sf-header.js` ≤ 4 KB, `sf-header.css` ≤ 4.5 KB, `sf-product-card.css` ≤ 2.5 KB, `sf-product-card.js` ≤ 1.75 KB, `sf-cart.js` ≤ 5.125 KB, `sf-base.css` ≤ 6.5 KB. On-demand modules: §4.1.
 
 | Asset | Budget |
 |---|---|
@@ -1217,7 +1230,8 @@ The preview serves files uncompressed, so budgets are **raw bytes as served**. B
 
 `dev/preview/server.mjs` is a Node 22 HTTP server (`node:http`, no Express needed). It renders `theme/` with **liquidjs** the way Shopify would, using fixtures. It is dev-only and never shipped.
 
-- Start with `node dev/preview/server.mjs [--port 9292] [--theme theme] [--fixtures dev/preview/fixtures]`. The default port is 9292 and the host 127.0.0.1.
+- Start with `node dev/preview/server.mjs [--port 9292] [--theme theme] [--fixtures dev/preview/fixtures] [--compress]`. The default port is 9292 and the host 127.0.0.1. Playwright reads the port from `SF_PREVIEW_PORT` (default 9292), so parallel runs can use their own server.
+- `--compress` (or `SF_PREVIEW_COMPRESS=1`; off by default): text responses (HTML, CSS, JS, JSON, SVG) are brotli/gzip-encoded per `Accept-Encoding` (static files at brotli q11, cached; dynamic HTML at q5) and `/cdn/` files get `Cache-Control: public, max-age=31536000, immutable`, like the Shopify CDN. Use it for lab timing (Lighthouse, LCP). Spec 16 does **not** depend on it: it computes compressed sizes itself.
 - `npm --prefix dev run preview` / `npm --prefix dev test` scripts.
 - Liquid is re-read from disk per request (no restart while developing).
 - HTML responses send `Cache-Control: no-store` and `X-Preview: 1`.
@@ -1280,7 +1294,7 @@ On any HTML route:
 - `?sections=a,b` → `application/json` `{ a: html|null, b: html|null }`.
 - Test overrides:
   - `?preview_settings=<url-encoded JSON>` merges into theme settings and persists in cookie `preview_settings`; `?preview_settings=reset` clears it.
-  - `?preview_sections=<JSON {"<templateSectionKey>": {settingId: value}}>` applies to this request only.
+  - `?preview_sections=<JSON {"<templateSectionKey>": {settingId: value, "blocks": {"<block id or block type>": {settingId: value}}}}>` applies to this request only. The optional `blocks` key merges settings into the template's existing blocks (by id, else every block of that type); it never adds blocks.
 
 ### 8.3 Rendering model (must match Shopify)
 
@@ -1459,8 +1473,9 @@ The cart is in memory, keyed by cookie `cart` (a random token), and persists acr
 | `time_tag` | `<time datetime>` with a strftime arg |
 | `url_param_escape` | |
 | `item_count_for_variant` | `cart \| item_count_for_variant: variant.id` |
+| `payment_button` | `{{ form \| payment_button }}` inside `{% form 'product' %}` only (any other input is a Liquid error). Shopify renders the accelerated checkout buttons client-side into `<div data-shopify="payment-button" class="shopify-payment-button">`. **Harness:** emits that container with one **inert** placeholder: a disabled `<button class="shopify-payment-button__button shopify-payment-button__button--unbranded">` reading "Accelerated checkout (renders on Shopify)". Never a working or fake checkout. Theme use: `sf-product-form` renders it under Add to cart **only** when `show_dynamic_checkout` is on (block setting on `sf-main-product` `buy_buttons`, default **false**; ruling §15.11). |
 
-Everything else is **forbidden** until it's added here. Explicitly forbidden: `img_url`, `asset_img_url`, `img_tag`, `link_to*`, `within`, `font_*`, `color_*`, `currency_selector`, `payment_type_*`, `metafield_*`, `customer_*_link`, `hmac_*`, `base64*`, `md5`, `sha*`, `camelize`, `find*`, `has`, `reject`.
+Everything else is **forbidden** until it's added here. Explicitly forbidden: `img_url`, `asset_img_url`, `img_tag`, `link_to*`, `within`, `font_*`, `color_*`, `currency_selector`, `payment_type_*` (not needed: `payment_button` covers dynamic checkout), `metafield_*`, `customer_*_link`, `hmac_*`, `base64*`, `md5`, `sha*`, `camelize`, `find*`, `has`, `reject`.
 
 **Global objects:**
 - `shop`: `name`, `url`, `domain`, `email`, `description`, `currency`, `money_format`, `money_with_currency_format`, `customer_accounts_enabled`, `customer_accounts_optional`, `password_message`, `policies` (each with `title`, `url`, `body`, `handle`), `privacy_policy`, `refund_policy`, `shipping_policy`, `terms_of_service`, `brand` (nil in the preview)
@@ -1573,19 +1588,19 @@ Every fixture file's root object carries `"placeholder": true` and a `"_note"` e
 | Homepage load | `01-homepage.spec.mjs` | 200 status. Sections A–F present in order (`[data-sf-section]` sequence: hero-film, featured-collection, signature-showcase, campaign-editorial, category-grid, brand-story) and G (newsletter + footer) present. Exactly one `h1`, containing the hero wordmark `img`, whose accessible name is "STEADFAST". CTA labels are "EXPLORE COLLECTION" (case-insensitive, href → collection) and "VIEW THE CAMPAIGN" (href `#campaign`, and `#campaign` exists on Section D). Section D has no lookbook. Section E renders the index list (5 links) with a visually hidden `h2`. `#newsletter` exists once. Ribbon visible. No `Liquid error` or `translation missing`. No console errors. No 4xx/5xx subresource. Featured cards = fixture count (≤ 8) with names, prices and colorways. |
 | Desktop nav | `02-nav-desktop.spec.mjs` | Primary nav links match `menus.json`. The dropdown opens on click and Enter, `aria-expanded` toggles, and Esc closes it and returns focus. The header is visible and its links are clickable during the intro (first visit). It is transparent over the hero with the logo at opacity 0, and solid after scrolling past it with the logo faded in. No element has a computed `backdrop-filter`. The `on-scroll-up` hide/show works. Desktop actions are the text labels SEARCH (opens the overlay with focus in the input), ACCOUNT (→ `/account/login`) and CART (n) (opens the drawer). |
 | Mobile nav | `03-nav-mobile.spec.mjs` (mobile project) | The desktop nav is hidden and the menu button visible (≥ 44px). The menu opens as the fullscreen dialog whose top row repeats the header (close button at the menu button's position), with focus inside; the open sequence settles within 560 ms. The submenu slide-over expands with a back button, and a link navigates. Esc and the close button work, and focus returns to the menu button. Body scroll is locked while open. The localization select is present when enabled. |
-| Product pages | `04-product.spec.mjs` | For **every** fixture product: title `h1`, price, all fixture media rendered with width/height, front/back where present, zoom dialog open/close, size guide drawer with the fallback "Sizing information to be confirmed.", the SHIPPING & RETURNS collapsible, no empty SIZE & FIT / CARE accordion, the buy button labelled "Add to cart", no dynamic checkout buttons by default, related products loaded via `/recommendations/products` (non-empty when fixtures allow), valid JSON-LD Product, and no "review"/"rating"/"★"/"360" strings. |
+| Product pages | `04-product.spec.mjs` | For **every** fixture product: title `h1`, price, all fixture media rendered with width/height, front/back where present, zoom dialog open/close, size guide drawer with the fallback "Sizing information to be confirmed.", the SHIPPING & RETURNS collapsible, no empty SIZE & FIT / CARE accordion, the buy button labelled "Add to cart", no dynamic checkout buttons by default, related products loaded via `/recommendations/products` (non-empty when fixtures allow), valid JSON-LD Product, and no "review"/"rating"/"★"/"360" strings. Dynamic checkout: none by default; with `preview_sections={"main":{"blocks":{"buy_buttons":{"show_dynamic_checkout":true}}}}` exactly one `[data-shopify="payment-button"]` renders inside the product form, and its placeholder button is disabled (ruling §15.11). |
 | Variant selection | `05-variants.spec.mjs` | Selecting a size updates `input[name=id]`, `?variant=` and the button label. A sold-out variant shows a disabled "Sold out". The unavailable-value marker is set correctly per §4.7. A colour change (garment 4) swaps the gallery to the variant media and updates the legend. Direct load of `?variant=` preselects it. Arrow keys move within the radio group. |
 | Cart operations | `06-cart.spec.mjs` | Add from the PDP → drawer opens, a line is present, `<sf-cart-count>` = 1, and the live region contains the added message. Increase/decrease and remove work. Exceeding fixture inventory shows the 422 message inline. The empty state renders. Card size cells: the zip hoodie card renders one `form[action$="/cart/add"]` per variant; a sold-out size is disabled; clicking an available size adds that variant and opens the drawer; with `javaScriptEnabled:false` the same click lands on `/cart` with the line. The multi-option "Add to cart" opens quick view with `intent:'add'`, and quick view add works. The live region says "… added to cart"; no visible or announced text matches `/\bbag\b/i`. `/cart` page update works with JS **and** with `javaScriptEnabled:false`. The checkout button POSTs to `/cart` → `/checkout` (Shopify checkout notice). `preview_settings={"cart_type":"page"}` → add navigates to `/cart`. |
-| Collection filtering | `07-collection-filtering.spec.mjs` | Counts are computed from fixtures. Each filter type works (size, colour, availability, price range, product type) and updates URL params and results without a reload. The active facet remove and "clear all" work. Back/forward restores state. The no-JS submit works. Sort by price ascending/descending and title gives the correct order. Pagination works with `preview_sections={"main":{"products_per_page":4}}`. The empty `tops` collection shows the empty state. The mobile filter drawer (mobile project) works. |
-| Video fallback | `08-hero-film.spec.mjs` | (a) Desktop first visit: the intro's `currentSrc` ends with `sf-film-desktop.mp4`, state reaches `playing`, the end still `img` is present with `fetchpriority="high"` and is the LCP entry, the header is visible. Seeking to `duration − 1` gives `.is-beat-8`, then `.is-beat-9` + state `ended`: the loop's `currentSrc` ends with `sf-film-loop-desktop.mp4`, the CTAs are visible, the control reads PAUSE, `sessionStorage['sf:intro-seen']==='1'`. (b) SKIP INTRO at ~1 s → final state within 500 ms and focus on the primary CTA. (c) Reload → **no intro request**, state `static`, end still and UI visible from first paint, the loop requested. (d) Mobile project: `sf-film-mobile.mp4` and `sf-film-loop-mobile.mp4`; a 1024×1366 portrait viewport also gets the mobile files (`MOBILE_MQ`). (e) `page.route('**/sf-film-desktop.mp4', abort)` → the intro ends (reason `error`) within 5 s and the loop plays; `page.route('**/sf-film-*.mp4', abort)` → `fallback`, end still and CTAs visible. (f) `HTMLMediaElement.prototype.play` rejecting (init script) → `fallback`, UI visible. (g) Save-Data emulation → `static`, **zero** mp4 requests. (h) Tab during the intro moves focus into the header and ends the intro (reason `key` or `focus`). (i) Scrolling during the intro ends it (`scrolled`); the loop pauses off-screen. (j) PAUSE flips `aria-pressed` and pauses the loop. (k) VIEW THE CAMPAIGN goes to `#campaign` by default; with `preview_sections={"hero":{"cta_secondary_action":"replay"}}` it restarts the intro from 0. (l) At most one intro and one loop file per visit. |
+| Collection filtering | `07-collection-filtering.spec.mjs` | Counts are computed from fixtures. Each filter type works (size, colour, availability, price range, product type) and updates URL params and results without a reload. The active facet remove and "clear all" work. Back/forward restores state. The no-JS submit works. Sort by price ascending/descending and title gives the correct order. Pagination works with `preview_sections={"main":{"products_per_page":4}}`. The empty `tops` collection shows the empty state. The mobile filter drawer (mobile project) works. With `products_per_page: 1` (≥ 6 pages), pages 1, 3, the middle and the last each have **exactly one** `[aria-current="page"]` in `.sf-pagination` with the page number, and gap parts render `…` (Shopify titles them `&hellip;`; PLAT-08). |
+| Video fallback | `08-hero-film.spec.mjs` | (a) Desktop first visit: the intro's `currentSrc` ends with `sf-film-desktop.mp4`, state reaches `playing`, the end still `img` is present with `fetchpriority="high"` and is the LCP entry, the header is visible. Seeking to `duration − 1` gives `.is-beat-8`, then `.is-beat-9` + state `ended`: the loop's `currentSrc` ends with `sf-film-loop-desktop.mp4`, the CTAs are visible, the control reads PAUSE, `sessionStorage['sf:intro-seen']==='1'`. (b) SKIP INTRO at ~1 s → final state within 500 ms and focus on the primary CTA. (c) Reload → **no intro request**, state `static`, end still and UI visible from first paint, the loop requested. (d) Mobile project: `sf-film-mobile.mp4` and `sf-film-loop-mobile.mp4`; a 1024×1366 portrait viewport also gets the mobile files (`MOBILE_MQ`). (e) `page.route('**/sf-film-desktop.mp4', abort)` → the intro ends (reason `error`) within 5 s and the loop plays; `page.route('**/sf-film-*.mp4', abort)` → `fallback`, end still and CTAs visible. (f) `HTMLMediaElement.prototype.play` rejecting (init script) → `fallback`, UI visible. (g) Save-Data emulation → `static`, **zero** mp4 requests. (h) Tab during the intro moves focus into the header and ends the intro (reason `key` or `focus`). (i) Scrolling during the intro ends it (`scrolled`); the loop pauses off-screen. (j) PAUSE swaps its label to PLAY (no `aria-pressed`) and pauses the loop; PLAY resumes it. (k) VIEW THE CAMPAIGN goes to `#campaign` by default; with `preview_sections={"hero":{"cta_secondary_action":"replay"}}` it restarts the intro from 0. (l) At most one intro and one loop file per visit. |
 | Animation behaviour | `09-animation.spec.mjs` | `gsap.min.js` is **not** requested on `/products/*`, `/collections/*` or the initial home load before scrolling, and **is** requested after scrolling to the signature section. A desktop `.pin-spacer` exists in the signature showcase; on mobile there's none. `ScrollTrigger.getAll().length` ≤ 10 on the homepage, and no GSAP is requested before scrolling past the hero. No running animation (`document.getAnimations()` or GSAP tween) targets `filter`. `[data-sf-reveal]` elements get `.is-revealed` after scrolling. No long task > 200 ms while scrolling the home page (PerformanceObserver). Dispatching `shopify:section:unload` on the signature section removes its pin-spacer and ScrollTriggers (`ScrollTrigger.getAll().length` drops). The cart drawer open/close transition settles and focus is correct. |
 | Reduced motion | `10-reduced-motion.spec.mjs` | With `reducedMotion: 'reduce'`: `html[data-sf-motion="reduced"]`, the hero is `static` with the wordmark and UI at rest, there's no mp4 request until PLAY is pressed (then only the loop file), no `.pin-spacer`, the Section F wordmark is fully visible, reveal content is visible immediately (computed opacity 1), and drawer animations are ≤ 150 ms. The footer visitor toggle sets reduced and persists across reloads. `preview_settings={"motion_level":"reduced"}` does the same without the OS preference. |
 | Responsive layouts | `11-responsive.spec.mjs` | Viewports 360×780, 390×844, 834×1112, 1280×800, 1440×900, 1920×1080 × routes `/`, `/collections/all`, a product, `/cart`, `/search?q=hoodie`, `/pages/contact`, `/account/login`. No horizontal overflow (`scrollWidth <= innerWidth`). CLS < 0.05 during load (layout-shift observer). Primary controls ≥ 44px on mobile. A full-page screenshot is saved for each. |
-| Keyboard accessibility | `12-a11y-keyboard.spec.mjs` | The skip link is the first Tab stop and focuses `#MainContent`. Focus indicators are visible (computed outline). Focus is trapped and Tab cycles inside the cart drawer, quick view, menu, search and size guide. Esc closes each and restores focus. Variant and facet controls are fully keyboard operable. Landmarks: one banner, one main, one contentinfo, labelled navs. axe on `/`, a product, `/collections/all`, `/cart`, `/search?q=hoodie`, `/account/login` and `/pages/contact` gives 0 serious/critical violations. |
-| (extra) Search | `13-search.spec.mjs` | Predictive results for "hoodie" (products section, arrow-key navigation, Enter → `/search?q=hoodie`). The results page shows counts and filters. The no-results state renders. |
+| Keyboard accessibility | `12-a11y-keyboard.spec.mjs` | The skip link is the first Tab stop and focuses `#MainContent`. Focus indicators are visible (computed outline). Focus is trapped and Tab cycles inside the cart drawer, quick view, menu, search and size guide. Esc closes each and restores focus. Variant and facet controls are fully keyboard operable. Landmarks: one banner, one main, one contentinfo, labelled navs. axe on `/`, a product, `/collections/all`, `/cart`, `/search?q=hoodie`, `/account/login` and `/pages/contact` gives 0 serious/critical violations. **Template suffixes are honoured** (A11Y-09): `/pages/contact` renders `form#contact_form` (page.contact), and a failed submit (server-side error path) renders `[data-sf-error-summary]` and **focuses** it; a failed newsletter submit moves focus to the invalid field or its error. **Open states** (A11Y-15), each axe-scanned on its own (`include: '[id=…] dialog'`) after opening via its trigger: cart drawer with a line, search overlay with results, quick view, product zoom, filter drawer, size guide, menu drawer (mobile), desktop mega menu. **Motion on**: the seven route scans run again with `reducedMotion: 'no-preference'` after a scroll-through. **Keyboard regressions (motion on, desktop):** Tab reaches `.sf-signature-showcase__cta`; every Tab stop on the homepage has an effective opacity > 0 once settled (2.4.7) and is never *entirely* covered by `.sf-header` (2.4.11). |
+| (extra) Search | `13-search.spec.mjs` | Predictive results for "hoodie" (products section, arrow-key navigation, Enter → `/search?q=hoodie`). The results page shows counts and filters. The no-results state renders. The overlay never shows more results than the request allows: with `resources[limit_scope]=each` at most `limit` per type, with the default `all` at most `limit` in total; the suggest endpoint itself enforces the same rule (PLAT-08). |
 | (extra) Quick view | `14-quick-view.spec.mjs` | Opens from a card, loads `?section_id=sf-quick-view`, the variant picker works, add → quick view closes and the drawer opens. Esc restores focus to the card trigger. |
 | (extra) Template smoke | `15-templates-smoke.spec.mjs` | Every route in §8.2 (GET) returns the expected status, has no Liquid errors and no console errors. Covers customer pages (logged out and logged in), password, gift card, policies, blog, article and 404 (status 404). |
-| (extra) Performance | `16-performance.spec.mjs` | The §6.1 budgets per route (summing response body sizes by type). Lazy images below the fold are not requested before scrolling. At most one intro and one loop file are requested. Exactly the 5 DESIGN §3.1 font files exist, each ≤ 40 KB; exactly 2 are preloaded (text-400, label-500). |
+| (extra) Performance | `16-performance.spec.mjs` | The §6.1 budgets per route, **compressed** (brotli q11 computed in-test with `zlib` on each text response; binary bodies as served) and HTTP/2-aware: theme-owned requests before first scroll, theme JS and CSS (brotli), render-blocking stylesheets (count and brotli bytes, from `renderBlockingStatus`), non-video transfer before first scroll (asserted on the mobile project, DPR 3). Every route attaches `<kind>-measure.json` (per-file raw and brotli bytes) so §6.1 can be re-derived. The connection is pinned to `cellular4g` (CDP `Network.emulateNetworkConditions`), so Chromium's lazy-load distance is a fixed 1250 px: lazy images more than `innerHeight + 1250 + 250` px below the fold are not requested before scrolling. Per-file brotli caps for the always-loaded core files (§6.1). GSAP is 0 bytes before scroll and ≤ 125 KB raw after. At most one intro and one loop file per visit. Fonts: exactly the five files, each ≤ 40 KB, two preloaded. Theme folder ≤ 40 MB. |
 | (extra) Data honesty | `17-data-honesty.spec.mjs` | On all routes: no matches for `/review|rating|★|only \d+ left|selling fast|limited stock|360°|in stock: \d+|campaign film|shot by|directed by|appliqu|embroider|\bbag\b/i` in visible text or `aria-label`s. The ribbon is present on every HTML page. No inventory numbers are rendered. |
 
 The pass/fail evidence is `dev/tests/reports/results.json`. ORCH writes `docs/TEST-REPORT.md` **only** from executed results, and skipped tests are reported as skipped with their reasons.
@@ -1615,7 +1630,7 @@ The v1 names `sf-font-display-400` and `sf-font-display-400-italic` are retired.
 | File | Spec |
 |---|---|
 | `sf-logo-wordmark.svg` | Traced letterforms, **viewBox 0 0 1115 154 (7.24:1)**, `fill="currentColor"`, no `width`/`height`, 10.4 KB (< 15 KB, required for `inline_asset_content`). |
-| `sf-logo-textured-{600,1200,1800}.webp`, `sf-logo-textured-1200.png` | Alpha-transparent cream wordmark with streaks, **1210×411 native box (2.944:1)**; letters at x 4.50–96.65 %, y 32.48–69.95 %. Delivered: 600/1200/1800 + png 1200 (the 1800 is a 1.49× upscale, DESIGN §3.4). |
+| `sf-logo-textured-{600,800,1000,1200,1800}.webp`, `sf-logo-textured-1200.png` | Alpha-transparent cream wordmark with streaks, **1210×411 native box (2.944:1)**; letters at x 4.50–96.65 %, y 32.48–69.95 %. Delivered: 600/800/1000/1200/1800 + png 1200 (the 1800 is a 1.49× upscale, DESIGN §3.4). WebP alpha quality 60: 600w 17.6 KB, 800w 29.5 KB, 1000w 43.6 KB, 1200w 59.3 KB (was 108.8 KB at alpha quality 75; PERF-04). |
 | `sf-logo-streaks-{1200,1800}.webp` | Delivered (MEDIA): the streak-only raster for the F lockup (letters knocked out under the SVG letter mask dilated 1 px), same 1210×411 box. |
 | `sf-favicon-32.png`, `sf-apple-touch-icon-180.png` | First-letter crops. (`sf-favicon-180.png`, `sf-favicon-512.png` are bundled but unreferenced.) |
 | `sf-og-default.jpg` | 1200×630 |
@@ -1641,14 +1656,14 @@ These four names are final (FILM A8's "name pending ARCH" is resolved). Any camp
 **Stills** (generated from `manifest.json` `theme_assets`; files are `{base}-{width}.webp` plus the listed fallback):
 | Base | WebP widths | Fallback file | Intrinsic w×h (fallback) | Default alt | Used by |
 |---|---|---|---|---|---|
-| `sf-logo-textured` | 600, 1200, 1800 | `sf-logo-textured-1200.png` | 1200×408 | (logo; `sf-logo` sets the alt) | hero `h1`, brand story (< 990 px), password page. |
+| `sf-logo-textured` | 600, 800, 1000, 1200, 1800 | `sf-logo-textured-1200.png` | 1200×408 | (logo; `sf-logo` sets the alt) | hero `h1`, brand story (< 990 px), password page. |
 | `sf-logo-wordmark` | — | `sf-logo-wordmark.svg` | 1115×154 | (logo; `sf-logo` sets the label) | header, footer, next-drop tile, menu header row, letters of the F lockup |
 | `sf-favicon-32` | — | `sf-favicon-32.png` | 32×32 | n/a | favicon fallback |
 | `sf-favicon-180` | — | `sf-favicon-180.png` | 180×180 | n/a | spare (not referenced) |
 | `sf-apple-touch-icon-180` | — | `sf-apple-touch-icon-180.png` | 180×180 | n/a | apple-touch-icon fallback |
 | `sf-favicon-512` | — | `sf-favicon-512.png` | 512×512 | n/a | spare (not referenced) |
 | `sf-og-default` | — | `sf-og-default.jpg` | 1200×630 | n/a | `og:image` fallback |
-| `sf-category-hoodies` | 540, 900, 1200 | `sf-category-hoodies-900.jpg` | 900×1125 | Hoodies | E default |
+| `sf-category-hoodies` | 540, 900, 1080 | `sf-category-hoodies-900.jpg` | 900×1125 | Hoodies | E default; header mega tile default. The black heavyweight zip hoodie, night photo upper crop (DESIGN §5.6; source-limited to 1080) |
 | `sf-signature-hero` | 960, 1600, 2400, 2730 | `sf-signature-hero-1600.jpg` | 1600×900 | STEADFAST zip hoodie in washed blue-grey on black, front | C desktop stage, front |
 | `sf-category-new-arrivals` | 540, 720 | `sf-category-new-arrivals-720.jpg` | 720×900 | New arrivals | E default. from the graded IMG_4913 embossed charcoal close-up (DESIGN §5.6) |
 | `sf-signature-front` | 600, 900, 1200 | `sf-signature-front-900.jpg` | 900×1125 | Front of the washed blue-grey STEADFAST zip hoodie | C mobile/reduced front; placeholder card 1 |
@@ -1785,7 +1800,7 @@ Contract:
 | X2 | Locale key names | `product_card.add_to_cart`, `products.add_to_cart` (DESIGN §6.2 still names the v1 keys) | DESIGN §6.2: update the key names |
 | X3 | Hero settings | IDs in §2.4 A (`intro_*`, `loop_*`, `end_image_*`, `campaign_film_*`, `logo_reveal`, `intro_frequency`); DESIGN v2's `eyebrow`, `subheading`, `logo_width` kept | FILM B7: use these IDs |
 | X4 | Section C `scroll_length` | Kept (DESIGN §10.1 uses it) | — |
-| X5 | Logo renditions | 600/1200/1800 + `sf-logo-streaks-{1200,1800}` | MEDIA: render, update the manifest, re-run the generator |
+| X5 | Logo renditions | 600/800/1000/1200/1800 + `sf-logo-streaks-{1200,1800}` (800/1000 added in the fix pass, PERF-04) | Done: rendered, manifest updated, generator re-run |
 | X6 | Category Tops / New Arrivals stills | DESIGN §5.6 sources | MEDIA: regenerate `sf-category-tops`, `sf-category-new-arrivals` |
 | X7 | Black-point clamp | DESIGN §5.3 | MEDIA: re-render on-black stills |
 | X8 | Fonts | DESIGN §3.1 five files | MEDIA: instance and subset; add `fonts` to the manifest |
@@ -1813,3 +1828,8 @@ Contract:
 - **X3 — Hero settings:** ARCH §2.4 A IDs (`intro_*`, `loop_*`, `end_image_*`, `campaign_film_*`, `logo_reveal`, `intro_frequency`) plus DESIGN's `eyebrow`, `subheading`, `logo_width`.
 - **Manifest concurrency.** Film renders write `media/processed/manifest.films.json`. Stills, logo and fonts write `media/processed/manifest.json`. `tools/media/gen_asset_snippet.py` reads **both**. Nobody else writes either file.
 - **Playwright.** Use the preinstalled Chromium. Never run `playwright install`. `@playwright/test` is pinned to the preinstalled `playwright` version. If the browser isn't found, launch with `executablePath: '/opt/pw-browsers/chromium'` per the environment note (resolve the real binary path under `/opt/pw-browsers`).
+- **15.10 — Performance budgets (fix pass, PERF-01 / PERF-07).** Keep Shopify-standard per-section stylesheets (§3.1; cacheable, multiplexed over HTTP/2 on the Shopify CDN, and required for theme-editor add/remove), but section JS that is not needed for the first screen is downloaded only when its section nears the viewport, and nothing is render-blocking beyond the three global stylesheets. Budgets are **compressed** and **HTTP/2-aware**: the old raw-byte totals and the 25-request home cap measured the wrong thing (Shopify serves brotli, and minifies only ES5-valid JS, which ours is not, so raw unminified bytes are what gets compressed). §6.1 numbers are the measured post-fix values + ~15 % margin; spec 16 enforces them. Merging the HOME stylesheets was rejected: it saves about 50 ms under Slow 4G and breaks §3.1 and the theme editor.
+- **15.11 — Dynamic checkout.** `payment_button` joins the allowed surface (§8.6); `payment_type_*` stays forbidden (not needed). The harness renders an inert stand-in. The PDP renders `{{ form | payment_button }}` only when the `buy_buttons` block's `show_dynamic_checkout` is on (default **false**).
+- **15.12 — Lead images.** The strongest product image leads: the blue-grey zip hoodie is the first card in the featured rail and grids (fixture order). A lifestyle or daylight frame is never the first card image or an LCP image when another view exists; the Gothic hoodie's charcoal frame is graded and its sky burnt out (MEDIA).
+- **15.13 — Default copy.** No construction or material claims (embroidered, appliqué, embossed, reflective, crystal, fabric, weight) and no invented facts in any default copy, alt text, fixture title or caption. Captions describe only what is visible.
+- **15.14 — `sf-core.js` size.** No build step. Dead code is removed and rarely used features move to lazily loaded modules where that reduces critical JS; the cap is then set to the measured size (§4.1, §6.1). New core features beyond it ship as on-demand modules.

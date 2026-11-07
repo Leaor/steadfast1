@@ -1,6 +1,6 @@
 # STEADFAST test suite — run summary
 
-> **Superseded:** this summary describes the pre-integration run (363/21/154). The final integration run (381 passed / 3 failed / 154 skipped) and its diagnoses are in `INTEGRATION.md`; `results.json` and `html/` are from that run.
+> **Superseded:** this summary describes the pre-integration run (363/21/154). The current report is **`docs/TEST-REPORT.md`** (full run 2026-11-07: 424 passed / 0 failed / 158 skipped), generated from `results.json`; the fix pass is `INTEGRATION.md` §8.
 
 
 Source of truth: `dev/tests/reports/results.json` (Playwright JSON reporter) from the **final full run**

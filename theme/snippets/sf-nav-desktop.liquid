@@ -1,16 +1,20 @@
 {%- doc -%}
-  Desktop primary navigation (≥ 990 px) with disclosure-pattern mega panels (DESIGN §7.2).
-  Top-level links with children become <button aria-expanded aria-controls> + a full-width panel:
-  cols 1–3 the link's children (CATEGORIES), cols 4–6 the optional secondary menu (COLLECTIONS),
-  cols 7–12 up to two menu_promo tiles whose `menu_item` matches the link title.
+  Desktop primary navigation (≥ 990 px) with disclosure-pattern mega panels (DESIGN §7.2), built on
+  the homepage's Section E index device: the link's children as a Spectral index (washed grey →
+  bone on hover/focus, 56 px rows on hairlines) in cols 1–5, the optional secondary menu as a quiet
+  label column in cols 6–8 (collapsed when empty), and a 3:4 image stage in cols 9–12 that
+  crossfades to the hovered/focused category (sf-header.js). Stage images: the collection's image,
+  else the bundled sf-category-{handle} still; a menu_promo block's image (matched by title) leads.
+  Links without an image keep the current frame. No stage images → no stage column.
 
   @param {object} menu - The main linklist.
-  @param {object} [secondary_menu] - Linklist for the COLLECTIONS column.
+  @param {object} [secondary_menu] - Linklist for the secondary column (first panel only).
   @param {object} [blocks] - section.blocks (menu_promo blocks).
 
   @example
   {% render 'sf-nav-desktop', menu: section.settings.menu, secondary_menu: section.settings.mega_secondary_menu, blocks: section.blocks %}
 {%- enddoc -%}
+{%- assign stage_assets = 'hoodies,tracksuits,tops,bottoms,new-arrivals' | split: ',' -%}
 {%- if menu != blank and menu.links.size > 0 -%}
   <nav class="sf-nav" aria-label="{{ 'accessibility.primary_nav' | t }}">
     <ul class="sf-nav__list" role="list">
@@ -18,62 +22,107 @@
         {%- assign panel_id = 'sf-mega-' | append: forloop.index -%}
         <li class="sf-nav__item{% if link.links.size > 0 %} sf-nav__item--has-panel{% endif %}" data-sf-nav-item>
           {%- if link.links.size > 0 -%}
+            {%- liquid
+              assign link_title = link.title | strip | downcase
+              assign show_secondary = false
+              if secondary_menu != blank and secondary_menu.links.size > 0 and forloop.first
+                assign show_secondary = true
+              endif
+
+              # A promo block for this menu item leads the stage (frame 0); its heading/link caption it.
+              assign promo = false
+              for block in blocks
+                if block.type == 'menu_promo' and promo == false
+                  assign promo_title = block.settings.menu_item | strip | downcase
+                  if promo_title == link_title
+                    assign promo = block
+                  endif
+                endif
+              endfor
+
+              # One stage frame per child that has an image; children map to their frame index.
+              assign frame_count = 0
+              assign child_frames = ''
+              if promo and promo.settings.image != blank
+                assign frame_count = 1
+              endif
+            -%}
+            {%- capture frames -%}
+              {%- if frame_count == 1 -%}
+                <span class="sf-mega__frame is-active" data-sf-mega-frame="0" {{ promo.shopify_attributes }}>
+                  {%- render 'sf-image', image: promo.settings.image, sizes: '(min-width: 990px) 280px, 1px', widths: '360,540,720', ratio: 0.75, crop: 'center', class: 'sf-mega__img', alt: '' -%}
+                </span>
+              {%- endif -%}
+              {%- for child in link.links -%}
+                {%- liquid
+                  assign child_has_img = false
+                  if child.type == 'collection_link' and child.object != blank and child.object.image != blank
+                    assign child_has_img = true
+                  endif
+                  assign child_handle = child.url | split: '?' | first | split: '/' | last
+                  assign child_asset = ''
+                  if stage_assets contains child_handle
+                    assign child_asset = 'sf-category-' | append: child_handle
+                  endif
+                  assign frame_idx = -1
+                  if child_has_img or child_asset != ''
+                    assign frame_idx = frame_count
+                    assign frame_count = frame_count | plus: 1
+                  endif
+                  assign child_frames = child_frames | append: frame_idx | append: ','
+                -%}
+                {%- if frame_idx > -1 -%}
+                  <span class="sf-mega__frame{% if frame_idx == 0 %} is-active{% endif %}" data-sf-mega-frame="{{ frame_idx }}">
+                    {%- if child_has_img -%}
+                      {%- render 'sf-image', image: child.object.image, sizes: '(min-width: 990px) 280px, 1px', widths: '360,540,720', ratio: 0.75, crop: 'center', class: 'sf-mega__img', alt: '' -%}
+                    {%- else -%}
+                      {%- render 'sf-image', asset: child_asset, sizes: '(min-width: 990px) 280px, 1px', class: 'sf-mega__img', alt: '' -%}
+                    {%- endif -%}
+                  </span>
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endcapture -%}
+            {%- assign child_frames = child_frames | split: ',' -%}
             <button type="button" class="sf-navlink sf-nav__trigger" aria-expanded="false" aria-controls="{{ panel_id }}" data-sf-mega-trigger>
               {{- link.title | escape -}}
             </button>
-            <div class="sf-mega" id="{{ panel_id }}" data-sf-mega-panel>
+            <div class="sf-mega{% if frame_count == 0 %} sf-mega--no-stage{% endif %}" id="{{ panel_id }}" data-sf-mega-panel>
               <div class="sf-mega__inner sf-container">
-                <div class="sf-mega__col sf-mega__col--categories" style="--i: 0">
-                  <p class="sf-mega__title">{{ 'menu.categories' | t }}</p>
-                  <ul class="sf-mega__links" role="list">
-                    {%- for child in link.links -%}
-                      <li>
-                        <a class="sf-mega__link" href="{{ child.url }}"{% if child.current %} aria-current="page"{% endif %}>{{ child.title | escape }}</a>
-                        {%- if child.links.size > 0 -%}
-                          <ul class="sf-mega__sublinks" role="list">
-                            {%- for grandchild in child.links -%}
-                              <li><a class="sf-mega__sublink" href="{{ grandchild.url }}"{% if grandchild.current %} aria-current="page"{% endif %}>{{ grandchild.title | escape }}</a></li>
-                            {%- endfor -%}
-                          </ul>
-                        {%- endif -%}
-                      </li>
+                <ul class="sf-mega__index" role="list" style="--i: 0">
+                  {%- for child in link.links -%}
+                    {%- assign frame_idx = child_frames[forloop.index0] -%}
+                    <li class="sf-mega__row">
+                      <a class="sf-mega__link" href="{{ child.url }}"{% if child.current %} aria-current="page"{% endif %}{% if frame_idx != '-1' %} data-sf-mega-show="{{ frame_idx }}"{% endif %}>
+                        {{- child.title | escape -}}
+                      </a>
+                      {%- if child.links.size > 0 -%}
+                        <ul class="sf-mega__sublinks" role="list">
+                          {%- for grandchild in child.links -%}
+                            <li><a class="sf-mega__sublink" href="{{ grandchild.url }}"{% if grandchild.current %} aria-current="page"{% endif %}>{{ grandchild.title | escape }}</a></li>
+                          {%- endfor -%}
+                        </ul>
+                      {%- endif -%}
+                    </li>
+                  {%- endfor -%}
+                </ul>
+                {%- if show_secondary -%}
+                  <ul class="sf-mega__secondary" role="list" style="--i: 1">
+                    {%- for child in secondary_menu.links -%}
+                      <li><a class="sf-mega__label-link" href="{{ child.url }}"{% if child.current %} aria-current="page"{% endif %}>{{ child.title | escape }}</a></li>
                     {%- endfor -%}
                   </ul>
-                </div>
-                {%- if secondary_menu != blank and secondary_menu.links.size > 0 and forloop.first -%}
-                  <div class="sf-mega__col sf-mega__col--collections" style="--i: 1">
-                    <p class="sf-mega__title">{{ 'menu.collections' | t }}</p>
-                    <ul class="sf-mega__links" role="list">
-                      {%- for child in secondary_menu.links -%}
-                        <li><a class="sf-mega__link" href="{{ child.url }}"{% if child.current %} aria-current="page"{% endif %}>{{ child.title | escape }}</a></li>
-                      {%- endfor -%}
-                    </ul>
-                  </div>
                 {%- endif -%}
-                {%- assign promo_count = 0 -%}
-                {%- capture promos -%}
-                  {%- for block in blocks -%}
-                    {%- if block.type == 'menu_promo' and promo_count < 2 -%}
-                      {%- assign promo_title = block.settings.menu_item | strip | downcase -%}
-                      {%- assign link_title = link.title | strip | downcase -%}
-                      {%- if promo_title == link_title -%}
-                        {%- assign promo_count = promo_count | plus: 1 -%}
-                        <a class="sf-mega__tile" href="{{ block.settings.link | default: link.url }}" {{ block.shopify_attributes }}>
-                          <span class="sf-mega__tile-media">
-                            {%- render 'sf-image', image: block.settings.image, asset: 'sf-category-hoodies', sizes: '(min-width: 990px) 20vw, 1px', class: 'sf-mega__tile-img', alt: '' -%}
-                          </span>
-                          {%- if block.settings.heading != blank -%}
-                            <span class="sf-mega__tile-name">{{ block.settings.heading | escape }}</span>
-                          {%- else -%}
-                            <span class="sf-visually-hidden">{{ link.title | escape }}</span>
-                          {%- endif -%}
-                        </a>
+                {%- if frame_count > 0 -%}
+                  <div class="sf-mega__stage-col" style="--i: 2">
+                    {%- if promo and promo.settings.image != blank -%}
+                      <a class="sf-mega__stage" href="{{ promo.settings.link | default: link.url }}" tabindex="-1" aria-hidden="true">{{ frames }}</a>
+                      {%- if promo.settings.heading != blank -%}
+                        <a class="sf-mega__label-link sf-mega__caption" href="{{ promo.settings.link | default: link.url }}">{{ promo.settings.heading | escape }}</a>
                       {%- endif -%}
+                    {%- else -%}
+                      <span class="sf-mega__stage" aria-hidden="true">{{ frames }}</span>
                     {%- endif -%}
-                  {%- endfor -%}
-                {%- endcapture -%}
-                {%- if promo_count > 0 -%}
-                  <div class="sf-mega__tiles" style="--i: 2">{{ promos }}</div>
+                  </div>
                 {%- endif -%}
               </div>
             </div>

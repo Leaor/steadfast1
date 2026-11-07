@@ -20,6 +20,27 @@
     <span class="sf-cart-totals__label">{{ 'cart.subtotal' | t }}</span>
     <span class="sf-cart-totals__amount sf-tabular" data-sf-cart-subtotal>{{ cart.total_price | money }}</span>
   </div>
+  {%- liquid
+    # Tax/duties wording follows the market (Dawn: cart.taxes_included / cart.duties_included); the shipping link only when a policy exists.
+    if cart.duties_included and cart.taxes_included
+      assign tax_line = 'products.duties_and_taxes_included' | t
+    elsif cart.duties_included
+      assign tax_line = 'products.duties_included_taxes_at_checkout' | t
+    elsif cart.taxes_included
+      assign tax_line = 'products.tax_included' | t
+    else
+      assign tax_line = 'products.tax_at_checkout' | t
+    endif
+  -%}
+  <p class="sf-cart-totals__note">
+    {%- if shop.shipping_policy.body == blank -%}{{ tax_line }}
+    {%- elsif cart.taxes_included or cart.duties_included -%}{{ tax_line }} {{ 'products.shipping_policy_html' | t: link: shop.shipping_policy.url }}
+    {%- else -%}{{ 'products.taxes_and_shipping_at_checkout_html' | t: link: shop.shipping_policy.url }}{%- endif -%}
+  </p>
+  {%- comment -%}
+    The merchant's own note follows. The setting is blank by default: a default sentence would restate
+    (and could contradict) the computed tax line above.
+  {%- endcomment -%}
   {%- if settings.cart_note_text != blank -%}
     <p class="sf-cart-totals__note">{{ settings.cart_note_text | escape }}</p>
   {%- endif -%}

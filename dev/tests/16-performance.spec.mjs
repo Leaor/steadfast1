@@ -1,17 +1,43 @@
-// Performance budgets (BRIEF §9; ARCHITECTURE §9 row 16, §6.1). Raw bytes as served by the preview.
-import { test, expect, fx, gotoOk, fileOf, markIntroSeen } from './helpers/base.mjs';
-import { readdirSync, statSync } from 'node:fs';
+// Performance budgets (BRIEF §9; ARCHITECTURE §9 row 16, §6.1 v1.2; ruling §15.10).
+// Budgets are COMPRESSED (brotli q11, computed in-test with zlib, as the Shopify CDN serves text) and
+// HTTP/2-aware (request counts are a ceiling on theme-owned requests, not a proxy for latency).
+// Every page writes its measurement to the test attachments (`<kind>-measure.json`) so §6.1 can be
+// re-derived from real numbers: budget = measured post-fix value + ~15 % (ARCHITECTURE §6.1).
+import { test, expect, fx, gotoOk, fileOf, markIntroSeen, isMobile } from './helpers/base.mjs';
+import { readdirSync, statSync, readFileSync } from 'node:fs';
 import path from 'node:path';
+import zlib from 'node:zlib';
 
 const KB = 1024;
+const br = (buf) => zlib.brotliCompressSync(buf, { params: { [zlib.constants.BROTLI_PARAM_QUALITY]: 11 } }).length;
+const TEXT = /^(text\/|application\/(json|javascript)|image\/svg\+xml)/;
+
+// requests: theme-owned requests before the first scroll (document + theme assets + media; no
+// content_for_header platform requests, none exist on the preview). jsBr/cssBr: brotli totals.
+// transfer: non-video bytes before the first scroll, compressed text + binary as served, mobile DPR 3.
+// ARCHITECTURE §6.1 v1.2: measured on 2026-11-07 (this spec's own *-measure.json, max of the desktop and
+// mobile projects, connection pinned to 4g) + ~15 % margin, rounded up. Re-derive them the same way.
 const BUDGETS = {
-  home: { js: 130 * KB, css: 170 * KB, gsap: 0, requests: 25 },
-  product: { js: 100 * KB, css: 120 * KB, gsap: 0, requests: 25 },
-  collection: { js: 90 * KB, css: 110 * KB, gsap: 0, requests: 25 },
-  search: { js: 90 * KB, css: 110 * KB, gsap: 0, requests: 25 },
-  cart: { js: 80 * KB, css: 100 * KB, gsap: 0, requests: 20 },
-  content: { js: 80 * KB, css: 100 * KB, gsap: 0, requests: 20 },
-  customer: { js: 80 * KB, css: 100 * KB, gsap: 0, requests: 20 },
+  home: { requests: 41, jsBr: 33.5 * KB, cssBr: 28.5 * KB, transfer: 465 * KB },
+  product: { requests: 29, jsBr: 27.5 * KB, cssBr: 20.5 * KB, transfer: 650 * KB },
+  collection: { requests: 26, jsBr: 24 * KB, cssBr: 20.5 * KB, transfer: 390 * KB },
+  search: { requests: 23, jsBr: 24 * KB, cssBr: 22.5 * KB, transfer: 270 * KB },
+  cart: { requests: 19, jsBr: 20.5 * KB, cssBr: 18.75 * KB, transfer: 117 * KB },
+  content: { requests: 19, jsBr: 22 * KB, cssBr: 18.5 * KB, transfer: 118 * KB },
+  customer: { requests: 20, jsBr: 22 * KB, cssBr: 20 * KB, transfer: 120 * KB },
+};
+// Render-blocking CSS, every template (§3.1: the three global files; measured 3 files, 12.2 KB br).
+const BLOCKING = { count: 4, br: 14.5 * KB };
+// Per-file caps for the always-loaded files (brotli q11; sf-core also a raw ceiling). sf-core.js is capped
+// at its measured size (ruling §15.14): new core features beyond it ship as on-demand modules.
+const FILE_CAPS = {
+  'sf-core.js': { br: 8 * KB, raw: 33 * KB },
+  'sf-header.js': { br: 4 * KB },
+  'sf-header.css': { br: 4.5 * KB },
+  'sf-product-card.css': { br: 2.5 * KB },
+  'sf-product-card.js': { br: 1.75 * KB },
+  'sf-cart.js': { br: 5.125 * KB },
+  'sf-base.css': { br: 6.5 * KB },
 };
 const ROUTES = () => [
   ['home', '/'], ['product', `/products/${fx.products()[0].handle}`], ['collection', '/collections/all'],
@@ -20,37 +46,81 @@ const ROUTES = () => [
 const isGsap = (u) => /\/(gsap|ScrollTrigger)\.min\.js/.test(u);
 
 function meter(page) {
-  const m = { js: 0, css: 0, gsap: 0, urls: new Set(), files: [] };
-  page.on('response', async (r) => {
+  const m = { js: 0, jsBr: 0, css: 0, cssBr: 0, gsap: 0, transfer: 0, urls: new Set(), files: [], pending: [] };
+  page.on('response', (r) => {
     const url = r.url();
     if (url.startsWith('data:')) return;
     m.urls.add(url.split('#')[0]);
     const type = r.request().resourceType();
-    if (type !== 'script' && type !== 'stylesheet') return;
-    let size = 0;
-    try { size = (await r.body()).length; } catch { size = Number(r.headers()['content-length'] || 0); }
-    if (isGsap(url)) m.gsap += size;
-    else if (type === 'script') m.js += size;
-    else m.css += size;
-    m.files.push(`${type} ${fileOf(url)} ${size}`);
+    if (type === 'media' || /\.mp4(\?|$)/.test(url)) return; // video budgets are §6.1's asset rows
+    m.pending.push((async () => {
+      let body = null;
+      try { body = await r.body(); } catch { /* redirects, aborted */ }
+      const size = body ? body.length : Number(r.headers()['content-length'] || 0);
+      const ctype = r.headers()['content-type'] || '';
+      const sizeBr = body && TEXT.test(ctype) && size > 512 ? br(body) : size;
+      m.transfer += sizeBr;
+      if (type === 'script' || type === 'stylesheet') {
+        if (isGsap(url)) m.gsap += size;
+        else if (type === 'script') { m.js += size; m.jsBr += sizeBr; } else { m.css += size; m.cssBr += sizeBr; }
+      }
+      m.files.push({ type, file: fileOf(url), raw: size, br: sizeBr });
+    })());
   });
   return m;
 }
+// Pin the effective connection type to 4g (Chromium's lazy-load distance is 1250 px on 4g, 3000 px when
+// unknown), so "before first scroll" means the same set of lazy images on every run (PERF-07).
+async function emulate4g(page) {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Network.enable');
+  await cdp.send('Network.emulateNetworkConditions', {
+    offline: false, latency: 20, downloadThroughput: 9 * 1024 * 1024 / 8, uploadThroughput: 9 * 1024 * 1024 / 8, connectionType: 'cellular4g',
+  });
+  return cdp;
+}
+const settle = async (m) => { let n = -1; while (n !== m.pending.length) { n = m.pending.length; await Promise.all(m.pending); } };
 
 for (const [i, kind] of ['home', 'product', 'collection', 'search', 'cart', 'content', 'customer'].entries()) {
   test(`budget: ${kind}`, async ({ page }, testInfo) => {
     const [, url] = ROUTES()[i];
+    await emulate4g(page);
     const m = meter(page);
     await gotoOk(page, url);
     await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => {});
+    await settle(m);
+    const blocking = await page.evaluate(() => performance.getEntriesByType('resource')
+      .filter((e) => e.renderBlockingStatus === 'blocking' && e.initiatorType === 'link').map((e) => e.name.split('/').pop().split('?')[0]));
+    const blockingBr = m.files.filter((f) => f.type === 'stylesheet' && blocking.includes(f.file)).reduce((a, f) => a + f.br, 0);
     const b = BUDGETS[kind];
-    await testInfo.attach(`${kind}-resources.txt`, { body: [...m.files, `requests=${m.urls.size}`, ...m.urls].join('\n') });
-    expect(m.js, `theme JS raw bytes on ${url}`).toBeLessThanOrEqual(b.js);
-    expect(m.css, `CSS raw bytes on ${url}`).toBeLessThanOrEqual(b.css);
+    const measure = {
+      project: testInfo.project.name, url, requests: m.urls.size, jsRaw: m.js, jsBr: m.jsBr, cssRaw: m.css, cssBr: m.cssBr,
+      transferBr: m.transfer, blockingCss: blocking, blockingBr, files: m.files.sort((a, z) => z.br - a.br),
+    };
+    await testInfo.attach(`${kind}-measure.json`, { body: JSON.stringify(measure, null, 2), contentType: 'application/json' });
     expect(m.gsap, `GSAP bytes before scroll on ${url}`).toBe(0);
-    expect(m.urls.size, `requests before first scroll on ${url}`).toBeLessThanOrEqual(b.requests);
+    expect(m.urls.size, `theme-owned requests before first scroll on ${url}`).toBeLessThanOrEqual(b.requests);
+    expect(m.jsBr, `theme JS (brotli) on ${url}`).toBeLessThanOrEqual(b.jsBr);
+    expect(m.cssBr, `CSS (brotli) on ${url}`).toBeLessThanOrEqual(b.cssBr);
+    expect(blocking.length, `render-blocking stylesheets on ${url}: ${blocking.join(', ')}`).toBeLessThanOrEqual(BLOCKING.count);
+    expect(blockingBr, `render-blocking CSS (brotli) on ${url}`).toBeLessThanOrEqual(BLOCKING.br);
+    // The transfer budget is defined at mobile DPR 3 (the heaviest image density).
+    if (isMobile(testInfo)) expect(m.transfer, `non-video transfer before first scroll on ${url} (mobile DPR 3, compressed)`).toBeLessThanOrEqual(b.transfer);
   });
 }
+
+test('per-file caps (brotli) for the always-loaded core files', async ({}, testInfo) => {
+  test.skip(isMobile(testInfo), 'file-system check, once');
+  const rows = [];
+  for (const [f, cap] of Object.entries(FILE_CAPS)) {
+    const buf = readFileSync(path.join(fx.THEME_DIR, 'assets', f));
+    const row = { f, raw: buf.length, br: br(buf) };
+    rows.push(row);
+    expect(row.br, `${f} brotli ≤ ${cap.br} B`).toBeLessThanOrEqual(cap.br);
+    if (cap.raw) expect(row.raw, `${f} raw ceiling ≤ ${cap.raw} B`).toBeLessThanOrEqual(cap.raw);
+  }
+  await testInfo.attach('file-caps.json', { body: JSON.stringify(rows, null, 2), contentType: 'application/json' });
+});
 
 test('home: GSAP after scroll stays within 125 KB raw', async ({ page }) => {
   await markIntroSeen(page);
@@ -64,15 +134,20 @@ test('home: GSAP after scroll stays within 125 KB raw', async ({ page }) => {
 
 test('home: below-the-fold lazy images are not requested before scrolling', async ({ page }) => {
   await markIntroSeen(page);
+  // Chromium's lazy-load distance depends on the effective connection type (unknown/offline 3000 px,
+  // 2g 8000, 3g 2500, 4g 1250). Pin the connection to 4g so the threshold is deterministic (PERF-07).
+  const LAZY_DISTANCE_4G = 1250;
+  await emulate4g(page);
   const imgs = [];
   page.on('request', (r) => { if (r.resourceType() === 'image') imgs.push(fileOf(r.url())); });
   await gotoOk(page, '/');
-  await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => {});
-  // Chromium starts lazy images up to 3000 px (unknown connection type) below the viewport; anything
-  // further down must not be requested before the first scroll.
-  const far = await page.evaluate(() => [...document.querySelectorAll('img[loading="lazy"]')]
-    .filter((i) => i.getBoundingClientRect().top > window.innerHeight + 3000)
-    .map((i) => (i.currentSrc || i.src).split('/').pop().split('?')[0].replace(/-\d+\.(webp|jpg|png)$/, '')));
+  await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => {});
+  const ect = await page.evaluate(() => navigator.connection?.effectiveType || 'unknown');
+  expect(ect, 'emulated effective connection type').toBe('4g');
+  // Margin: 250 px so an image right at the line (rounding, late layout) is not a false positive.
+  const far = await page.evaluate((d) => [...document.querySelectorAll('img[loading="lazy"]')]
+    .filter((i) => i.getBoundingClientRect().top > window.innerHeight + d)
+    .map((i) => (i.currentSrc || i.src).split('/').pop().split('?')[0].replace(/-\d+\.(webp|jpg|png)$/, '')), LAZY_DISTANCE_4G + 250);
   expect(far.length, 'there are lazy images far below the fold').toBeGreaterThan(0);
   const eagerBases = await page.evaluate(() => [...document.querySelectorAll('img:not([loading="lazy"])')]
     .map((i) => (i.currentSrc || i.src).split('/').pop().split('?')[0].replace(/-\d+\.(webp|jpg|png)$/, '')));

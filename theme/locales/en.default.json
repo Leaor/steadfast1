@@ -220,8 +220,8 @@
     "price_to": "To",
     "remove_filter": "Remove filter: {{ label }}",
     "results_count": {
-      "one": "{{ count }} product",
-      "other": "{{ count }} products"
+      "one": "{{ count }} piece",
+      "other": "{{ count }} pieces"
     },
     "selected_count": {
       "one": "{{ count }} selected",
@@ -280,6 +280,7 @@
     "cart": "Cart",
     "cart_with_count": "Cart ({{ count }})",
     "home_label": "{{ shop }} home",
+    "menu": "Menu",
     "menu_close": "Close menu",
     "menu_open": "Open menu",
     "search": "Search"
@@ -304,6 +305,7 @@
     },
     "signature": {
       "back": "Back",
+      "cta_fallback": "Explore the collection",
       "details": "Details",
       "front": "Front",
       "label": "Signature piece: {{ title }}",
@@ -380,10 +382,14 @@
     "adding": "Adding…",
     "choose_option": "Choose {{ name }}",
     "description": "Details",
+    "duties_and_taxes_included": "Duties and taxes included.",
+    "duties_included_taxes_at_checkout": "Duties included. Taxes calculated at checkout.",
     "gallery": "Product media",
     "image_alt": "{{ title }}, image {{ index }}",
     "media_label": "Media {{ index }} of {{ total }}",
+    "media_next": "Next media",
     "media_position": "{{ current }} / {{ total }}",
+    "media_prev": "Previous media",
     "model_label": "3D model of {{ title }}",
     "option_label": "{{ name }}",
     "play_video": "Play video",
@@ -394,21 +400,28 @@
     "quantity_increment": "Increments of {{ quantity }}",
     "quantity_min": "Minimum of {{ quantity }}",
     "related_heading": "You may also like",
+    "select_size": "Select a size",
     "selected_value": "{{ name }}: {{ value }}",
     "share": "Share",
+    "shipping_policy_html": "<a href=\"{{ link }}\">Shipping</a> calculated at checkout.",
     "shipping_returns": "Shipping & returns",
     "size_guide": "Size guide",
+    "size_required": "Select a size to add this to your cart.",
     "sold_out": "Sold out",
     "tax_at_checkout": "Taxes calculated at checkout.",
     "tax_included": "Tax included.",
+    "taxes_and_shipping_at_checkout_html": "Taxes and <a href=\"{{ link }}\">shipping</a> calculated at checkout.",
     "unavailable": "Unavailable",
     "value_sold_out": "Sold out",
     "value_unavailable": "{{ value }} - Unavailable",
+    "view_3d": "View in 3D",
     "view_in_space": "View in your space",
     "zoom": "Open image {{ index }} in the viewer",
+    "zoom_hint": "Image zoomed. Use the arrow keys to move around.",
     "zoom_next": "Next image",
     "zoom_prev": "Previous image",
-    "zoom_title": "Image viewer"
+    "zoom_title": "Image viewer",
+    "zoom_toggle": "Zoom image"
   },
   "quick_add": {
     "added": "{{ title }} added to cart"

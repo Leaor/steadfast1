@@ -35,7 +35,8 @@
     "menu_open": "Open menu",
     "menu_close": "Close menu",
     "home_label": "{{ shop }} home",
-    "announcement_pause": "Pause announcements"
+    "announcement_pause": "Pause announcements",
+    "menu": "Menu"
   },
   "menu": {
     "categories": "Categories",

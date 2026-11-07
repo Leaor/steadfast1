@@ -129,9 +129,19 @@
     });
   }
 
+  /* body: a plain object (sent as JSON) or FormData (a product form: properties[], selling_plan and
+     app-injected inputs travel as-is, like Dawn's product-form). */
   function post(route, body) {
     var ids = sectionIds();
-    if (ids.length) { body.sections = ids; body.sections_url = window.location.pathname; }
+    if (ids.length) {
+      if (body instanceof FormData) {
+        body.set('sections', ids.join(','));
+        body.set('sections_url', window.location.pathname);
+      } else {
+        body.sections = ids;
+        body.sections_url = window.location.pathname;
+      }
+    }
     return S.utils.fetchJSON(route + '.js', { method: 'POST', body: body });
   }
 
@@ -147,7 +157,7 @@
       var d = drawerEl();
       if (open && d && typeof d.prepare === 'function') d.prepare();
       return enqueue(function () {
-        return post(routes.cart_add, { items: items }).then(function (res) {
+        return post(routes.cart_add, items instanceof FormData ? items : { items: items }).then(function (res) {
           applySections(res && res.sections);
           return cart.get().then(function (c) {
             var added = (res && res.items) || (res ? [res] : []);

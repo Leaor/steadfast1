@@ -3,7 +3,6 @@
 @layer sf.sections {
   .sf-newsletter {
     border-top: var(--sf-hairline) solid var(--sf-line);
-    scroll-margin-top: var(--sf-header-h, 56px);
   }
 
   .sf-newsletter__inner {

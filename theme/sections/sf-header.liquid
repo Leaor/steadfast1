@@ -22,11 +22,28 @@
     <span class="sf-header__surface" aria-hidden="true"></span>
     <div class="sf-header__inner sf-container">
       <div class="sf-header__start">
+        {%- comment -%} First in DOM so the mobile focus order matches the visual order (WCAG 2.4.3). {%- endcomment -%}
+        <button type="button" class="sf-header__action sf-header__action--menu sf-header__icon-btn" data-sf-open="menu" aria-expanded="false" aria-controls="sf-menu-drawer" aria-haspopup="dialog" aria-label="{{ 'header.menu_open' | t }}">
+          {%- render 'sf-icon', name: 'menu', size: 20 -%}
+        </button>
         {%- render 'sf-nav-desktop', menu: hdr.menu, secondary_menu: hdr.mega_secondary_menu, blocks: section.blocks -%}
       </div>
 
-      <a class="sf-header__logo" href="{{ routes.root_url }}" aria-label="{{ 'header.home_label' | t: shop: shop.name }}">
-        {%- render 'sf-logo', variant: 'flat', width: logo_w_d, loading: 'eager' -%}
+      {%- liquid
+        # Brief §2: keep the distressed texture where the mark is large enough to carry it (≥ 148 px
+        # letters, desktop, not condensed); the flat SVG stays for the condensed bar and < 990 px.
+        assign logo_textured = false
+        if settings.logo == blank and logo_w_d >= 148
+          assign logo_textured = true
+          assign logo_tex_w = logo_w_d | times: 1.0 | divided_by: 0.9215 | round
+          assign logo_tex_sizes = logo_tex_w | append: 'px'
+        endif
+      -%}
+      <a class="sf-header__logo{% if logo_textured %} sf-header__logo--textured{% endif %}" href="{{ routes.root_url }}" aria-label="{{ 'header.home_label' | t: shop: shop.name }}">
+        <span class="sf-header__logo-flat">{%- render 'sf-logo', variant: 'flat', width: logo_w_d, loading: 'eager' -%}</span>
+        {%- if logo_textured -%}
+          <span class="sf-header__logo-tex" aria-hidden="true">{%- render 'sf-logo', variant: 'textured', width: logo_tex_w, class: 'sf-logo--fit', sizes: logo_tex_sizes, alt: '' -%}</span>
+        {%- endif -%}
       </a>
 
       <div class="sf-header__actions">
@@ -37,6 +54,15 @@
           </a>
         {%- endif -%}
         {%- if show_account -%}
+          {%- comment -%}
+            Shopify's account component (Theme Store requirement; new customer accounts open its account
+            sheet, legacy accounts link to sign-in). Until Shopify defines the element (and with no JS),
+            the plain account link below is shown instead.
+          {%- endcomment -%}
+          {%- assign account_menu = hdr.customer_account_menu.handle | default: 'customer-account-main-menu' -%}
+          <shopify-account class="sf-header__account" menu="{{ account_menu }}">
+            <span slot="signed-out-avatar" class="sf-header__account-avatar">{%- render 'sf-icon', name: 'account', size: 20 -%}</span>
+          </shopify-account>
           <a class="sf-header__action sf-header__action--account" href="{{ routes.account_url }}">
             <span class="sf-header__text">{{ 'header.account' | t }}</span>
           </a>
@@ -53,9 +79,6 @@
             {%- render 'sf-localization-form', id_suffix: 'header' -%}
           </div>
         {%- endif -%}
-        <button type="button" class="sf-header__action sf-header__action--menu sf-header__icon-btn" data-sf-open="menu" aria-expanded="false" aria-controls="sf-menu-drawer" aria-haspopup="dialog" aria-label="{{ 'header.menu_open' | t }}">
-          {%- render 'sf-icon', name: 'menu', size: 20 -%}
-        </button>
       </div>
     </div>
     <span class="sf-header__mega-scrim" data-sf-mega-scrim aria-hidden="true"></span>
@@ -77,7 +100,7 @@
       "type": "link_list",
       "id": "mega_secondary_menu",
       "label": "Mega menu: collections column",
-      "info": "Optional. Shown next to the first menu item's links."
+      "info": "Optional. A quiet text column in the first menu item's panel."
     },
     {
       "type": "select",
@@ -105,6 +128,13 @@
       "info": "Shown only when customer accounts are enabled."
     },
     {
+      "type": "link_list",
+      "id": "customer_account_menu",
+      "label": "Customer account menu",
+      "default": "customer-account-main-menu",
+      "info": "Shown in the account sheet that opens from the account icon."
+    },
+    {
       "type": "checkbox",
       "id": "show_localization",
       "label": "Show country selector in the header",
@@ -130,8 +160,8 @@
           "label": "Menu item",
           "info": "The exact title of the top-level menu link this image appears under, e.g. Shop."
         },
-        { "type": "image_picker", "id": "image", "label": "Image", "info": "Shown at 3:4." },
-        { "type": "text", "id": "heading", "label": "Heading" },
+        { "type": "image_picker", "id": "image", "label": "Image", "info": "Leads the panel's 3:4 image stage." },
+        { "type": "text", "id": "heading", "label": "Caption", "info": "Optional text link under the image." },
         { "type": "url", "id": "link", "label": "Link" }
       ]
     }

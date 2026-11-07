@@ -229,7 +229,7 @@ Rules:
 
 - **Resolution rule.** The textured raster is 1210 px wide natively. It may render at most **1.5× its native pixels** (device px ≤ 1815). The hero cap (640 CSS px → 1280 device px at DPR 2) stays near 1×. The plain raster never renders above **900 CSS px**.
 - **Layered lockup** (Section F at ≥990, and anywhere a box would exceed 900 CSS px): a wrapper with `aspect-ratio: 1210 / 411` holds the streak-only raster as the bottom layer and the inline SVG letters (`fill: var(--sf-bone)`) absolutely positioned at `left: 4.5%; top: 32.48%; width: 92.15%; height: 37.47%`. The source letters are near-solid cream, so the vector letters lose nothing, and their edges stay crisp at any size. The light sweep mask (§8.2) goes on the wrapper, so both layers sweep together.
-- **Raster renditions** (MEDIA): textured `sf-logo-textured-{600,1200,1800}.webp` (+ `-1200.png` fallback) and streak-only `sf-logo-streaks-{1200,1800}.webp`. **Drop the 2000 and 2400 widths** (they're 1.65–2× upscales). The 1600 and 1800 widths are upscales of 1.32× and 1.49×; keep them only if recorded in the manifest as upscaled. ARCHITECTURE §10.1 lists `-2000`; it becomes `-1800` (§14).
+- **Raster renditions** (MEDIA): textured `sf-logo-textured-{600,800,1000,1200,1800}.webp` (+ `-1200.png` fallback; 800/1000 fill the gap so a 634 CSS px desktop hero and a 984 device-px phone hero don't pull the 1200; WebP alpha quality 60, PERF-04) and streak-only `sf-logo-streaks-{1200,1800}.webp`. **Drop the 2000 and 2400 widths** (they're 1.65–2× upscales). The 1600 and 1800 widths are upscales of 1.32× and 1.49×; keep them only if recorded in the manifest as upscaled. ARCHITECTURE §10.1 lists `-2000`; it becomes `-1800` (§14).
 - **Clear space** is the letter cap-height **H** on all sides, measured from the letters, not the streaks.
   - SVG: H = 0.138 × box width (154/1115). Header 148px → H 20.4px; 3H = 61px fits the 72px header. Condensed 120px → 50px of 56. Mobile 112px → 46px of 56.
   - Textured: H = 0.1273 × box width. The streaks already cover most of it, so the **minimum margin around the textured box** is 0.083 × box width left and right and 0.017 × box width top and bottom. Streaks may overlap neighbours only in the hero and Section F.
@@ -341,13 +341,13 @@ preceded by a per-source **pre** stage (HLG→BT.709 tone-map for the HEVC clips
 
 | Category (`sf-category-*`) | Source | Treatment | Widths |
 |---|---|---|---|
-| Hoodies | zip hoodie front crop (`zip-hoodie-blue-grey-front.png`) | colour-true, black-point clamp | 540, 900, 1200 |
+| Hoodies | **black heavyweight zip hoodie**, `black-tracksuit-night.jpg` upper crop (crown to mid-thigh, 4:5 box y 0.21–0.63, centred x 0.45). Not the zip hoodie: the signature showcase owns that garment, and five tiles mean five garments | flash grade (as Bottoms); right-edge burn (car door); soft left burn | 540, 900, 1080 (source-limited; the 1080 cap replaces 1200) |
 | Tracksuits | stone campaign figure crop (already produced; balaclava retouch, see DEPLOYMENT) | campaign grade | 540, 900, 1200 |
 | Bottoms | black sweatpants, `black-tracksuit-night.jpg` lower crop | flash grade; right-edge burn (car door); sneaker side marks illegible | 540, 900, 1200 |
 | New Arrivals | embossed charcoal hoodie close-up (from `sf-lookbook-embossed-hoodie`, IMG_4913 frame) | film grade | 540, 720 (source-limited) |
 | Tops | reflective tracksuit **front, top crop** (the hoodie top with its chest script), phone UI removed | colour-true + black-point clamp | 400, 560 (source-limited) |
 
-The currently produced Hoodies, Tops and New Arrivals stills all show the blue-grey zip hoodie; MEDIA regenerates Tops and New Arrivals from the sources above. A clean IMG_4913 crewneck frame is **not** used for Tops: the crewneck isn't one of the five evidenced garments (CONTEXT), and the frame carries the unidentified "S7" monogram.
+The blue-grey zip hoodie appears once on the homepage as a hero garment: in the signature showcase (and as featured card 1 when it is the newest product). Hoodies, Tops and New Arrivals are regenerated from the sources above, and the header mega-menu tile default (`sf-category-hoodies`) therefore shows the black hoodie too. All zip-hoodie stills have the **hanger painted out** (MEDIA, FILM-STORYBOARD A1). A clean IMG_4913 crewneck frame is **not** used for Tops: the crewneck isn't one of the five evidenced garments (CONTEXT), and the frame carries the unidentified "S7" monogram.
 
 ---
 
@@ -536,7 +536,7 @@ The black separator keeps the ring at ≥ 3:1 over imagery and next to bone butt
 
 ### 8.3 Choreography by section and component
 
-**A. Hero (intro eligible: first visit in the session, motion `full` or `subtle`, not save-data).** The hero uses **no GSAP**: CSS transitions/keyframes keyed off ARCHITECTURE's `data-state` plus two beat classes the hero script sets from `timeupdate`. Film details: `FILM-STORYBOARD.md`.
+**A. Hero (intro eligible: first visit in the session, motion `full` or `subtle`, not save-data).** The store is never behind the film: from the first cut (film `t ≥ 2.2s`) the CTA row is present at opacity 0.8 (1 on hover or focus) and clickable; before that it has `pointer-events: none`. Only the wordmark waits for beat 8, and the eyebrow and line for beat 9. The hero uses **no GSAP**: CSS transitions/keyframes keyed off ARCHITECTURE's `data-state` plus two beat classes the hero script sets from `timeupdate`. Film details: `FILM-STORYBOARD.md`.
 - `t = 0` (`data-state="playing"`): the header is already visible in its minimal transparent state (§7.1): nav, search, account and cart usable, logo slot empty. The film plays inside the black stage. The hero content (wordmark `h1`, eyebrow, campaign line, CTAs) is **in the DOM and focusable**, visually at `opacity: 0` (never `visibility: hidden` or `display: none`). `SKIP INTRO` fades to 1 at t = 0.8s (`--sf-dur-slow`).
 - **Ending the intro early.** Any of these ends it at once: `SKIP INTRO`; **focus entering the hero content** (e.g. tabbing to a CTA); **any keydown**; **any scroll** of the page (or wheel/touchmove); the pause toggle. The hero jumps to the end of beat 9 in `--sf-dur-base`: film opacity → 0, end still/loop visible, wordmark at rest, eyebrow/line/CTAs visible. It writes `sf:intro-seen`. Nothing blocks scrolling at any time. (ARCHITECTURE's skip behaviour, focus to the primary CTA, applies to `SKIP INTRO`.)
 - `t = duration − 0.4s` (12.4s for the bundled 12.8s edit; the film always ends on ≥ 0.4s of black): **beat 8** (`.is-beat-8`). The hero wordmark appears centred with the light sweep (`--sweep` −30%→130% over `--sf-dur-cinematic`, `--sf-ease-in-out`), opacity 0→1 over the first 500ms, scale 1.035→1 over 1600ms `--sf-ease-out`.
@@ -548,7 +548,7 @@ The black separator keeps the ring at ≥ 3:1 over imagery and next to bone butt
 
 **C. Signature showcase:** a pinned scroll timeline (§10).
 
-**D. Campaign editorial:** *aperture open*, scrubbed: `start: "top 90%", end: "top 15%", scrub: 0.8`. `clip-path: inset(14% 22% 14% 22%)` → `inset(0)` on the frame; the inner image scales 1.15→1.00. Mobile: `inset(8% 10% 8% 10%)` → `inset(0)`. The text block reveals once at `start: "top 40%"` with `clip-path: inset(0 0 100% 0)` → `inset(0)`, 900ms `--sf-ease-out`. No parallax.
+**D. Campaign editorial:** *aperture open*, scrubbed: `start: "top 90%", end: "top 15%", scrub: 0.8`. A **vertical shaft only**: `clip-path: inset(0 30%)` → `inset(0)` on the frame (never inset top or bottom, so no horizontal edge crosses the haze); the inner image scales 1.15→1.00. The two side edges are feathered: 96px gradients from the section background to transparent ride the moving edges (translate) and fade to 0 over the last 30% of the scrub. Mobile: `inset(0 14%)` → `inset(0)`. If GSAP arrives after the section has already crossed `top 90%` (anchor jump, fast fling, slow network), the frame and text stay in their final state; nothing on screen shrinks or re-hides (the same rule applies to the brand-story sweep at `top 75%`). The text block reveals once at `start: "top 40%"` with `clip-path: inset(0 0 100% 0)` → `inset(0)`, 900ms `--sf-ease-out`. No parallax.
 
 **E. Shop by category (desktop index):** hover or focus on a name changes it washed-grey → bone (`--sf-dur-instant`). The stage crossfades to that category's image (opacity 480ms `--sf-ease-in-out`) and the incoming image scales 1.03→1 (900ms `--sf-ease-out`). Mobile tiles: press state only (overlay +0.15, `--sf-dur-instant`).
 
@@ -653,6 +653,8 @@ Mobile (<990):
 ```
 - **No Spectral italic line on mobile.** Stacking the italic line directly under the serif wordmark puts two serifs head to head. The campaign line exists only in the desktop left column (`display: none` below 990).
 - Bottom scrim (§5.5). CTAs sit 24px above `env(safe-area-inset-bottom)`.
+- Below 990 the hero is `min-height: max(100svh, 560px)` and grows with its content; the bottom row of the PAUSE control is reserved under the CTAs, so at 200% zoom or with large text the CTAs never sit under PAUSE and are never clipped.
+- Landscape phones (`orientation: landscape` and height ≤ 500px): hero exactly `100svh`, wordmark `min(60vw, 30svh × 2.944)` placed under the header, eyebrow 12px below, then both CTAs in one centred row (24px gap), so lockup, eyebrow and both CTAs fit the first screen.
 - EXPLORE COLLECTION → `cta_primary_link`, default `routes.all_products_collection_url`. VIEW THE CAMPAIGN → **`cta_secondary_action: link`** (default; ARCHITECTURE currently defaults to `replay`, §14), link default `#campaign` (Section D). `replay` remains an option.
 - The eyebrow is the **only** campaign label on the page. Section D has no eyebrow by default.
 
@@ -704,13 +706,13 @@ Mobile (<990):
 ### F. Brand story
 
 - A black field. The **wordmark** is the subject: textured raster at `min(84vw, 880px)` below 990px; the **layered lockup** (streak-only raster + crisp SVG letters) at `min(60vw, 880px)` at ≥990px (§3.4). Below it, after `--sf-space-8`, a centred lead paragraph (Spectral `--sf-text-lg`, silver, max 46ch).
-- Default text: **"Steadfast. Firm in purpose, unmoved by noise."**
+- Default text: **blank.** The wordmark alone carries the section until STEADFAST supplies two or three sentences (BRIEF §4F: no invented brand copy; a client input in DEPLOYMENT). When text is set it is centred under the mark, `max-width: 46ch` on the Spectral paragraph itself (≈ 610px at 22px; not on the Archivo wrapper), `text-wrap: balance`. Don't open it with the brand name: the lockup above already says STEADFAST.
 - Optional `link_label`/`link` text link (hidden if not set).
 - Motion: the light sweep (§8.3 F).
 
 | Setting | Default | Info text |
 |---|---|---|
-| `text` | `<p>Steadfast. Firm in purpose, unmoved by noise.</p>` | "Replace with two or three sentences from STEADFAST. No dates, origins or claims until they are supplied." |
+| `text` | blank | "Blank by default: the wordmark carries the section. Add two or three sentences supplied by STEADFAST; no dates, origins or claims until they are confirmed." |
 | `logo_display` | `textured` | |
 
 ### G. Newsletter and footer
@@ -726,7 +728,7 @@ Mobile (<990):
 | B heading | The collection | Optional |
 | B next-drop tile | Details to be announced. | Replace or hide |
 | D line / body | Under one light. / The tracksuit in stone, seen from behind. | Supply |
-| F lead | Steadfast. Firm in purpose, unmoved by noise. | Supply the brand story |
+| F lead | (blank; the wordmark alone) | Supply two or three sentences of brand story |
 | Newsletter heading / success | New pieces, by email. / You're subscribed. | Optional |
 | PDP size guide / shipping & returns | Sizing information to be confirmed. / Shipping and returns details to be confirmed. | Supply the policies |
 | Related heading | You may also like | Optional |
@@ -752,29 +754,31 @@ Rects are (x0, y0, x1, y1) fractions of `sf-signature-hero`.
 
 | Progress | Beat | Image layer | Exposure overlay | Caption / UI |
 |---|---|---|---|---|
-| 0.00–0.10 | **Enter** | scale 0.88→0.94, y 4%→0 | 1→0.15 | Title at left: `--sf-text-2xs` eyebrow "SIGNATURE PIECE" over Spectral `--sf-display-md` heading (default "The zip hoodie", or the product title) |
+| before the pin (`top 85%` → `top top`, scrub 0.8) | **Arrive** | scale 0.86→0.88 | 1→0.45 (the hoodie is dimly present as the section arrives; never an empty black stage) | Title at left |
+| 0.00–0.10 | **Enter** | scale 0.88→0.94, y 4%→0 | 0.45→0.15 | Title at left: `--sf-text-2xs` eyebrow "SIGNATURE PIECE" over Spectral `--sf-display-md` heading (default "The zip hoodie", or the product title) |
 | 0.10–0.22 | **Perspective** | rotateY −6°→3°, rotateX 2°→0°, scale 0.94→1.0 | 0.15→0 | Title holds |
 | 0.22–0.36 | **Detail 1** (block `zip`): rect (0.445, 0.17, 0.555, 0.47), centre (0.50, 0.32) | rotate→0, **z = 2.2** | vignette layer →0.6 | Title out. Caption "ZIP AND NECK LABEL" |
 | 0.36–0.50 | **Detail 2** (`chest-logo`): rect (0.375, 0.36, 0.625, 0.66), centre (0.50, 0.51) | **z = 1.8** | vignette 0.6 | "DISTRESSED CHEST LOGO" |
 | 0.50–0.63 | **Detail 3** (`shoulder`): rect (0.365, 0.17, 0.475, 0.43), centre (0.42, 0.30) | **z = 2.4** | vignette 0.6 | "SHOULDER EMBELLISHMENT" |
 | 0.63–0.74 | **Detail 4** (`cuff-label`): rect (0.625, 0.76, 0.705, 0.90), centre (0.665, 0.83) | **z = 2.4** (cap; the source is dark and soft here) | vignette 0.5 | "SLEEVE LABEL" |
 | 0.74–0.80 | **Return** | z →1.0, centred | vignette →0 | Caption out |
-| 0.80–0.90 | **Front → back** ("the turn happens in the dark") | Front rotateY 0→−6°, opacity 1→0. Back rotateY 6°→0, opacity 0→1. Crossover 0.85 | overlay 0→0.55 at 0.85, →0 at 0.90 | No caption |
+| 0.80–0.90 | **Front → back** ("a cut in the dark", sequential, never a double exposure) | 0.80–0.85: front rotateY 0→−6°, opacity 1→0. 0.85–0.90: back rotateY 6°→0, opacity 0→1. Both faces are 0 at 0.85 | overlay 0→0.92 over 0.80–0.85, 0.92→0 over 0.85–0.90 | No caption |
 | 0.90–1.00 | **CTA** | back holds, scale 1.0→0.96 | 0 | Right column (cols 9–12, centred): product title (Spectral `--sf-text-xl`), live price, Primary CTA (`cta_label`, default "Shop the zip hoodie"), `--sf-text-2xs` "FRONT / BACK" segmented control |
 
 - **Detail blocks.** The preset has **4** blocks: `zip` "Zip and neck label", `chest-logo` "Distressed chest logo", `shoulder` "Shoulder embellishment", `cuff-label` "Sleeve label". The `neck-label` crop stays available as an optional fifth block (not in the preset). The produced `hem` crop is not used. **No construction terms** in default titles ("appliqué", "embroidered", "crystal" only if the merchant edits a caption with confirmed facts; ARCHITECTURE's "Chest appliqué" becomes "Distressed chest logo", §14).
 - At each detail, at most 1.5× source upscaling at DPR 1 (use `sf-signature-hero-2730`, the native width, lazy, starting when the section is within one viewport).
-- Section `aria-label` "Signature piece: {{ product.title }}". Captions are real text in DOM order; the CTA is reachable by keyboard without scrolling the pin.
+- Section `aria-label` "Signature piece: {{ product.title }}". Captions are real text in DOM order; the CTA is reachable by keyboard without scrolling the pin. Captions and the buy block are faded with `opacity` only (never `visibility`/`autoAlpha`), so they stay in the accessibility tree and FRONT / BACK and the CTA stay in the tab order; focusing one shows the block at once and moves the pin to its end. The block takes pointer events only from progress 0.90. The detail list is a tab stop only while it is a horizontal scroller (stacked rail).
 
 ### 10.3 Mobile, `subtle` and reduced motion (static, no pin)
 
 ```
 [ SIGNATURE PIECE / heading ]
 [ front 4:5 ]                    ← exposure lift once (mobile) / static (reduced)
-[ detail 1 ][ detail 2 ] →       ← horizontal snap rail of the 1:1 `sf-signature-detail-*` crops, caption under each
-[ FRONT | BACK toggle ]          ← segmented control crossfades the 4:5 image (200ms)
+[ FRONT | BACK toggle ]          ← directly under the image it crossfades (200ms), 16px gap
 [ title  price  CTA ]
+[ detail 1 ][ detail 2 ] →       ← horizontal snap rail of the 1:1 `sf-signature-detail-*` crops, caption under each, 64px above
 ```
+The toggle sits with the image it swaps (a control 400px below its image looks broken). Desktop stacked (≥990, `subtle`/reduced/pin off): image cols 1–6, toggle + title + price + CTA cols 8–12 beside it, details as one row below. DOM order matches the visual order.
 The 1:1 detail crops are MEDIA's `sf-signature-detail-{zip,chest-logo,shoulder,cuff-label}` (in a live store, merchant-uploaded block images).
 
 ---
@@ -783,7 +787,7 @@ The 1:1 detail crops are MEDIA's `sf-signature-detail-{zip,chest-logo,shoulder,c
 
 - Keyboard reaches everything with a visible focus ring (§6.7). Menus, drawers and dialogs trap and restore focus and close on Esc.
 - The hero intro never traps focus or scroll: navigation is usable from t = 0, and focusing hero content ends the intro.
-- Autoplaying video over 5s has a visible PAUSE control, state announced via `aria-pressed`.
+- Autoplaying video over 5s has a visible PAUSE control whose label names the action (PAUSE ↔ PLAY; no `aria-pressed`, which would contradict the swapped label). The merchant's `show_skip` setting hides only SKIP INTRO, never PAUSE / PLAY.
 - Every image has meaningful `alt` (products: title plus view, e.g. "Washed zip hoodie, back"; lifestyle views say so). Decorative film/loop video is `aria-hidden="true"`.
 - Content is visible with JS disabled. Hidden-initial states are applied only under `html.js`.
 - Tap targets ≥ 44×44. No hover-only information.
@@ -921,7 +925,7 @@ Each line is the decision and the side that changes. "ARCH edit" items are reque
 | 24 | Dynamic checkout | `show_dynamic_checkout` default **false** | ARCH edit §2.4 `buy_buttons` |
 | 25 | Signature details | 4 preset blocks with §10.2 titles; neck-label optional; hem unused | ARCH edit: preset titles, no "appliqué"; MEDIA may drop the hem crop |
 | 26 | Category defaults | §5.6 | ARCH edit §10.1 sources for tracksuits (campaign ✓), tops (reflective front top crop, 400/560), new-arrivals (embossed close-up, 540/720) |
-| 27 | Logo renditions | textured 600/1200/1800 + streak-only 1200/1800; aspect from §3.4 | ARCH edit §10.1; MEDIA regenerates |
+| 27 | Logo renditions | textured 600/800/1000/1200/1800 + streak-only 1200/1800; aspect from §3.4 | ARCH edit §10.1; MEDIA regenerates |
 | 28 | Grade | grade.sh is the single look | FILM edited; MEDIA re-renders editorial stills |
 | 29 | Hero logo width setting | `logo_width` range 240–640, default 640; mobile `min(84vw, logo_width)` | ARCH edit |
 | 30 | End stills | Loop frame 0, no logo baked; desktop widths 960/1600/1920 (2400 would be an upscale) | ARCH edit §10.1 |

@@ -16,7 +16,8 @@
       "front": "Front",
       "back": "Back",
       "view": "View",
-      "details": "Details"
+      "details": "Details",
+      "cta_fallback": "Explore the collection"
     },
     "category": {
       "count": {

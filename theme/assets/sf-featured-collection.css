@@ -195,4 +195,12 @@
   @media (prefers-reduced-motion: no-preference) {
     html:not([data-sf-motion='reduced']) .sf-featured-collection__track { scroll-behavior: smooth; }
   }
+
+  /* Followed by the staged (pinned) signature showcase: its own black stage carries the transition,
+     so the rail hands over after 64 px instead of a full section pad (DESIGN §9 C). */
+  @media (min-width: 990px) {
+    html.js[data-sf-motion='full'] .shopify-section:has(+ .sf-shopify-section--signature-showcase .sf-signature-showcase--pin:not(.is-static)) .sf-featured-collection {
+      padding-bottom: var(--sf-space-8);
+    }
+  }
 }

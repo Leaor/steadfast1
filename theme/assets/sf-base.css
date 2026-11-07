@@ -32,7 +32,13 @@
     background: var(--sf-ink);
     color: var(--sf-fg);
     color-scheme: dark;
+    /* Keep focused / scrolled-to elements clear of the sticky header and any sticky toolbar
+       (WCAG 2.4.11). --sf-sticky-offset is the height of a second sticky bar, when present. */
+    --sf-sticky-offset: 0px;
+    scroll-padding-top: calc(var(--sf-header-h, 56px) + var(--sf-sticky-offset) + 8px);
   }
+  /* The collection/search facets toolbar (sf-collection.css) is a 48 px sticky bar + 2 hairlines. */
+  html:has(.sf-facets__toolbar) { --sf-sticky-offset: 50px; }
   @media (prefers-reduced-motion: no-preference) {
     html:not([data-sf-motion="reduced"]) { scroll-behavior: smooth; }
   }
@@ -184,6 +190,13 @@
   .sf-logo--textured, .sf-logo--lockup { position: relative; width: min(100%, var(--sf-logo-w, 640px)); aspect-ratio: 1210 / 411; }
   .sf-logo--textured img, .sf-logo--lockup img { display: block; width: 100%; height: 100%; object-fit: contain; }
   .sf-logo__raster { display: block; width: 100%; height: 100%; }
+  /* Textured raster laid out as its LETTER box (negative margins = the streak margins, DESIGN §3.4
+     geometry), so it can replace the flat SVG of width 0.9215 × W without moving anything. */
+  .sf-logo--textured.sf-logo--fit {
+    width: var(--sf-logo-w);
+    max-width: none;
+    margin: calc(var(--sf-logo-w) * -.11033) calc(var(--sf-logo-w) * -.0335) calc(var(--sf-logo-w) * -.10207) calc(var(--sf-logo-w) * -.045);
+  }
   .sf-logo__letters { display: none; position: absolute; left: 4.5%; top: 32.48%; width: 92.15%; height: 37.47%; color: var(--sf-bone); }
   @media (min-width: 990px) { .sf-logo--layered .sf-logo__letters { display: block; } }
   .sf-logo-custom-box { display: block; width: var(--sf-logo-w); max-width: 100%; }
@@ -497,7 +510,7 @@
     justify-content: space-between;
     gap: var(--sf-space-4);
     min-height: 64px;
-    padding-inline: var(--sf-space-5);
+    padding-inline: max(var(--sf-space-5), var(--sf-safe-l, 0px)) max(var(--sf-space-5), var(--sf-safe-r, 0px));
     border-bottom: var(--sf-hairline) solid var(--sf-line);
   }
   .sf-dialog__title {
@@ -508,7 +521,7 @@
     text-transform: uppercase;
   }
   .sf-dialog__title:focus { outline: none; box-shadow: none; }
-  .sf-dialog__body { padding: var(--sf-space-5); }
+  .sf-dialog__body { padding: var(--sf-space-5) max(var(--sf-space-5), var(--sf-safe-r, 0px)) var(--sf-space-5) max(var(--sf-space-5), var(--sf-safe-l, 0px)); }
 
   /* Newsletter form (sf-newsletter-form; DESIGN §7.10) */
   .sf-newsletter-form { width: 100%; }
@@ -536,24 +549,50 @@
   /* Localization form (selects styled as compact text controls) */
   .sf-localization { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sf-space-3) var(--sf-space-5); }
   .sf-localization__field { position: relative; display: inline-flex; align-items: center; gap: 8px; }
-  .sf-localization__select {
-    appearance: none;
+  /* The visible value keeps the compact 11 px caps look; the native <select> sits over it at 16 px
+     (transparent) so iOS Safari never zooms on focus (UX-03). */
+  .sf-localization__value {
+    display: inline-flex;
+    align-items: center;
     min-height: 44px;
     padding: 0 22px 0 0;
-    border: 0;
-    background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23C3C8CD' stroke-width='1.75' stroke-linecap='square'%3E%3Cpath d='M6 9.25l6 6 6-6'/%3E%3C/svg%3E") right 2px center / 12px 12px no-repeat;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23C3C8CD' stroke-width='1.75' stroke-linecap='square'%3E%3Cpath d='M6 9.25l6 6 6-6'/%3E%3C/svg%3E") right 2px center / 12px 12px no-repeat;
     color: var(--sf-fg-muted);
     font-family: var(--sf-font-label);
     font-weight: 500;
     font-size: var(--sf-text-2xs);
     letter-spacing: var(--sf-tracking-label);
     text-transform: uppercase;
-    cursor: pointer;
+    white-space: nowrap;
     max-width: 100%;
+    overflow: hidden;
     text-overflow: ellipsis;
+    pointer-events: none;
+    transition: color calc(var(--sf-dur-instant) * var(--sf-motion)) linear;
+  }
+  .sf-localization__select {
+    appearance: none;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--sf-fg);
+    font-size: 16px;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .sf-localization__select:focus-visible { outline: none; box-shadow: none; }
+  .sf-localization__field:has(.sf-localization__select:focus-visible) .sf-localization__value {
+    color: var(--sf-fg);
+    outline: 2px solid var(--sf-focus);
+    outline-offset: 3px;
   }
   .sf-localization__select option { background: var(--sf-charcoal); color: var(--sf-bone); text-transform: none; letter-spacing: 0; }
-  @media (hover: hover) and (pointer: fine) { .sf-localization__select:hover { color: var(--sf-fg); } }
+  @media (hover: hover) and (pointer: fine) { .sf-localization__field:hover .sf-localization__value { color: var(--sf-fg); } }
   .sf-localization__icon { color: var(--sf-fg-subtle); }
 }
 

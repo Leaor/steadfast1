@@ -1,7 +1,8 @@
 # STEADFAST: integration report (ARCHITECTURE §11)
 
-Integrator pass after the build agents finished. Every number below comes from a command that was actually run in this pass. The final suite run was at 2026-11-06 22:23 UTC, the last one listed in §5. `reports/results.json` and `reports/html/` are from that run. `SUMMARY.md` still describes the earlier pre-integration run (363/21/154).
+**Update 2026-11-07, round 2:** the final integration pass after all four fixers is §9. Its last full run (2026-11-07 01:23:58 UTC) is **424 passed / 0 failed / 0 flaky / 158 skipped**; `reports/results.json`, `reports/html/` and `docs/TEST-REPORT.md` are from that run. §1–§7 describe round 1 (2026-11-06) and §8 the MEDIA/HARNESS/DOCS fix pass.
 
+**Round 1 (§1–§7):** integrator pass after the build agents finished. Every number in §1–§7 comes from a command run in that pass; its final suite run was at 2026-11-06 22:23 UTC (381/3/154). `results.json` has since been overwritten by later runs (see the note above). `SUMMARY.md` still describes the earlier pre-integration run (363/21/154).
 ## 1. Checklist results
 
 | Step | Command | Result |
@@ -155,3 +156,135 @@ There were four full runs in this pass: 367/17, then 380/4, then 379/5, then 381
 - **FILM-STORYBOARD A4 (ORCH doc):** apply MEDIA-film's deviations 1–3: the smooth toe instead of `0.08/0` crush, the 5 %/15 % left burn, and the S7 mask edge.
 - **MEDIA:** the products "Zip hoodie, black" and "Wide sweatpants" have only one image each, the lifestyle night crop, so a lifestyle image comes first in their galleries. There is no studio image of either garment.
 - **CORE:** re-check the Archivo Label fallback visually on a system without Archivo cached.
+
+## 8. Fix pass: MEDIA / HARNESS / DOCS (2026-11-07)
+
+### 8.1 Harness changes
+
+- **Template suffixes** (`lib/request.mjs`, CD-10 / A11Y-09 / F4). `setTemplate` tried `[view, suffix, null]` and skipped only `undefined`, but `URLSearchParams.get('view')` returns `null`, so the base template always won and no `template_suffix` was ever applied. It now tries `?view=`, then the resource's suffix, then the base. `/pages/contact` renders `page.contact` (main + `sf-contact-form`), so specs 11, 12, 16 and 17 now really cover the contact form. Product and collection suffixes are fixed the same way.
+- **Predictive search `limit_scope`** (`lib/drops.mjs`, PLAT-08). Shopify's default is `all` (`resources[limit]` caps the total across types); `each` caps every type. The mock applied the limit per type regardless, which hid an overflow in the theme's overlay.
+- **Pagination gap** (`lib/catalog.mjs`, PLAT-08): the gap part's title is `&hellip;` (what Shopify emits), not U+2026.
+- **`payment_button`** (`lib/filters.mjs`, ruling §15.11): valid only on a product form; renders Shopify's `[data-shopify="payment-button"]` container with a disabled, clearly labelled stand-in button. Allowed surface: ARCHITECTURE §8.6.
+- **`preview_sections` block overrides** (`lib/theme.mjs`): `{"main":{"blocks":{"buy_buttons":{"show_dynamic_checkout":true}}}}` merges settings into existing blocks (by id or type).
+- **`--compress`** (`server.mjs`, `lib/http.mjs`, PERF-07): opt-in brotli/gzip for text and immutable `/cdn/` caching, for lab timing closer to the Shopify CDN. Off by default.
+- **Fixtures** (`tools/build-fixtures.mjs`, ruling §15.12): the blue-grey zip hoodie is the newest placeholder product, so it leads "date, new to old" grids (featured rail, collection, search, related), and it is first in `new-arrivals`. No lifestyle or daylight frame is a first card image.
+
+### 8.2 Tests added or changed
+
+| Spec | Change |
+|---|---|
+| 04 | Dynamic checkout: off by default; on via a block override → exactly one inert `payment_button` container in the product form. |
+| 07 | ≥ 6 pages: exactly one `[aria-current="page"]` in `.sf-pagination` on pages 1, 3, middle and last; gaps render `…`. |
+| 12 | Contact form present on `/pages/contact`; failed contact submit focuses `[data-sf-error-summary]`; failed newsletter submit focuses the field/error. axe per open state (cart drawer with a line, search with results, quick view, zoom, filter drawer, size guide, menu, mega menu). The seven route scans again with motion on after a scroll-through. Keyboard (motion on): Tab reaches the signature CTA; no Tab stop at opacity 0 or entirely under the sticky header. |
+| 13 | The overlay and the suggest endpoint never exceed `resources[limit]` under the requested `limit_scope`. |
+| 16 | Budgets are compressed (brotli computed in-test) and HTTP/2-aware (ARCHITECTURE §6.1 v1.2); per-route `*-measure.json` attachments; per-file brotli caps; the connection is pinned to `cellular4g`, so the lazy-image check uses Chromium's 1250 px 4g distance instead of the 3000 px "unknown" one (this was the flaky §5 item 2). |
+
+### 8.3 Platform features the preview stubs (not exercised against Shopify)
+
+These render on Shopify but the preview only stands in for them, so no test here proves they work on the platform. Check them on the unpublished theme (DEPLOYMENT §9):
+
+| Feature | Preview behaviour | What to check on Shopify |
+|---|---|---|
+| `{{ form \| payment_button }}` (dynamic checkout) | Inert container with a disabled stand-in button | Shop Pay / accelerated buttons render in the monochrome frame and complete a test checkout |
+| `model_viewer_tag` (3D media) | Empty `<model-viewer data-preview-stub>` | Only if a GLB is ever uploaded: the viewer loads, AR/XR buttons work |
+| Gift card QR code (`shopify_asset_url: 'vendor/qrcode.js'`) | `window.QRCode` is a no-op | The QR code draws on `/gift_cards/…` |
+| Checkout (`/checkout`) | Static notice page | Shopify checkout opens with the cart lines |
+| Customer accounts (new accounts / Shop sign-in) | Classic forms with fixture customer | Login, register, addresses with the store's account mode |
+| `content_for_header` | Empty (no platform scripts) | Request counts in §6.1 exclude these |
+| Predictive search ranking | Simple substring match | Result relevance and synonyms |
+| Section Rendering API cache and CDN | Rendered fresh per request; no CDN unless `--compress` | Real TTFB and caching |
+
+### 8.4 Media fixes in this pass (see `media/processed/manifest.json` ops per file)
+
+- **Hanger painted out** of both zip-hoodie stills (CD-01), before/after in `media/processed/_qa/hanger-retouch-*.jpg`; regenerated the signature stage (front and aligned back), front/back 4:5, details, product images and film S2 (which now opens on the zip pull, y 0.30).
+- **Gothic hoodie, washed charcoal** (CD-02 / F6): film grade + sky/foliage burnt behind the hood + supercar burn. Top-right 30 %×35 %: mean luma **13.9** (was 185), **0.0 %** green-dominant pixels; 40 %×35 %: luma 33, 0.0 %. The lookbook and New Arrivals stills use the same image.
+- **Gothic hoodie, washed grey** (CD-14): crop shifted 40 px left, 0.12-wide right feather (the sleeve fades instead of ending in a straight cut), soft left burn on the kerb.
+- **Reflective tracksuit** (CD-03): black knee (luma ≤ 14 → 0, smooth to 24) before plating on #000 with a 120 px feather. Row 500 of the front 800: 0 everywhere (was 2 / 8–12 / 2); plate-edge means ≤ 1.6 luma on all four sides (front ≤ 0.3).
+- **Hoodies category tile** (CD-18): the black heavyweight zip hoodie (night photo, upper crop), not the showcase garment; also the mega-menu tile default and the Hoodies collection banner.
+- **Hero film** (CD-04): 120 px horizontal feather, top 6 % / bottom 14 % fade on every desktop plate (and S7's full frame and the end stills), edge crush, wider left burn on S6/loop. Desktop end still: rows 1060–1079 mean luma 0.0, row 1030 max 21. Weights: intro desktop 2.58 MB, mobile 2.29 MB, loops 0.85 / 0.78 MB (all CRF 23, within §6.1).
+- **Logo** (PERF-04): new 800w (29.5 KB) and 1000w (43.6 KB) renditions; alpha quality 60 takes the 1200w from 108.8 KB to 59.3 KB with no visible change on black.
+
+## 9. Round 2: integration after the review fix pass (2026-11-07)
+
+Integrator pass after the CORE, HOME, COMMERCE and MEDIA/HARNESS/DOCS fixers. Every number below comes from a command run in this pass, on a fresh preview at `:9320` (no stale fixer servers reused).
+
+### 9.1 Checklist (§11)
+
+| Step | Command | Result |
+|---|---|---|
+| 1 | `python3 tools/media/gen_asset_snippet.py` | exit 0: "sf-asset-data.liquid up to date (29 bases)", 129 bundled media files (14.04 MB), 0 copied, 0 removed; `theme/assets` 166 files, 14.52 MB |
+| 1 | `node tools/locales/merge-locales.mjs` | exit 0: `en.default.json` (26 namespaces, 375 keys) |
+| 2 | `shopify theme check --path theme` (dev's CLI 5.0.1) | **0 errors, 4 warnings**, 105 files: `AssetPreload` ×4 (font preloads, `layout/theme.liquid:41-42`, `layout/password.liquid:23-24`). They stay until `preload_tag` is in §8.6 and the preview (CORE PLAT-09 remainder) |
+| 3 | `node dev/preview/tools/smoke.mjs --base http://127.0.0.1:9320` | **56/56 routes clean** (status, no Liquid errors, no "translation missing", every `/cdn/` subresource resolves). Re-run after my edits: 56/56 |
+| 4 | Literal `asset_url` references | all resolve to files in `theme/assets` |
+| 5 | §11.5 greps | see §9.3 |
+| 6 | `SF_PREVIEW_PORT=9320 npm --prefix dev test` (both projects) | run 1 (before my edits): **424 / 0 / 158**; run 2 (final, after my edits): **424 passed, 0 failed, 0 flaky, 158 skipped** |
+| 7 | `shopify theme package` in `theme/` | `Steadfast-1.1.0.zip`, **14,216,386 B (13.6 MiB)** compressed, 14,867,520 B uncompressed, 279 entries (167 assets, 3 config, 3 layout, 2 locales, 37 sections, 45 snippets, 22 templates). The zip was moved out of `theme/` so it is not committed or re-packaged |
+
+### 9.2 What I fixed (file: change)
+
+All are cross-owner leftovers the fixers flagged; none weakens or edits a test.
+
+- **HOME** `assets/sf-campaign-editorial.css`, `assets/sf-newsletter.css`: removed `scroll-margin-top: var(--sf-header-h)`. CORE's A11Y-05 fix put `scroll-padding-top: header + sticky offset + 8px` on `html`, and the two add up. Measured with `location.hash` (motion on, header revealed at 56 px): `#newsletter` and the campaign section landed at y = 120–128, now y = 64–68 at 390 and 1440 (8–12 px below the header, as intended).
+- **CORE** `config/settings_schema.json`, `config/settings_data.json`: `cart_note_text` has no default any more (blank) and an `info` line. **COMMERCE** `snippets/sf-cart-totals.liquid`: dropped the temporary string-match that hid the old default sentence; the note now renders whenever the merchant sets one. The computed tax/shipping line (PLAT-04) is the only tax wording in the drawer and on `/cart` (checked in the cart-drawer screenshots). Closes the PLAT-04 remainder.
+- **CORE** `snippets/sf-quick-add.liquid`: a product with `requires_selling_plan` gets the quick-view link only, never inline size cells or a one-click add (they would post without a selling plan). The preview drop always returns `false`, so nothing changes on the preview. Closes the PLAT-01 remainder.
+- **DOCS** `docs/ARCHITECTURE.md`: §1 file tree lists `sf-dialog-history.js` (CORE, on demand); the cross-owner key table lists `header.menu`; the `cart_note_text` row says blank by default and why. `docs/TEST-REPORT.md`: points at the final run (counts unchanged: 424/0/158).
+
+### 9.3 Grep checks (§11.5)
+
+- Forbidden tags and filters (§8.6), `inventory_quantity`, `console.log`, `backdrop-filter`: none in `theme/`.
+- `box-shadow`: only focus rules (`sf-base.css:77` `:focus-visible`, `sf-product.css:80` option `:focus-visible`, `sf-product-card.css:99` card link `:focus-visible::after`) and `none` resets.
+- `filter` in transitions, keyframes or GSAP tweens: none.
+- `/\bbag\b/i`: no locale value or visible text; the only hits are the internal icon name `sf-icon name: 'bag'` (rendered as an SVG, label "Cart").
+- Honesty words: "campaign film" appears only in the hero schema's merchant-facing labels for the optional uploaded film (not storefront text); none in the locale.
+
+### 9.4 Final test counts (run 2, `node dev/tests/helpers/summarize.mjs`)
+
+| Spec | Pass | Fail | Skip |
+|---|---:|---:|---:|
+| 00-theme-check | 1 | 0 | 1 |
+| 01-homepage | 10 | 0 | 0 |
+| 02-nav-desktop | 7 | 0 | 7 |
+| 03-nav-mobile | 5 | 0 | 5 |
+| 04-product | 50 | 0 | 0 |
+| 05-variants | 8 | 0 | 0 |
+| 06-cart | 20 | 0 | 0 |
+| 07-collection-filtering | 26 | 0 | 4 |
+| 08-hero-film | 22 | 0 | 2 |
+| 09-animation | 9 | 0 | 1 |
+| 10-reduced-motion | 8 | 0 | 0 |
+| 11-responsive | 58 | 0 | 56 |
+| 12-a11y-keyboard | 67 | 0 | 5 |
+| 13-search | 8 | 0 | 0 |
+| 14-quick-view | 4 | 0 | 0 |
+| 15-templates-smoke | 50 | 0 | 40 |
+| 16-performance | 25 | 0 | 1 |
+| 17-data-honesty | 46 | 0 | 36 |
+| **Total** | **424** | **0** | **158** |
+
+Started 2026-11-07 01:23:58 UTC, 365 s, 2 workers, 0 retries, `flaky` 0. Skips are by design (project-specific cases). The fixers' reported failures (08 `aria-pressed`, the CORE mega-menu Liquid error, the pre-selected-size cases in 04/05/06/17, the old request budgets in 16) were all resolved before this pass by the later fixers; none reproduced in either run.
+
+Spec 16 measurements, theme-owned requests before first scroll / JS br / CSS br (KB), desktop · mobile: home 36 · 33 / 29.0 / 24.7; product 20 · 25 / 23.9 / 17.7; collection 22 · 21 / 20.6 / 17.6; search 20 / 20.6 / 19.2; cart 16 / 17.7 / 16.2; contact 16 / 19.1 / 15.9; login 17 / 19.1 / 17.2. All within the §6.1 v1.2 budgets (home 41, product 29, collection 26, search 23, cart 19, content 19, customer 20). `sf-core.js` is 33,503 B raw (cap 33 KB raw / 8 KB br, at its cap), `sf-dialog-history.js` 3,274 B.
+
+### 9.5 Remaining failures and open items
+
+**No failing tests.** Open items, none of them blocking:
+
+1. **PERF-06 (HOME):** the six homepage sections still load their JS with `<script defer>`; CORE's `data-sf-module` loader is ready. Moving them would take home from 36 to about 31 requests. The §6.1 budget (41) was calibrated on the current markup, so this is a saving, not a fix.
+2. **PLAT-05 (COMMERCE/DOCS):** `<shopify-account>` is in the header, but `templates/customers/*` (7 files) is still shipped and §12.8 still says classic templates are included. Removing them is an ORCH decision; specs 15/17 cover the classic routes today.
+3. **PLAT-09 (CORE/DOCS/HARNESS):** the 4 `AssetPreload` warnings remain until `preload_tag` is allowed in §8.6 and implemented in the preview.
+4. **CD-05 caveat (HOME/MEDIA):** in the campaign editorial (desktop) the still's own top edge is visible as a faint step on black (HOME measured luma 0 → 33), also in the final frame; see `desktop-08-home-campaign.png`. A top feather in the still, or a mask on the shaft, would remove it.
+5. **CD-01 / CD-04 (HOME):** the optional showcase target change and the CSS mask fallback for the film edges are still open (MEDIA did its parts).
+6. **COMMERCE:** set `--sf-sticky-offset` from the real toolbar height (CORE's `html:has(.sf-facets__toolbar)` 50 px fallback is in use). Mobile product page transfer (≈ 563 KB before scroll vs the reviewer's 350 KB target) is recorded in the budget, not reduced.
+7. **Behaviour note (not a regression):** a cart changed outside the page (another tab, or an API call) is only picked up on `pageshow` from bfcache or after 30 s hidden; opening the drawer primes `/cart.js` but keeps the server-rendered lines. Same as Dawn. I hit it only while scripting the screenshots.
+8. **Hero logo:** could take `fetchpriority: 'low'` (MEDIA's note); the `sf-logo` snippet already accepts it.
+
+### 9.6 Screenshots (`dev/tests/screenshots/integration/`, overwritten, DPR 1)
+
+36 files, taken with `scratchpad/integrator2/shots.mjs` against `:9320`; no console errors, no failed `/cdn/` requests, `scrollWidth − innerWidth` = 0 on home, collection and PDP in both runs.
+
+- **Desktop 1440×900** (19): `00-hero-film` (intro at 1.2 s: no CTAs yet, F2), `01-hero`, `02-home-featured`, `03…07-home-signature-{0,25,50,75,97}`, `08-home-campaign`, `09-home-categories`, `10-home-story`, `11-home-newsletter`, `12-home-footer`, `20-mega-menu`, `30-collection`, `31-collection-grid`, `40-pdp`, `41-pdp-scrolled`, `50-cart-drawer`.
+- **Mobile 390×844** (17): the same home sections (signature at 0/50/97), `20-menu-drawer`, `30/31-collection`, `40/41-pdp`, `50-cart-drawer`.
+
+What I checked by eye: hero lockup and CTAs (Explore collection + View the campaign, PAUSE label); zip hoodie leads the rail, grid and showcase with no hanger; the signature pin ends on BACK with title, price and "Shop the zip hoodie"; the category index with stage on the right; brand story with no default copy (F8); the textured wordmark in the full-height desktop header and the footer, the flat one when condensed and on mobile (F9); the mega menu as an index plus 3:4 stage, no promo (CD-11); the collection title block and "6 pieces" count (CD-08, CD-17); PDP "Select a size" with no size pre-selected (UX-07) and the mobile sticky buy bar (CD-16); cart drawer with one line and a single tax line (PLAT-04). The Gothic hoodie card no longer shows daylight (CD-02).
+

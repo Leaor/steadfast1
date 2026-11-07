@@ -743,8 +743,12 @@ export class PredictiveSearchDrop extends Drop {
     this._types = (q.get('resources[type]') || 'query,product,collection,page,article').split(',').map((s) => s.trim());
     this._limit = Math.min(10, Math.max(1, parseInt(q.get('resources[limit]') || '10', 10) || 10));
     this._unavailableLast = (q.get('resources[options][unavailable_products]') || 'last') === 'last';
+    // Shopify: resources[limit_scope] = 'all' (default; `limit` caps the TOTAL across types) | 'each'
+    // (`limit` per type). https://shopify.dev/docs/api/ajax/reference/predictive-search (PLAT-08).
+    this._limitScope = q.get('resources[limit_scope]') === 'each' ? 'each' : 'all';
   }
   get performed() { return this._q !== ''; }
+  get limit_scope() { return this._limitScope; }
   get terms() { return this._q; }
   get types() { return this._types; }
   get resources() {
@@ -772,13 +776,26 @@ export class PredictiveSearchDrop extends Drop {
         }
       }
     }
-    const lim = (a) => a.slice(0, this._limit);
+    const lists = { product: products, collection: collections, page: pages, article: articles, query: queries };
+    const take = {};
+    if (this._limitScope === 'each') {
+      for (const t of Object.keys(lists)) take[t] = this._limit;
+    } else {
+      // 'all': one budget shared across types, filled in the order the types were requested.
+      let left = this._limit;
+      for (const t of Object.keys(lists)) take[t] = 0;
+      for (const t of this._types) {
+        if (!(t in lists) || left <= 0) continue;
+        take[t] = Math.min(left, lists[t].length);
+        left -= take[t];
+      }
+    }
     this._res = {
-      products: lim(products).map((p) => s.product(p)),
-      collections: lim(collections).map((c) => s.collection(c)),
-      pages: lim(pages).map((p) => s.pageByHandle(p.handle)),
-      articles: lim(articles).map(([a, b]) => s.article(a, b)),
-      queries: lim(queries),
+      products: products.slice(0, take.product).map((p) => s.product(p)),
+      collections: collections.slice(0, take.collection).map((c) => s.collection(c)),
+      pages: pages.slice(0, take.page).map((p) => s.pageByHandle(p.handle)),
+      articles: articles.slice(0, take.article).map(([a, b]) => s.article(a, b)),
+      queries: queries.slice(0, take.query),
     };
     return this._res;
   }

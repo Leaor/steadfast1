@@ -38,18 +38,28 @@
   endif
 -%}
 <section class="sf-section sf-main-collection sf-tone-ink sf-space-none" data-section-id="{{ section.id }}" aria-labelledby="sf-collection-title-{{ section.id }}">
-  <header class="sf-collection-header{% if show_banner %} sf-collection-header--banner{% endif %}">
+  {%- comment -%}
+    Header: title (+ description) in cols 1–6 and, when set, the collection image at its own aspect
+    ratio in cols 9–12, height-capped so the first product row starts within the first viewport.
+    A portrait still is never cropped into a wide band.
+  {%- endcomment -%}
+  <header class="sf-collection-header sf-container{% if show_banner %} sf-collection-header--banner{% endif %}">
     {%- if show_banner -%}
-      <div class="sf-collection-header__banner">
-        {%- render 'sf-image', image: collection.image, sizes: '100vw', widths: '750,1100,1500,2200,3000', loading: 'eager', fetchpriority: 'high', alt: '', class: 'sf-collection-header__img' -%}
+      {%- assign banner_ar = collection.image.aspect_ratio | default: 0.8 -%}
+      <div class="sf-collection-header__banner" style="--_ar: {{ banner_ar }}">
+        {%- render 'sf-image', image: collection.image, sizes: '(min-width: 990px) 300px, 36vw', widths: '360,540,720,900', loading: 'eager', alt: '', class: 'sf-collection-header__img' -%}
       </div>
     {%- endif -%}
-    <div class="sf-collection-header__text sf-container">
+    <div class="sf-collection-header__text">
       <h1 class="sf-collection-header__title sf-display-lg" id="sf-collection-title-{{ section.id }}">{{ collection.title | escape }}</h1>
       {%- if section.settings.show_description and collection.description != blank -%}
         <div class="sf-collection-header__description sf-rte">{{ collection.description }}</div>
       {%- endif -%}
-      <p class="sf-collection-header__count sf-micro sf-tabular">{{ 'collections.products_count' | t: count: collection.products_count }}</p>
+      {%- comment -%}
+        One visible count per viewport, both live (sf-facets.js swaps them): this one only below 750px,
+        where the toolbar has no room; the toolbar's [data-sf-facets-count] from 750px.
+      {%- endcomment -%}
+      <p class="sf-collection-header__count sf-micro sf-tabular" data-sf-facets-count-header>{{ 'facets.results_count' | t: count: paginate.items }}</p>
     </div>
   </header>
 
@@ -62,11 +72,11 @@
           {%- for product in collection.products -%}
             {%- liquid
               assign c_loading = 'lazy'
-              assign c_priority = blank
+              assign c_priority = ''
               if forloop.index <= 4 and paginate.current_page == 1
                 assign c_loading = 'eager'
               endif
-              if forloop.first and paginate.current_page == 1 and show_banner == false
+              if forloop.first and paginate.current_page == 1
                 assign c_priority = 'high'
               endif
             -%}
@@ -99,7 +109,7 @@
   "class": "sf-shopify-section--main-collection",
   "settings": [
     { "type": "checkbox", "id": "show_description", "label": "Show collection description", "default": true },
-    { "type": "checkbox", "id": "show_banner_image", "label": "Show collection image", "default": true, "info": "21:9 on desktop, 4:5 on mobile." },
+    { "type": "checkbox", "id": "show_banner_image", "label": "Show collection image", "default": true, "info": "Shown beside the title at its own proportions." },
     { "type": "range", "id": "products_per_page", "label": "Products per page", "min": 8, "max": 48, "step": 4, "default": 24 },
     { "type": "select", "id": "columns_desktop", "label": "Columns on desktop", "default": "4", "options": [ { "value": "2", "label": "2" }, { "value": "4", "label": "4" } ] },
     { "type": "select", "id": "columns_mobile", "label": "Columns on mobile", "default": "2", "options": [ { "value": "1", "label": "1" }, { "value": "2", "label": "2" } ] },

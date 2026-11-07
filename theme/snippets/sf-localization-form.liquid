@@ -2,6 +2,8 @@
   Country/currency (and optional language) selector. A native select that submits on change via
   <sf-localization> (sf-header.js), with a visible submit button inside <noscript>. Renders only
   when the store sells to more than one country (or has more than one language).
+  The compact 11 px caps value is an aria-hidden <span>; the real <select> is laid over it
+  transparently at 16 px so iOS Safari does not zoom the page on focus.
 
   @param {string} id_suffix - Unique per page, e.g. 'footer', 'menu', 'header'.
   @param {boolean} [show_country] - Default settings.show_currency_selector.
@@ -40,6 +42,9 @@
         <div class="sf-localization__field">
           <label class="sf-visually-hidden" for="{{ country_select_id }}">{{ 'localization.country_label' | t }}</label>
           {%- render 'sf-icon', name: 'globe', size: 14, class: 'sf-localization__icon' -%}
+          <span class="sf-localization__value" aria-hidden="true" data-sf-localization-value>
+            {{- localization.country.name }} ({{ localization.country.currency.iso_code }} {{ localization.country.currency.symbol }})
+          </span>
           <select class="sf-localization__select" id="{{ country_select_id }}" name="country_code" data-sf-localization-select>
             {%- for country in localization.available_countries -%}
               <option value="{{ country.iso_code }}"{% if country.iso_code == localization.country.iso_code %} selected{% endif %}>
@@ -53,6 +58,7 @@
         {%- assign language_select_id = form_id | append: '-language' -%}
         <div class="sf-localization__field">
           <label class="sf-visually-hidden" for="{{ language_select_id }}">{{ 'localization.language_label' | t }}</label>
+          <span class="sf-localization__value" aria-hidden="true" data-sf-localization-value>{{ localization.language.endonym_name | capitalize }}</span>
           <select class="sf-localization__select" id="{{ language_select_id }}" name="language_code" data-sf-localization-select>
             {%- for language in localization.available_languages -%}
               <option value="{{ language.iso_code }}" lang="{{ language.iso_code }}"{% if language.iso_code == localization.language.iso_code %} selected{% endif %}>
@@ -63,7 +69,8 @@
         </div>
       {%- endif -%}
       <noscript>
-        <button type="submit" class="sf-btn sf-btn--text sf-btn--sm"><span class="sf-btn__label">{{ 'localization.update' | t }}</span></button>
+        {%- assign loc_update = 'localization.update' | t -%}
+        {%- render 'sf-button', label: loc_update, style: 'text', size: 'sm', type: 'submit' -%}
       </noscript>
     {%- endform -%}
   </sf-localization>

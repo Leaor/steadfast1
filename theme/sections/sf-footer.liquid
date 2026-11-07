@@ -32,7 +32,8 @@
     {%- if ft.show_logo -%}
       <div class="sf-footer__brand">
         <a class="sf-footer__logo" href="{{ routes.root_url }}" aria-label="{{ 'header.home_label' | t: shop: shop.name }}">
-          {%- render 'sf-logo', variant: 'flat', width: 148 -%}
+          {%- comment -%} Brief §2: the 148 px footer mark keeps the distressed texture (letters 148 px wide). {%- endcomment -%}
+          {%- render 'sf-logo', variant: 'textured', width: 161, class: 'sf-logo--fit', sizes: '161px', alt: '' -%}
         </a>
       </div>
     {%- endif -%}

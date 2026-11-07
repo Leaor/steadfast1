@@ -192,6 +192,22 @@ test.describe('collection filtering', () => {
     expect([...first, ...second]).toEqual(fx.sortProducts(all(), 'created-descending').map((p) => p.handle).slice(0, first.length + second.length));
   });
 
+  test('pagination with 6+ pages: exactly one aria-current="page", gap parts are not current (PLAT-08)', async ({ page }) => {
+    const n = all().length;
+    test.skip(n < 6, 'needs ≥ 6 products for 6 pages at 1 per page');
+    const ps = encodeURIComponent(JSON.stringify({ main: { products_per_page: 1, pagination_type: 'pager' } }));
+    for (const pg of [1, 3, Math.ceil(n / 2) + 1, n]) {
+      await gotoOk(page, `${URL_ALL}?preview_sections=${ps}&page=${pg}`);
+      const nav = page.locator('main .sf-pagination');
+      await expect(nav).toHaveCount(1);
+      await expect(nav.locator('[aria-current="page"]'), `page ${pg}: one current part`).toHaveCount(1);
+      await expect(nav.locator('[aria-current="page"]')).toHaveText(String(pg));
+      // Shopify titles the gap part '&hellip;' (rendered as …); it is never the current page.
+      const gaps = await nav.locator('.sf-pagination__gap').allTextContents();
+      for (const g of gaps) expect(g.trim()).toBe('…');
+    }
+  });
+
   test('empty states: tops collection and filters with no match', async ({ page }) => {
     const tops = fx.collection('tops');
     test.skip(!tops, 'no tops collection');

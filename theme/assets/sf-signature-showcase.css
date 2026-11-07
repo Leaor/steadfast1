@@ -70,7 +70,7 @@
     grid-auto-flow: column;
     grid-auto-columns: 72vw;
     gap: var(--sf-space-1);
-    margin: var(--sf-space-6) calc(var(--sf-gutter) * -1) 0;
+    margin: var(--sf-space-8) calc(var(--sf-gutter) * -1) 0;
     padding: 0 var(--sf-gutter);
     list-style: none;
     overflow-x: auto;
@@ -118,12 +118,14 @@
     color: var(--sf-fg-muted);
   }
 
+  /* Stacked order (DESIGN §10.3): image, then the FRONT / BACK control directly under it (it swaps that
+     image), then title, price and CTA, then the detail rail. */
   .sf-signature-showcase__buy {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: var(--sf-space-3);
-    margin-top: var(--sf-space-6);
+    margin-top: var(--sf-space-4);
   }
 
   .sf-signature-showcase__toggle {
@@ -276,6 +278,15 @@
       pointer-events: none;
     }
 
+    /* Pre-pin exposure lift (sf-signature-showcase.js): 1 → 0 between "top 85%" and "top top". */
+    .sf-signature-showcase__dawn {
+      position: absolute;
+      inset: 0;
+      background: #000;
+      opacity: 0;
+      pointer-events: none;
+    }
+
     html.js[data-sf-motion='full'] .sf-signature-showcase--pin:not(.is-static) .sf-signature-showcase__intro,
     html.js[data-sf-motion='full'] .sf-signature-showcase--pin:not(.is-static) .sf-signature-showcase__details {
       position: absolute;
@@ -330,11 +341,19 @@
       align-items: center;
       text-align: center;
       opacity: 0;
+      pointer-events: none;
     }
+
+    html.js[data-sf-motion='full'] .sf-signature-showcase--pin.is-buy-live:not(.is-static) .sf-signature-showcase__buy { pointer-events: auto; }
 
     html.js[data-sf-motion='full'] .sf-signature-showcase--pin:not(.is-static) .sf-signature-showcase__title--staged { display: block; }
 
-    html.js[data-sf-motion='full'] .sf-signature-showcase--pin:not(.is-static) .sf-signature-showcase__buy:focus-within { opacity: 1; }
+    /* Keyboard focus shows the block at once (the focusin handler also scrolls the pin to its end);
+       !important beats the timeline's inline opacity. */
+    html.js[data-sf-motion='full'] .sf-signature-showcase--pin:not(.is-static) .sf-signature-showcase__buy:focus-within {
+      opacity: 1 !important;
+      pointer-events: auto;
+    }
 
     /* FRONT / BACK pressed at the end of the pin: the chosen face holds over the timeline's state. */
     .sf-signature-showcase[data-face='front'] .sf-signature-showcase__face:not(.sf-signature-showcase__face--back) {

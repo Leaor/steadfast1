@@ -70,7 +70,8 @@ test.describe('hero film', () => {
     await expect.poll(() => loop(page).evaluate((v) => !v.paused)).toBe(true);
     await contentVisible(page);
     await expect(control(page)).toHaveText(/pause/i);
-    await expect(control(page)).toHaveAttribute('aria-pressed', 'false');
+    // ARCH §5.3: the label names the action; no aria-pressed (it would announce "Play, pressed").
+    await expect(control(page)).not.toHaveAttribute('aria-pressed', /.*/);
     expect(await page.evaluate(() => sessionStorage.getItem('sf:intro-seen'))).toBe('1');
     const distinct = [...new Set(mp4)];
     expect(distinct.filter((x) => /sf-film-(desktop|mobile)\.mp4/.test(x)), 'one intro file').toEqual([f.intro]);
@@ -205,19 +206,19 @@ test.describe('hero film', () => {
     await expect.poll(() => loop(page).evaluate((v) => !v.paused), { timeout: 5000, message: 'loop resumes on return' }).toBe(true);
   });
 
-  test('(j) PAUSE flips aria-pressed and pauses the loop', async ({ page }) => {
+  test('(j) PAUSE swaps its label to PLAY (no aria-pressed) and pauses the loop; PLAY resumes it', async ({ page }) => {
     await markIntroSeen(page);
     await gotoOk(page, '/');
     await expect.poll(() => loop(page).evaluate((v) => !v.paused && v.currentTime > 0), { timeout: 8000 }).toBe(true);
     await expect(control(page)).toHaveText(/pause/i);
-    await expect(control(page)).toHaveAttribute('aria-pressed', 'false');
+    await expect(control(page)).not.toHaveAttribute('aria-pressed', /.*/);
     await control(page).click();
-    await expect(control(page)).toHaveAttribute('aria-pressed', 'true');
     await expect(control(page)).toHaveText(/play/i);
+    await expect(control(page)).not.toHaveAttribute('aria-pressed', /.*/);
     await expect.poll(() => loop(page).evaluate((v) => v.paused)).toBe(true);
     await expect.poll(() => state(page)).toBe('paused');
     await control(page).click();
-    await expect(control(page)).toHaveAttribute('aria-pressed', 'false');
+    await expect(control(page)).toHaveText(/pause/i);
     await expect.poll(() => loop(page).evaluate((v) => !v.paused)).toBe(true);
   });
 

@@ -73,7 +73,6 @@
   };
 
   /* ── utils ─────────────────────────────────────────────── */
-  var uidCount = 0;
   S.utils = {
     debounce: function (fn, ms) {
       var t;
@@ -95,10 +94,6 @@
           t = setTimeout(function () { last = Date.now(); fn.apply(ctx, args); }, wait);
         }
       };
-    },
-    uid: function (prefix) {
-      uidCount += 1;
-      return (prefix || 'sf-uid') + '-' + uidCount;
     },
     fetchJSON: function (url, opts) {
       opts = opts || {};
@@ -190,7 +185,9 @@
   var scriptPromises = {};
   var dclFired = doc.readyState === 'complete';
   if (!dclFired) doc.addEventListener('DOMContentLoaded', function () { dclFired = true; }, { once: true });
-  S.loadScript = function (url) {
+  /* opts.ordered: inserted with async = false, so several scripts download in parallel but execute in
+     insertion order (GSAP then ScrollTrigger, PERF-05). */
+  S.loadScript = function (url, opts) {
     if (!url) return Promise.reject(new Error('No script URL'));
     if (scriptPromises[url]) return scriptPromises[url];
     scriptPromises[url] = new Promise(function (resolve, reject) {
@@ -212,7 +209,7 @@
       s.addEventListener('error', function () { delete scriptPromises[url]; reject(new Error('Failed to load ' + url)); }, { once: true });
       if (!existing) {
         s.src = url;
-        s.defer = true;
+        s.async = !(opts && opts.ordered);
         doc.head.appendChild(s);
       }
     });
@@ -242,8 +239,10 @@
   var gsapPromise = null;
   S.loadGsap = function () {
     if (gsapPromise) return gsapPromise;
-    gsapPromise = S.loadScript(S.assets.gsap)
-      .then(function () { return S.loadScript(S.assets.scrollTrigger); })
+    gsapPromise = Promise.all([
+      S.loadScript(S.assets.gsap, { ordered: true }),
+      S.loadScript(S.assets.scrollTrigger, { ordered: true })
+    ])
       .then(function () {
         var gsap = window.gsap, ScrollTrigger = window.ScrollTrigger;
         gsap.registerPlugin(ScrollTrigger);
@@ -445,15 +444,33 @@
     if (root.querySelectorAll) nodes = nodes.concat([].slice.call(root.querySelectorAll('[data-sf-section]')));
     nodes.forEach(function (el) { cb(el.getAttribute('data-sf-section'), el); });
   }
+  /* Lazy section modules (PERF-06): a section root may carry data-sf-module="{{ 'sf-x.js' | asset_url }}"
+     instead of a <script defer>. The script is fetched when the section nears the viewport (100%
+     rootMargin), or at once in the theme editor / on force; its S.sections.register() call then inits. */
+  var moduleSeen = new WeakSet();
+  function loadModule(el, now) {
+    var url = el.getAttribute('data-sf-module');
+    if (!url || moduleSeen.has(el)) return;
+    moduleSeen.add(el);
+    var load = function () { S.loadScript(url).catch(function (err) { moduleSeen.delete(el); S.debug('module failed', url, err); }); };
+    if (now || (window.Shopify && window.Shopify.designMode)) load();
+    else S.inView(el, load, { rootMargin: '100% 0px' });
+  }
   S.sections = {
     register: function (type, def) {
       registry[type] = def;
       doc.querySelectorAll('[data-sf-section="' + type + '"]').forEach(function (el) { initEl(type, el, false); });
     },
-    init: function (root, force) { eachSection(root || doc, function (type, el) { initEl(type, el, force); }); },
+    init: function (root, force) {
+      eachSection(root || doc, function (type, el) {
+        if (registry[type]) initEl(type, el, force);
+        else loadModule(el, force);
+      });
+    },
     destroy: function (root) { eachSection(root || doc, function (type, el) { destroyEl(type, el); }); }
   };
   doc.addEventListener('shopify:section:load', function (e) {
+    eachSection(e.target, function (type, el) { if (!registry[type]) loadModule(el, true); });
     S.sections.init(e.target, false);
     var first = e.target.querySelector && e.target.querySelector('[data-sf-section]');
     S.bus.emit('section:load', { sectionId: e.detail && e.detail.sectionId, type: first ? first.getAttribute('data-sf-section') : null, el: e.target });
@@ -527,6 +544,25 @@
     });
     return max;
   }
+
+  /* Back closes the topmost dialog on touch devices (UX-05). The history logic is a lazy module
+     (sf-dialog-history.js), fetched on the first dialog open on a coarse pointer. */
+  var coarse = window.matchMedia ? window.matchMedia('(pointer: coarse)') : { matches: false };
+  function historyPush(d) {
+    if (!coarse.matches || !d.id || d.closest('sf-facets') || !window.history.pushState) return;
+    if (S.dialogHistory) { S.dialogHistory.push(d); return; }
+    if (!S.assets.dialogHistory) return;
+    S.loadScript(S.assets.dialogHistory).then(function () {
+      if (S.dialogHistory && d.isOpen) S.dialogHistory.push(d);
+    }).catch(function (err) { S.debug('dialog history failed', err); });
+  }
+  function historyRelease(d) { if (d._historyEntry && S.dialogHistory) S.dialogHistory.release(d); }
+  // Registered here, before any section script, so a dialog's popstate can stop URL-driven listeners.
+  window.addEventListener('popstate', function (e) { if (S.dialogHistory) S.dialogHistory.onPop(e); });
+  // A fresh load onto a stale dialog entry (no bfcache): neutralise it.
+  try {
+    if (window.history.state && window.history.state.sfDialog) window.history.replaceState(null, '');
+  } catch (e) { /* history unavailable */ }
 
   class SfDialog extends HTMLElement {
     connectedCallback() {
@@ -611,6 +647,7 @@
       var initial = this.dialog.querySelector('[data-sf-initial-focus]') || this.dialog.querySelector('[autofocus]');
       if (initial) initial.focus({ preventScroll: true });
       this._setExpanded(true);
+      historyPush(this);
       S.bus.emit('drawer:open', { id: this.id });
       if (EVENT_ALIASES[this.id]) S.bus.emit(EVENT_ALIASES[this.id] + ':open', {});
     }
@@ -639,6 +676,7 @@
       if (trigger && trigger.isConnected && typeof trigger.focus === 'function') {
         trigger.focus({ preventScroll: true });
       }
+      historyRelease(this);
       S.bus.emit('drawer:close', { id: this.id });
       if (EVENT_ALIASES[this.id]) S.bus.emit(EVENT_ALIASES[this.id] + ':close', {});
     }
@@ -703,17 +741,19 @@
     syncMotionToggles();
     S.reveal.scan(doc);
     S.sections.init(doc, false);
-    // Newsletter: after a successful post Shopify reloads the page; focus the status message.
-    var success = doc.querySelector('.sf-newsletter-form__success[tabindex="-1"]');
-    if (success) {
-      var focusSuccess = function () {
-        if (doc.activeElement === success) return;
-        success.focus({ preventScroll: true });
-        success.scrollIntoView({ block: 'center', behavior: 'auto' });
+    // Newsletter: after a post Shopify reloads the page at #form-id. Focus the success message, or on a
+    // failed submit the invalid field (its aria-describedby reads the error; ARCHITECTURE §7.8).
+    var target = doc.querySelector('.sf-newsletter-form__success[tabindex="-1"]') ||
+      doc.querySelector('.sf-newsletter-form [aria-invalid="true"]');
+    if (target) {
+      var focusTarget = function () {
+        if (doc.activeElement === target) return;
+        target.focus({ preventScroll: true });
+        target.scrollIntoView({ block: 'center', behavior: 'auto' });
       };
-      focusSuccess();
+      focusTarget();
       // The redirect's #form fragment is applied after load and moves focus to the document; re-apply.
-      var refocus = function () { requestAnimationFrame(function () { setTimeout(focusSuccess, 0); }); };
+      var refocus = function () { requestAnimationFrame(function () { setTimeout(focusTarget, 0); }); };
       if (doc.readyState === 'complete') refocus();
       else window.addEventListener('load', refocus, { once: true });
     }

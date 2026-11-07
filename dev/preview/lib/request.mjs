@@ -73,8 +73,10 @@ export class RequestContext {
     const dir = path.join(this.themeDir, 'templates', directory || '');
     const view = this.query.get('view');
     const tries = [];
-    for (const s of [view, suffix, null]) {
-      if (s === undefined) continue;
+    // Shopify order: ?view= alternate first, then the resource's template_suffix, then the base
+    // template. URLSearchParams.get() returns null (not undefined) when absent, so filter falsy
+    // values instead of only skipping undefined (CD-10/A11Y-09/F4: the base used to win).
+    for (const s of [...new Set([view, suffix].filter(Boolean)), null]) {
       const base = `${name}${s ? `.${s}` : ''}`;
       tries.push([s, path.join(dir, `${base}.json`), 'json'], [s, path.join(dir, `${base}.liquid`), 'liquid']);
     }

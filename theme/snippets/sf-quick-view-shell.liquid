@@ -10,7 +10,6 @@
 <sf-dialog id="sf-quick-view" data-sf-dialog-type="modal" class="sf-quick-view-dialog" data-sf-css="{{ 'sf-quick-view.css' | asset_url }} {{ 'sf-product.css' | asset_url }}">
   <dialog class="sf-quick-view" aria-labelledby="sf-quick-view-title">
     <sf-quick-view class="sf-quick-view__inner">
-      <span class="sf-quick-view__handle" aria-hidden="true"></span>
       <button type="button" class="sf-btn sf-btn--icon sf-quick-view__close" data-sf-close aria-label="{{ 'general.close' | t | escape }}">
         {%- render 'sf-icon', name: 'close', size: 20 -%}
       </button>

@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 // STEADFAST preview server: renders theme/ with liquidjs the way Shopify would, using
 // placeholder fixtures (ARCHITECTURE §8). Dev-only, never shipped, never contacts Shopify.
-//   node dev/preview/server.mjs [--port 9292] [--theme theme] [--fixtures dev/preview/fixtures]
+//   node dev/preview/server.mjs [--port 9292] [--theme theme] [--fixtures dev/preview/fixtures] [--compress]
+//   --compress (or SF_PREVIEW_COMPRESS=1): brotli/gzip text responses and immutable /cdn/ caching.
 import http from 'node:http';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import {
-  parseCookies, cookieHeader, parseBody, send, sendJSON, redirect, serveFile, escapeHTML,
+  parseCookies, cookieHeader, parseBody, send, sendJSON, redirect, serveFile, escapeHTML, setCompression,
 } from './lib/http.mjs';
 import { loadData } from './lib/data.mjs';
 import { RequestContext } from './lib/request.mjs';
@@ -32,6 +33,9 @@ const THEME_DIR = resolveDir(argv('theme', 'theme'));
 const FIXTURES_DIR = resolveDir(argv('fixtures', 'dev/preview/fixtures'));
 const MEDIA_DIR = path.join(repoRoot, 'media/processed');
 const QUIET = process.argv.includes('--quiet');
+// PERF-07: opt-in brotli/gzip for text responses + immutable /cdn/ caching (lab numbers closer to the Shopify CDN).
+const COMPRESS = process.argv.includes('--compress') || process.env.SF_PREVIEW_COMPRESS === '1';
+setCompression(COMPRESS);
 
 const log = (msg) => { if (!QUIET || /error|404/i.test(msg)) process.stderr.write(`[preview] ${msg}\n`); };
 
@@ -588,7 +592,7 @@ export function createServer() {
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const server = createServer();
   server.listen(PORT, HOST, () => {
-    log(`listening on http://${HOST}:${PORT}  theme=${path.relative(repoRoot, THEME_DIR) || THEME_DIR}  fixtures=${path.relative(repoRoot, FIXTURES_DIR)}`);
+    log(`listening on http://${HOST}:${PORT}${COMPRESS ? '  (compress on)' : ''}  theme=${path.relative(repoRoot, THEME_DIR) || THEME_DIR}  fixtures=${path.relative(repoRoot, FIXTURES_DIR)}`);
   });
   const stop = () => server.close(() => process.exit(0));
   process.on('SIGINT', stop);

@@ -25,16 +25,6 @@
   sf-dialog#sf-quick-view > dialog::backdrop { background: rgb(0 0 0 / .7); }
 
   .sf-quick-view__inner { position: relative; display: block; height: 100%; }
-  .sf-quick-view__handle {
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    width: 32px;
-    height: 2px;
-    margin-left: -16px;
-    background: var(--sf-washed-grey);
-    z-index: 2;
-  }
   .sf-quick-view__close { position: absolute; top: 8px; right: 8px; z-index: 3; color: var(--sf-fg); background: rgb(20 22 25 / .72); }
   .sf-quick-view__body { height: 100%; overflow-y: auto; overscroll-behavior: contain; }
 
@@ -46,8 +36,37 @@
   .sf-qv__title:focus { outline: none; box-shadow: none; }
   .sf-qv__price { margin-top: var(--sf-space-3); }
   .sf-qv__picker { margin-top: var(--sf-space-6); }
-  .sf-qv__buy { margin-top: var(--sf-space-6); }
-  .sf-qv__details { align-self: flex-start; margin-top: var(--sf-space-4); color: var(--sf-fg-muted); }
+  .sf-qv__buyrow { margin-top: var(--sf-space-6); }
+  .sf-qv__details { margin-top: var(--sf-space-4); color: var(--sf-fg-muted); }
+
+  /* Bottom sheet (< 990px): a short media strip, and the buy row pinned to the sheet's bottom edge,
+     so Add to cart is visible without scrolling in portrait and landscape. */
+  @media (max-width: 989px) {
+    .sf-qv__media .sf-media { aspect-ratio: auto; height: min(42svh, 125vw); }
+    .sf-qv__media .sf-media .sf-img { object-fit: contain; object-position: 50% 50%; }
+    .sf-qv__skeleton--media { aspect-ratio: auto; height: min(42svh, 125vw); }
+    .sf-qv__info { padding-bottom: 0; }
+    .sf-qv__buyrow {
+      position: sticky;
+      bottom: 0;
+      z-index: 2;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0 var(--sf-space-4);
+      margin-inline: calc(var(--sf-space-5) * -1);
+      margin-top: var(--sf-space-5);
+      padding: var(--sf-space-3) var(--sf-space-5) max(16px, env(safe-area-inset-bottom));
+      background: var(--sf-bg-raised);
+      border-top: var(--sf-hairline) solid var(--sf-line);
+    }
+    .sf-qv__buy { flex: 1 1 100%; }
+    .sf-qv__details { margin-top: var(--sf-space-2); }
+  }
+  @media (max-width: 989px) and (orientation: landscape) {
+    .sf-qv__buy { flex: 1 1 auto; }
+  }
   .sf-qv--error { display: flex; flex-direction: column; align-items: flex-start; gap: var(--sf-space-5); padding: var(--sf-space-8) var(--sf-space-5); }
 
   /* Loading skeleton: flat raised blocks, no shimmer. */
@@ -68,7 +87,6 @@
       --_open-dur: calc(360ms * var(--sf-motion));
     }
     sf-dialog#sf-quick-view.is-open > dialog { opacity: 1; transform: none; }
-    .sf-quick-view__handle { display: none; }
     .sf-quick-view__close { background: none; top: 12px; right: 12px; }
     .sf-quick-view__body { overflow: hidden; }
     .sf-qv { grid-template-columns: calc(min(720px, 88vh) * .8 - 2px) minmax(0, 1fr); height: 100%; }

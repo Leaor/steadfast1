@@ -23,6 +23,7 @@
   .sf-footer__top { display: grid; gap: var(--sf-space-7); }
   .sf-footer__logo { display: inline-block; color: var(--sf-fg); }
   .sf-footer__logo .sf-logo--flat { width: 148px; }
+  .sf-footer__logo .sf-logo--textured { width: 161px; }
 
   /* Link groups: accordions on mobile, columns on desktop. */
   .sf-footer__nav { display: grid; }
@@ -47,13 +48,13 @@
   .sf-footer__links,
   .sf-footer__text,
   .sf-footer__social { padding-bottom: var(--sf-space-5); }
-  .sf-footer__links { display: grid; gap: 4px; }
+  .sf-footer__links { display: grid; gap: 0; }
   .sf-footer__link,
   .sf-social__link {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    min-height: 40px;
+    min-height: 44px;
     color: var(--sf-fg-muted);
     font-size: var(--sf-text-sm);
     line-height: 1.4;
@@ -166,5 +167,5 @@
   .sf-motion-toggle[data-os-reduced] { cursor: default; }
   @media (hover: hover) and (pointer: fine) { .sf-motion-toggle:hover { color: var(--sf-fg); } }
 
-  .sf-footer__localization .sf-localization__select { color: var(--sf-fg-muted); }
+  .sf-footer__localization .sf-localization__value { color: var(--sf-fg-muted); }
 }

@@ -71,7 +71,7 @@
   .sf-ps__products::-webkit-scrollbar { display: none; }
   .sf-ps__option { position: relative; }
   .sf-ps__link { display: block; color: var(--sf-fg-muted); text-decoration: none; transition: color calc(var(--sf-dur-instant) * var(--sf-motion)) linear; }
-  .sf-ps__product .sf-ps__link { display: grid; gap: 6px; padding-bottom: var(--sf-space-2); }
+  .sf-ps__link.sf-ps__product { display: grid; gap: 6px; padding-bottom: var(--sf-space-2); }
   .sf-ps__thumb { position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; background: var(--sf-bg-sunken); }
   .sf-ps__thumb .sf-img, .sf-ps__thumb .sf-placeholder { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
   .sf-ps__name {
@@ -89,9 +89,9 @@
   .sf-ps__text { display: block; min-height: 40px; padding-block: 8px; line-height: 24px; font-size: var(--sf-text-base); }
   .sf-ps__text mark, .sf-ps__text .highlight, .sf-ps__text b, .sf-ps__text strong { background: none; color: var(--sf-fg); font-weight: 500; }
   .sf-ps__side { display: grid; gap: var(--sf-space-5); align-content: start; }
-  .sf-ps__empty { color: var(--sf-fg-muted); }
-  .sf-ps__search-for { border-top: var(--sf-hairline) solid var(--sf-line); }
-  .sf-ps__search-for .sf-ps__link {
+  .sf-ps__empty { margin-bottom: var(--sf-space-5); color: var(--sf-fg-muted); }
+  .sf-ps__link.sf-ps__search-for {
+    border-top: var(--sf-hairline) solid var(--sf-line);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -105,8 +105,8 @@
     text-transform: uppercase;
   }
   /* Active option (keyboard or pointer): bone text and a 1px rule, no fills. */
-  .sf-ps__option.is-active .sf-ps__link { color: var(--sf-fg); }
-  .sf-ps__option.is-active .sf-ps__text, .sf-ps__option.is-active .sf-ps__name { text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px; }
+  .sf-ps__option.is-active { color: var(--sf-fg); }
+  .sf-ps__option.is-active.sf-ps__text, .sf-ps__option.is-active .sf-ps__name { text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1px; }
   .sf-ps__product.is-active .sf-ps__thumb { outline: 1px solid var(--sf-fg); outline-offset: -1px; }
   @media (min-width: 990px) {
     .sf-ps { grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); column-gap: var(--sf-grid-gap); }

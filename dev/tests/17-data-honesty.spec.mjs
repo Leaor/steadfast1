@@ -1,5 +1,5 @@
 // Data honesty (BRIEF §4–§7, §10; ARCHITECTURE §0.4–§0.5, §9 row 17; CONTEXT decision 6).
-import { test, expect, fx, visibleText, ariaLabels, markIntroSeen } from './helpers/base.mjs';
+import { test, expect, fx, visibleText, ariaLabels, markIntroSeen, chooseSizeIfRequired } from './helpers/base.mjs';
 import { htmlRoutes } from './helpers/routes.mjs';
 
 // ARCH §9 pattern. "review" is matched only as a word start so the ribbon's "PREVIEW" is never the match.
@@ -40,6 +40,7 @@ test('opened drawers and dialogs stay honest too', async ({ page }) => {
   await markIntroSeen(page);
   const p = fx.sizeCellProduct();
   await page.goto(`/products/${p.handle}`);
+  await chooseSizeIfRequired(page.locator('main'), p);
   await page.locator('main sf-product-form button[type="submit"]').first().click();
   await expect.poll(() => page.locator('#sf-cart-drawer dialog').evaluate((d) => d.open)).toBe(true);
   const text = await page.locator('#sf-cart-drawer dialog').innerText();

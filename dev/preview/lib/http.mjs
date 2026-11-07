@@ -2,6 +2,27 @@
 // multipart), nested-key decoding (Rails/Shopify style), static files with ranges.
 import fs from 'node:fs';
 import path from 'node:path';
+import zlib from 'node:zlib';
+
+// ---------- opt-in compression (PERF-07; `server.mjs --compress`) ----------
+// Off by default so byte-level tests keep seeing raw bodies. On: text responses are brotli/gzip
+// encoded like the Shopify CDN, and /cdn/ assets get the CDN's immutable cache header.
+const COMPRESSION = { on: false };
+export function setCompression(on) { COMPRESSION.on = !!on; }
+export const compressionEnabled = () => COMPRESSION.on;
+const COMPRESSIBLE = /^(text\/|application\/(json|javascript)|image\/svg\+xml)/;
+const fileCache = new Map(); // `${enc}:${file}:${mtime}` -> Buffer
+function pickEncoding(res) {
+  const ae = String(res.req?.headers?.['accept-encoding'] || '');
+  if (/\bbr\b/.test(ae)) return 'br';
+  if (/\bgzip\b/.test(ae)) return 'gzip';
+  return null;
+}
+function encode(buf, enc, quality) {
+  return enc === 'br'
+    ? zlib.brotliCompressSync(buf, { params: { [zlib.constants.BROTLI_PARAM_QUALITY]: quality, [zlib.constants.BROTLI_PARAM_SIZE_HINT]: buf.length } })
+    : zlib.gzipSync(buf, { level: quality >= 9 ? 9 : 6 });
+}
 
 export const MIME = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
@@ -123,6 +144,17 @@ export async function parseBody(req) {
 
 export function send(res, status, body, headers = {}) {
   if (res.headersSent) return;
+  if (COMPRESSION.on && status === 200 && body != null) {
+    const type = String(headers['Content-Type'] || headers['content-type'] || '');
+    const buf = Buffer.isBuffer(body) ? body : Buffer.from(String(body));
+    const enc = COMPRESSIBLE.test(type) && buf.length > 512 ? pickEncoding(res) : null;
+    if (enc) {
+      const out = encode(buf, enc, 5); // dynamic HTML/JSON: fast quality, as an edge would use
+      res.writeHead(status, { ...headers, 'Content-Encoding': enc, Vary: 'Accept-Encoding', 'Content-Length': out.length });
+      res.end(out);
+      return;
+    }
+  }
   res.writeHead(status, headers);
   res.end(body);
 }
@@ -146,7 +178,16 @@ export function serveFile(req, res, file, { log } = {}) {
   }
   const type = MIME[path.extname(file).toLowerCase()] || 'application/octet-stream';
   const headers = { 'Content-Type': type, 'Accept-Ranges': 'bytes', 'Cache-Control': 'public, max-age=60', 'Last-Modified': stat.mtime.toUTCString() };
+  if (COMPRESSION.on) headers['Cache-Control'] = 'public, max-age=31536000, immutable';
   const range = req.headers.range;
+  const enc = COMPRESSION.on && !range && COMPRESSIBLE.test(type) && stat.size > 512 ? pickEncoding(res) : null;
+  if (enc) {
+    const key = `${enc}:${file}:${stat.mtimeMs}`;
+    let out = fileCache.get(key);
+    if (!out) { out = encode(fs.readFileSync(file), enc, 11); fileCache.set(key, out); }
+    res.writeHead(200, { ...headers, 'Content-Encoding': enc, Vary: 'Accept-Encoding', 'Content-Length': out.length });
+    return res.end(req.method === 'HEAD' ? undefined : out);
+  }
   if (range) {
     const m = /bytes=(\d*)-(\d*)/.exec(range);
     let startB = m && m[1] !== '' ? parseInt(m[1], 10) : null;

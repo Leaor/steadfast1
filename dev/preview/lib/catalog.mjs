@@ -215,7 +215,7 @@ export function paginateInfo(total, pageSize, currentPage, basePath, params) {
     let prev = 0;
     for (let n = 1; n <= pages; n++) {
       if (!show.has(n)) continue;
-      if (prev && n - prev > 1) parts.push({ title: '…', url: '', is_link: false });
+      if (prev && n - prev > 1) parts.push({ title: '&hellip;', url: '', is_link: false }); // Shopify emits the entity, not U+2026 (PLAT-08)
       parts.push(n === current ? { title: String(n), url: '', is_link: false } : { title: String(n), url: url(n), is_link: true });
       prev = n;
     }

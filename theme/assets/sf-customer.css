@@ -11,6 +11,7 @@
   .sf-customer__title { letter-spacing: var(--sf-tracking-tight); }
   .sf-customer--narrow .sf-customer__title { margin-bottom: var(--sf-space-2); }
   .sf-customer__lead { color: var(--sf-fg-muted); }
+  .sf-customer__forgot { justify-self: start; }
   .sf-customer__label-row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sf-space-4); }
   .sf-customer__minor { color: var(--sf-fg-muted); font-size: var(--sf-text-sm); text-underline-offset: 4px; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); }
   @media (pointer: coarse) { .sf-customer__minor { display: inline-flex; align-items: center; min-height: 44px; } }

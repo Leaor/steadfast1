@@ -47,12 +47,13 @@
     mask-image: linear-gradient(105deg, #000 0%, #000 calc(var(--sweep) - 15%), transparent calc(var(--sweep) + 15%));
   }
 
-  .sf-brand-story__copy {
-    max-width: 46ch;
-    margin-top: var(--sf-space-8);
-  }
+  .sf-brand-story__copy { margin-top: var(--sf-space-8); }
 
+  /* The measure is set where the Spectral size is (46ch ≈ 610 px at 22 px), not on the Archivo wrapper. */
   .sf-brand-story__text {
+    max-width: 46ch;
+    margin-inline: auto;
+    text-wrap: balance;
     font-family: var(--sf-font-display);
     font-weight: 300;
     font-size: calc(var(--sf-text-lg) * var(--sf-type-scale, 1));

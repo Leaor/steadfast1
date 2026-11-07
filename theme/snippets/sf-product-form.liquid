@@ -8,6 +8,8 @@
   @param {boolean} [show_quantity] - Render the quantity stepper.
   @param {string} [source] - 'product-form' (default) | 'quick-view'.
   @param {string} [block_attrs] - The block's shopify_attributes.
+  @param {boolean} [show_dynamic_checkout] - Render {{ form | payment_button }} under Add to cart. Default false.
+  @param {boolean} [buybar] - Render the mobile sticky buy bar (PDP only). Default false.
 
   @example
   {% render 'sf-product-form', product: product, section_id: section.id %}
@@ -16,8 +18,20 @@
   assign current = product.selected_or_first_available_variant
   assign form_id = 'sf-product-form-' | append: section_id
   assign f_source = source | default: 'product-form'
+  # Same rule as sf-variant-picker: with no ?variant and a multi-value Size option, no size is chosen yet.
+  assign size_names = 'size,sizes,taille' | split: ','
+  assign needs_size = false
+  if product.selected_variant == blank
+    for option in product.options_with_values
+      assign o_name = option.name | downcase | strip
+      if size_names contains o_name and option.values.size > 1
+        assign needs_size = true
+      endif
+    endfor
+  endif
+  assign label_select = 'products.select_size' | t
 -%}
-<sf-product-form class="sf-product-form" data-section-id="{{ section_id }}" data-source="{{ f_source }}" data-product-title="{{ product.title | escape }}" {{ block_attrs }}>
+<sf-product-form class="sf-product-form" data-section-id="{{ section_id }}" data-source="{{ f_source }}" data-product-title="{{ product.title | escape }}" data-label-select="{{ label_select | escape }}" data-label-required="{{ 'products.size_required' | t | escape }}" data-requires-selling-plan="{{ product.requires_selling_plan | json }}" {{ block_attrs }}>
   {%- form 'product', product, id: form_id, class: 'sf-product-form__form', novalidate: 'novalidate' -%}
     <input type="hidden" name="id" value="{{ current.id }}" data-sf-variant-id>
     {%- unless product.has_only_default_variant -%}
@@ -55,10 +69,39 @@
       elsif current.available == false
         assign btn_label = 'products.sold_out' | t
         assign btn_disabled = true
+      elsif needs_size
+        assign btn_label = label_select
       endif
     -%}
-    <button type="submit" name="add" class="sf-btn sf-btn--primary sf-btn--full sf-product-form__submit" data-sf-add-button{% if btn_disabled %} disabled aria-disabled="true"{% endif %}>
+    <button type="submit" name="add" class="sf-btn sf-btn--primary sf-btn--full sf-product-form__submit" data-sf-add-button{% if needs_size and btn_disabled == false %} data-state="select"{% endif %}{% if btn_disabled %} disabled aria-disabled="true"{% endif %}>
       <span class="sf-btn__label" data-sf-add-label>{{ btn_label }}</span>
     </button>
+    {%- if show_dynamic_checkout -%}
+      {%- comment -%} Shopify's accelerated checkout (Shop Pay, Apple Pay…); monochrome wrapper, ARCHITECTURE §8.6. {%- endcomment -%}
+      <div class="sf-product-form__dynamic">{{ form | payment_button }}</div>
+    {%- endif -%}
   {%- endform -%}
+  {%- if buybar -%}
+    {%- comment -%}
+      Mobile sticky buy bar (< 990px): shown while the main Add to cart is out of view. Its button
+      submits this form, or scrolls to and focuses the size row when no size is chosen yet.
+    {%- endcomment -%}
+    {%- assign bb_media = current.featured_media | default: product.featured_media -%}
+    <div class="sf-buybar" data-sf-buybar hidden>
+      <div class="sf-buybar__inner">
+        <span class="sf-buybar__thumb" aria-hidden="true">
+          {%- if bb_media != blank -%}
+            <img src="{{ bb_media | image_url: width: 120 }}" width="40" height="50" alt="" loading="lazy" decoding="async" data-sf-buybar-img>
+          {%- endif -%}
+        </span>
+        <span class="sf-buybar__text">
+          <span class="sf-buybar__title">{{ product.title | escape }}</span>
+          <span class="sf-buybar__price sf-tabular" data-sf-buybar-price>{{ current.price | default: product.price | money }}</span>
+        </span>
+        <button type="button" class="sf-btn sf-btn--primary sf-btn--sm sf-buybar__btn" data-sf-buybar-btn{% if btn_disabled %} disabled aria-disabled="true"{% endif %}>
+          <span class="sf-btn__label" data-sf-buybar-label>{{ btn_label }}</span>
+        </button>
+      </div>
+    </div>
+  {%- endif -%}
 </sf-product-form>

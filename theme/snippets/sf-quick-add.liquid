@@ -24,7 +24,10 @@
       endif
     endfor
     assign mode = 'view'
-    if settings.card_show_quick_add
+    comment
+      A product that requires a selling plan can't be added without one (selling plans are out of v1 scope, §12.9): quick view link only.
+    endcomment
+    if settings.card_show_quick_add and product.requires_selling_plan != true
       if product.has_only_default_variant
         assign mode = 'single'
       elsif varying_count == 1 and product.variants.size <= 8 and varying_name contains 'size'

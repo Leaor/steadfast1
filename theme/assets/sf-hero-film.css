@@ -26,9 +26,8 @@
     --_d-cut: calc(var(--sf-dur-base) * var(--sf-motion, 1));
     position: relative;
     display: block;
-    height: 100vh;
-    height: 100svh;
-    min-height: 560px;
+    /* Below 990 the hero grows with its content (zoom, landscape, large text): never clips a CTA. */
+    min-height: var(--_h);
     overflow: hidden;
     isolation: isolate;
     color: var(--sf-fg);
@@ -99,15 +98,17 @@
 
   /* ---------- Content ---------- */
   .sf-hero__content {
-    position: absolute;
-    inset: 0;
+    position: relative;
     z-index: 4;
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-height: var(--_h);
     /* width, max-width and gutters come from .sf-container */
-    /* Mobile: wordmark centre at 58 % of the hero height. */
+    /* Mobile: wordmark centre at 58 % of the hero height. In flow, with the dock's row reserved at the
+       bottom, so the CTAs can never sit under PAUSE (200 % zoom, short viewports). */
     padding-top: calc(var(--_h) * 0.58 - var(--_logo-w) * 411 / 1210 / 2);
+    padding-bottom: calc(44px + var(--sf-space-5) * 2 + env(safe-area-inset-bottom, 0px));
     text-align: center;
     pointer-events: none;
   }
@@ -182,6 +183,30 @@
   .sf-hero__ctas .sf-btn--primary { width: 100%; }
   .sf-hero__cta--secondary { align-self: center; min-height: 44px; }
 
+  /* Landscape phones (and 200 % zoom on a laptop): lockup, eyebrow and both CTAs inside the first screen. */
+  @media (orientation: landscape) and (max-height: 500px) and (max-width: 989px) {
+    .sf-hero {
+      --_h: 100svh;
+      --_logo-w: min(60vw, calc(30svh * 1210 / 411), var(--_logo-max, 640px));
+    }
+
+    .sf-hero__content { padding-top: calc(var(--sf-header-h, 56px) + var(--sf-space-3)); }
+    .sf-hero__copy { margin-top: var(--sf-space-3); }
+
+    .sf-hero__ctas {
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      gap: var(--sf-space-5);
+      width: auto;
+      max-width: none;
+      margin-top: var(--sf-space-4);
+    }
+
+    .sf-hero__ctas .sf-btn--primary { width: auto; }
+    .sf-hero__cta--secondary { align-self: auto; }
+  }
+
   /* ---------- Control: SKIP INTRO → PAUSE / PLAY ---------- */
   .sf-hero__dock {
     position: absolute;
@@ -241,6 +266,22 @@
     opacity: 0;
     transform: translateY(var(--sf-reveal-distance, 12px));
   }
+
+  /* Never clickable while invisible. */
+  html[data-sf-intro='play'] .sf-hero:not(.is-beat-9):not(.is-ui) .sf-hero__ctas { pointer-events: none; }
+
+  /* From the film's first cut (t ≥ 2.2 s, .is-ui from the script) the CTA row is present at 0.8, so a visitor
+     who neither scrolls nor presses a key can shop during the film (BRIEF §3). Only the wordmark waits for
+     beat 8; eyebrow and line wait for beat 9. Hover, focus or the end of the intro take it to 1. */
+  html[data-sf-intro='play'] .sf-hero.is-ui:not(.is-beat-9) .sf-hero__ctas .sf-hero__reveal {
+    opacity: 0.8;
+    transform: none;
+    transition:
+      opacity calc(700ms * var(--sf-motion, 1)) var(--sf-ease-out) calc(var(--_i, 2) * 80ms - 160ms),
+      transform calc(700ms * var(--sf-motion, 1)) var(--sf-ease-out) calc(var(--_i, 2) * 80ms - 160ms);
+  }
+
+  html[data-sf-intro='play'] .sf-hero.is-ui:not(.is-beat-9) .sf-hero__ctas .sf-hero__reveal:is(:hover, :focus-visible) { opacity: 1; }
 
   /* Beat 8: the wordmark appears centred; opacity over 500 ms, scale 1.035 → 1 over 1600 ms. The sweep is WAAPI. */
   .sf-hero.is-beat-8:not(.is-cut) .sf-hero__mark {
@@ -353,13 +394,20 @@
     .sf-hero {
       --_logo-w: min(44vw, var(--_logo-max, 640px));
       --_logo-lift: calc(var(--_h) * -0.16);
+      height: 100vh;
+      height: 100svh;
+      min-height: 560px;
     }
 
     .sf-hero__scrim { display: none; }
 
     .sf-hero__content {
+      position: absolute;
+      inset: 0;
       display: block;
+      min-height: 0;
       padding-top: 0;
+      padding-bottom: 0;
       text-align: start;
     }
 

@@ -189,6 +189,23 @@ export async function chooseOption(scope, optionName, value) {
   return select;
 }
 
+/**
+ * Size is never pre-selected on the PDP / quick view (sf-variant-picker): with no ?variant= and more than
+ * one size, the submit shows "Select a size" (data-state="select") until the shopper picks one. This picks
+ * the size of `variant` (default: the first available variant) when, and only when, that state is shown.
+ */
+export async function chooseSizeIfRequired(scope, product, variant) {
+  const btn = scope.locator('sf-product-form button[type="submit"]').first();
+  if ((await btn.getAttribute('data-state')) !== 'select') return false;
+  const p = product;
+  const v = variant || fx.firstAvailable(p);
+  const si = (p.options || []).findIndex((o) => fx.optName(o).toLowerCase() === 'size');
+  if (si < 0) return false;
+  await chooseOption(scope, 'size', fx.variantOptions(v)[si]);
+  await expect(btn).not.toHaveAttribute('data-state', 'select');
+  return true;
+}
+
 export function slug(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 80); }
 export function screenshotPath(testInfo, name) {
   const dir = path.join(SCREENSHOT_DIR, testInfo.project.name);

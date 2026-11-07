@@ -13,10 +13,10 @@
         "widths": [
           540,
           900,
-          1200
+          1080
         ],
-        "width": 1200,
-        "height": 1500,
+        "width": 1080,
+        "height": 1350,
         "alt": "Hoodies"
       },
       "product_handles": [
@@ -101,8 +101,8 @@
         "alt": "New arrivals"
       },
       "product_handles": [
-        "embossed-gothic-hoodie",
         "zip-hoodie-washed-blue-grey",
+        "embossed-gothic-hoodie",
         "reflective-piping-tracksuit-black-speckle"
       ],
       "default_sort_by": "manual",

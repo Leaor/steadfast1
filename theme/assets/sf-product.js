@@ -37,7 +37,7 @@
         var i = Number(group.getAttribute('data-index'));
         var checked = group.querySelector('input[type="radio"]:checked');
         var select = group.querySelector('select');
-        values[i] = checked ? checked.value : select ? select.value : null;
+        values[i] = checked ? checked.value : (select && select.value) ? select.value : null; // '' = the "Choose…" placeholder
       });
       this.querySelectorAll('[data-sf-option-fixed]').forEach(function (input) {
         values[Number(input.getAttribute('data-index'))] = input.value;
@@ -63,7 +63,20 @@
         url.searchParams.set('variant', exact.id);
         window.history.replaceState(window.history.state, '', url.toString());
       }
-      S.bus.emit('variant:change', { sectionId: this.sectionId, productId: this.product.id, variant: exact, source: this.source });
+      if (exact) {
+        var ph = this.querySelectorAll('[data-sf-option-placeholder]');
+        ph.forEach(function (o) { o.remove(); });
+      }
+      // Without a full selection (no size yet) the closest match still leads the gallery, so a colour change shows that colour.
+      var near = exact || this.findVariant(values);
+      S.bus.emit('variant:change', { sectionId: this.sectionId, productId: this.product.id, variant: exact, source: this.source,
+        incomplete: !exact && values.indexOf(null) !== -1, mediaId: near ? near.featured_media_id : null });
+    }
+    /* The first option group with nothing chosen (Size, when the shopper has not picked one). */
+    firstMissing() {
+      var values = this.selected();
+      var groups = [].slice.call(this.querySelectorAll('[data-sf-option]'));
+      return groups.find(function (g) { return values[Number(g.getAttribute('data-index'))] === null; }) || null;
     }
     /* A value is available if some available variant has it AND matches the other selected values. */
     _refreshAvailability(values) {
@@ -84,7 +97,7 @@
           var hint = label.querySelector('[data-sf-unavailable-text]');
           if (hint) hint.hidden = ok;
         });
-        group.querySelectorAll('option').forEach(function (opt) {
+        group.querySelectorAll('option:not([data-sf-option-placeholder])').forEach(function (opt) {
           var ok = isAvailable(opt.value);
           opt.textContent = ok ? opt.getAttribute('data-label') : S.t('products.value_unavailable', { value: opt.getAttribute('data-label') });
         });
@@ -102,22 +115,35 @@
       this.idInput = this.form.querySelector('[data-sf-variant-id]');
       this.button = this.form.querySelector('[data-sf-add-button]');
       this.label = this.form.querySelector('[data-sf-add-label]');
+      this._state = this.button && this.button.getAttribute('data-state') === 'select' ? 'select'
+        : this.button && this.button.disabled ? 'none' : 'add';
       this.form.addEventListener('submit', this._onSubmit.bind(this), sig);
       this._off = S.bus.on('variant:change', this._onVariant.bind(this));
+      this._initBuybar(sig);
     }
     disconnectedCallback() {
       if (this._ac) this._ac.abort();
       if (this._off) this._off();
+      if (this._io) this._io.disconnect();
     }
     get sectionId() { return this.getAttribute('data-section-id'); }
+    _labelFor(state) {
+      if (state === 'select') return this.getAttribute('data-label-select') || S.t('products.add_to_cart');
+      return S.t({ add: 'products.add_to_cart', sold: 'products.sold_out', none: 'products.unavailable', busy: 'products.adding' }[state]);
+    }
     _setButton(state) {
       var b = this.button;
       if (!b) return;
-      var key = { add: 'products.add_to_cart', sold: 'products.sold_out', none: 'products.unavailable', busy: 'products.adding' }[state];
-      this.label.textContent = S.t(key);
+      var text = this._labelFor(state);
+      this.label.textContent = text;
       var disabled = state === 'sold' || state === 'none';
-      b.disabled = disabled;
-      if (disabled) b.setAttribute('aria-disabled', 'true'); else b.removeAttribute('aria-disabled');
+      [b, this.bbBtn].forEach(function (el) {
+        if (!el) return;
+        el.disabled = disabled;
+        if (disabled) el.setAttribute('aria-disabled', 'true'); else el.removeAttribute('aria-disabled');
+        if (state === 'select') el.setAttribute('data-state', 'select'); else el.removeAttribute('data-state');
+      });
+      if (this.bbLabel) this.bbLabel.textContent = text;
       if (state === 'busy') { b.setAttribute('aria-busy', 'true'); b.classList.add('is-loading'); }
       else { b.removeAttribute('aria-busy'); b.classList.remove('is-loading'); }
       this._state = state;
@@ -128,7 +154,8 @@
       var prev = this._state;
       this._clearError();
       if (!v) {
-        this._setButton('none');
+        this._setButton(d.incomplete ? 'select' : 'none');
+        if (d.mediaId) this._syncThumb({ featured_media_id: d.mediaId });
       } else {
         this.idInput.value = v.id;
         this._setButton(v.available ? 'add' : 'sold');
@@ -138,30 +165,48 @@
           tmp.innerHTML = v.price_html;
           var src = tmp.querySelector('[data-sf-price]');
           if (src) { priceEl.className = src.className + ' sf-price--pdp'; priceEl.innerHTML = src.innerHTML; }
+          if (src && this.bbPrice) this.bbPrice.textContent = (src.querySelector('.sf-price__current') || src).textContent.trim();
         }
+        this._syncThumb(v);
         var qty = this.querySelector('sf-quantity-input');
         if (qty && typeof qty.setRules === 'function') qty.setRules(v.quantity_rule);
         var minQ = this.form.querySelector('[data-sf-min-qty]');
         if (minQ && v.quantity_rule) minQ.value = v.quantity_rule.min || 1;
       }
-      if (prev !== this._state && this._state !== 'add') S.a11y.announce(this.label.textContent);
+      if (prev !== this._state && this._state !== 'add' && this._state !== 'select') S.a11y.announce(this.label.textContent);
     }
     _clearError() {
       var box = this.querySelector('[data-sf-form-error]');
       if (box) box.hidden = true;
     }
+    /* No size chosen yet: bring the size row into view, focus it and say why (assertive). */
+    _promptSize() {
+      var picker = rootOf(this).querySelector('sf-variant-picker');
+      var group = picker && typeof picker.firstMissing === 'function' ? picker.firstMissing() : null;
+      if (group) {
+        var target = group.querySelector('input:not([disabled]), select') || group;
+        group.scrollIntoView({ block: 'center', behavior: smooth() });
+        target.focus({ preventScroll: true });
+      }
+      S.a11y.announce(this.getAttribute('data-label-required') || this._labelFor('select'), 'assertive');
+    }
     _onSubmit(e) {
+      if (this._state === 'select') { e.preventDefault(); this._promptSize(); return; }
       if (!S.cart || typeof S.cart.add !== 'function') return; // native POST to /cart/add
       e.preventDefault();
       if (!this.button || this.button.disabled || this._state === 'busy') return;
-      var id = Number(this.idInput.value);
-      var qInput = this.form.querySelector('[name="quantity"]');
-      var qty = Math.max(1, Number(qInput && qInput.value) || 1);
+      // The whole form, like the no-JS POST: properties[], selling_plan and app-injected inputs
+      // (including inputs outside it that use form="…") reach the cart unchanged.
+      var body = new FormData(this.form);
+      // The picker's choice wins over any no-JS fallback field (a <noscript> select parsed by DOMParser is live markup).
+      body.set('id', this.idInput.value);
+      var q = Number(body.get('quantity'));
+      if (!q || q < 1) body.set('quantity', '1');
       var self = this;
       var title = this.getAttribute('data-product-title') || '';
       this._clearError();
       this._setButton('busy');
-      S.cart.add([{ id: id, quantity: qty }], { source: this.getAttribute('data-source') || 'product-form', trigger: this.button })
+      S.cart.add(body, { source: this.getAttribute('data-source') || 'product-form', trigger: this.button })
         .then(function () {
           self._setButton('add');
           S.a11y.announce(S.t('cart.item_added', { title: title }));
@@ -176,6 +221,42 @@
           }
           S.a11y.announce(msg, 'assertive');
         });
+    }
+    /* Mobile buy bar: visible (< 990px) while the main Add to cart button is off-screen. */
+    _initBuybar(sig) {
+      var bar = this.querySelector('[data-sf-buybar]');
+      if (!bar || !this.button || !('IntersectionObserver' in window)) return;
+      this.bar = bar;
+      this.bbBtn = bar.querySelector('[data-sf-buybar-btn]');
+      this.bbLabel = bar.querySelector('[data-sf-buybar-label]');
+      this.bbPrice = bar.querySelector('[data-sf-buybar-price]');
+      this.bbImg = bar.querySelector('[data-sf-buybar-img]');
+      var self = this;
+      var mq = window.matchMedia('(max-width: 989px)');
+      var offscreen = false;
+      var apply = function () {
+        var show = mq.matches && offscreen;
+        if (show) bar.hidden = false;
+        bar.classList.toggle('is-visible', show);
+        bar.setAttribute('aria-hidden', show ? 'false' : 'true');
+        bar.inert = !show;
+      };
+      this._io = new IntersectionObserver(function (entries) {
+        offscreen = !entries[entries.length - 1].isIntersecting;
+        apply();
+      });
+      this._io.observe(this.button);
+      mq.addEventListener('change', apply, sig);
+      this.bbBtn.addEventListener('click', function () {
+        if (self._state === 'select') { self._promptSize(); return; }
+        if (typeof self.form.requestSubmit === 'function') self.form.requestSubmit(self.button);
+        else self.button.click();
+      }, sig);
+    }
+    _syncThumb(v) {
+      if (!this.bbImg || !v.featured_media_id) return;
+      var img = rootOf(this).querySelector('[data-media-id="' + v.featured_media_id + '"] img');
+      if (img && (img.currentSrc || img.src)) this.bbImg.src = img.currentSrc || img.src;
     }
   }
 
@@ -203,15 +284,33 @@
     }
     get items() { return [].slice.call(this.list.children); }
     _isRail() { return this.list.scrollWidth > this.list.clientWidth + 2; }
+    _index() {
+      var w = this.list.clientWidth || 1;
+      return Math.min(this.items.length - 1, Math.max(0, Math.round(this.list.scrollLeft / w)));
+    }
     _sync() {
       var items = this.items;
       if (!items.length || !this._isRail()) return;
-      var w = this.list.clientWidth || 1;
-      var i = Math.min(items.length - 1, Math.max(0, Math.round(this.list.scrollLeft / w)));
+      var i = this._index();
       if (this.counter) this.counter.textContent = S.t('products.media_position', { current: i + 1, total: items.length });
       if (this.bar) this.bar.style.setProperty('--_p', ((i + 1) / items.length).toFixed(4));
+      var prev = this.querySelector('[data-sf-gallery-prev]');
+      var next = this.querySelector('[data-sf-gallery-next]');
+      if (prev) prev.disabled = i === 0;
+      if (next) next.disabled = i === items.length - 1;
+    }
+    /* Previous/Next on rails: keyboard- and mouse-reachable without a horizontal scroll gesture. */
+    step(dir) {
+      var items = this.items;
+      var i = Math.max(0, Math.min(items.length - 1, this._index() + dir));
+      this.list.scrollTo({ left: items[i].offsetLeft - this.list.offsetLeft, behavior: smooth() });
+      S.a11y.announce(S.t('products.media_position', { current: i + 1, total: items.length }));
+      var self = this;
+      setTimeout(function () { self._sync(); }, S.motion.reduced ? 0 : 400);
     }
     _onClick(e) {
+      if (e.target.closest('[data-sf-gallery-prev]')) { this.step(-1); return; }
+      if (e.target.closest('[data-sf-gallery-next]')) { this.step(1); return; }
       var play = e.target.closest('[data-sf-media-play]');
       if (play) { e.preventDefault(); this._loadDeferred(play.closest('[data-sf-deferred-media]')); return; }
       var zoom = e.target.closest('[data-sf-zoom]');
@@ -228,26 +327,50 @@
       if (!box || box.dataset.loaded) return;
       var tpl = box.querySelector('template');
       if (!tpl) return;
+      var self = this;
       var mount = function () {
         box.dataset.loaded = '1';
         var node = tpl.content.cloneNode(true);
         box.querySelector('[data-sf-media-play]').remove();
         box.appendChild(node);
+        var mv = box.querySelector('model-viewer');
+        // Shopify's model UI (controls, fullscreen) and AR, wired as Dawn's product-model does.
+        if (mv && window.Shopify && window.Shopify.ModelViewerUI && !mv.dataset.sfUi) {
+          mv.dataset.sfUi = '1';
+          try { new window.Shopify.ModelViewerUI(mv); } catch (err) { /* feature unavailable */ }
+        }
+        if (mv) self._setupXR();
         var v = box.querySelector('video');
         if (v) v.play().catch(function () {});
         var focusable = box.querySelector('video, iframe, model-viewer');
         if (focusable) focusable.focus({ preventScroll: true });
       };
       if (box.hasAttribute('data-model') && window.Shopify && typeof window.Shopify.loadFeatures === 'function') {
-        window.Shopify.loadFeatures([{ name: 'model-viewer-ui', version: '1.0', onLoad: function () {} }, { name: 'shopify-xr', version: '1.0', onLoad: function () {} }], mount);
+        var pending = 2;
+        var done = function () { if (--pending === 0) mount(); };
+        window.Shopify.loadFeatures([
+          { name: 'model-viewer-ui', version: '1.0', onLoad: done },
+          { name: 'shopify-xr', version: '1.0', onLoad: function (err) { if (!err) self._setupXR(); done(err); } }
+        ]);
       } else {
         mount();
       }
     }
+    _setupXR() {
+      if (this._xr || !window.ShopifyXR) return;
+      var json = doc.querySelector('[data-sf-product-models="' + this.getAttribute('data-section-id') + '"]');
+      if (!json) return;
+      try {
+        window.ShopifyXR.addModels(JSON.parse(json.textContent));
+        window.ShopifyXR.setupXRElements();
+        this._xr = true;
+      } catch (err) { /* AR not supported here */ }
+    }
     /* The selected variant's media leads the gallery (moved first, 200ms crossfade). */
     _onVariant(d) {
-      if (!d || d.sectionId !== this.getAttribute('data-section-id') || !d.variant || !d.variant.featured_media_id) return;
-      var id = String(d.variant.featured_media_id);
+      var mediaId = d && (d.variant ? d.variant.featured_media_id : d.mediaId);
+      if (!d || d.sectionId !== this.getAttribute('data-section-id') || !mediaId) return;
+      var id = String(mediaId);
       var item = this.list.querySelector('[data-media-id="' + id + '"]');
       if (!item) return;
       var first = this.list.firstElementChild;
@@ -280,12 +403,31 @@
       var sig = { signal: this._ac.signal };
       var self = this;
       this.counter = this.querySelector('[data-sf-zoom-counter]');
+      this.toggleBtn = this.querySelector('[data-sf-zoom-toggle]');
       this.addEventListener('click', function (e) {
         if (e.target.closest('[data-sf-zoom-prev]')) self.go(-1);
         else if (e.target.closest('[data-sf-zoom-next]')) self.go(1);
+        else if (e.target.closest('[data-sf-zoom-toggle]')) self.toggleZoom(self.current());
         else if (e.target.closest('.sf-zoom__img')) self.toggleZoom(e.target.closest('.sf-zoom__slide'), e);
       }, sig);
+      /* Keyboard: +/- zoom the current image (centred); while zoomed the arrow keys pan it;
+         otherwise Left/Right change image. Previous/Next buttons always change image. */
+      var PAN = 80;
       this.addEventListener('keydown', function (e) {
+        if (e.altKey || e.ctrlKey || e.metaKey) return;
+        var slide = self.current();
+        var zoomed = slide && slide.classList.contains('is-zoomed');
+        if (e.key === '+' || e.key === '=') { e.preventDefault(); if (!zoomed) self.toggleZoom(slide); return; }
+        if (e.key === '-' || e.key === '_') { e.preventDefault(); if (zoomed) self.toggleZoom(slide); return; }
+        if (zoomed && /^Arrow/.test(e.key)) {
+          e.preventDefault();
+          var pan = slide.querySelector('[data-sf-zoom-pan]');
+          var dx = e.key === 'ArrowLeft' ? -PAN : e.key === 'ArrowRight' ? PAN : 0;
+          var dy = e.key === 'ArrowUp' ? -PAN : e.key === 'ArrowDown' ? PAN : 0;
+          pan.scrollBy({ left: dx, top: dy, behavior: 'auto' });
+          return;
+        }
+        if (e.target.closest && e.target.closest('button') && (e.key === 'Enter' || e.key === ' ')) return;
         if (e.key === 'ArrowRight') { e.preventDefault(); self.go(1); }
         if (e.key === 'ArrowLeft') { e.preventDefault(); self.go(-1); }
       }, sig);
@@ -301,31 +443,42 @@
     get index() { return Math.round(this.track.scrollLeft / (this.track.clientWidth || 1)); }
     show(mediaId) {
       var slide = this.track.querySelector('[data-media-id="' + mediaId + '"]') || this.slides[0];
+      this.slides.forEach(function (s) { s.classList.remove('is-zoomed'); });
+      this._pressed(false);
       var self = this;
       requestAnimationFrame(function () {
         self.track.scrollTo({ left: slide.offsetLeft, behavior: 'auto' });
         self._sync();
       });
     }
+    current() { return this.slides[Math.max(0, Math.min(this.slides.length - 1, this.index))] || null; }
     go(dir) {
       var i = Math.max(0, Math.min(this.slides.length - 1, this.index + dir));
       this.slides.forEach(function (s) { s.classList.remove('is-zoomed'); });
+      this._pressed(false);
       this.track.scrollTo({ left: this.slides[i].offsetLeft, behavior: smooth() });
     }
     _sync() {
       if (this.counter) this.counter.textContent = S.t('products.media_position', { current: this.index + 1, total: this.slides.length });
     }
+    _pressed(on) { if (this.toggleBtn) this.toggleBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+    /* Pointer: zoom at the click point. Keyboard / button (no event): zoom centred. */
     toggleZoom(slide, e) {
       if (!slide || this._dragged) return;
       var pan = slide.querySelector('[data-sf-zoom-pan]');
       var on = !slide.classList.contains('is-zoomed');
-      var rect = pan.getBoundingClientRect();
-      var fx = (e.clientX - rect.left) / rect.width, fy = (e.clientY - rect.top) / rect.height;
+      var fx = 0.5, fy = 0.5;
+      if (e && typeof e.clientX === 'number' && e.detail !== 0) {
+        var rect = pan.getBoundingClientRect();
+        fx = (e.clientX - rect.left) / rect.width;
+        fy = (e.clientY - rect.top) / rect.height;
+      }
       slide.classList.toggle('is-zoomed', on);
+      this._pressed(on);
       if (on) {
         pan.scrollLeft = fx * (pan.scrollWidth - pan.clientWidth);
         pan.scrollTop = fy * (pan.scrollHeight - pan.clientHeight);
-        pan.focus({ preventScroll: true });
+        if (!e) S.a11y.announce(this.getAttribute('data-label-zoomed') || '');
       }
     }
     _drag(sig) {

@@ -1,6 +1,6 @@
 {%- doc -%}
-  One gallery media item (DESIGN §7.8): image | video | external_video | model, always in a 4:5
-  well. Images open the zoom viewer (a link to the full image without JS). Hosted and external
+  One gallery media item (DESIGN §7.8): image | video | external_video | model, in a 4:5 well
+  (lead positions, rails) or at its own ratio (desktop detail grid). Images open the zoom viewer (a link to the full image without JS). Hosted and external
   videos start only on click; 3D models load model-viewer only on click.
 
   @param {object} media - The product media.
@@ -23,7 +23,16 @@
   assign m_alt = media.alt | default: fallback_alt
   assign poster = media.preview_image
 -%}
-<div class="sf-media sf-media--{{ media.media_type }}" data-media-type="{{ media.media_type }}">
+{%- liquid
+  # Media that is not 4:5 (square detail crops, 16:9 video) is shown whole (contain) in 4:5 wells, and at
+  # its own ratio in the desktop detail grid, so small crops are never cropped again or blown up.
+  assign m_ratio = media.aspect_ratio | default: 0.8
+  assign m_free = false
+  if m_ratio > 0.82 or m_ratio < 0.78
+    assign m_free = true
+  endif
+-%}
+<div class="sf-media sf-media--{{ media.media_type }}{% if m_free %} sf-media--free{% endif %}" data-media-type="{{ media.media_type }}" style="--_ar: {{ m_ratio }}">
   {%- case media.media_type -%}
     {%- when 'image' -%}
       {%- if zoom -%}
@@ -47,7 +56,12 @@
           {%- if media.media_type == 'video' -%}
             {{ media | video_tag: controls: true, playsinline: true, autoplay: true, muted: false, loop: video_loop, image_size: '1200x', class: 'sf-media__video' }}
           {%- else -%}
-            {{ media | external_video_url: autoplay: true, loop: video_loop, playsinline: true | external_video_tag: class: 'sf-media__iframe', title: m_alt }}
+            {%- if video_loop and media.host == 'youtube' -%}
+              {%- comment -%} YouTube only loops a single video when it is also its own playlist. {%- endcomment -%}
+              {{ media | external_video_url: autoplay: true, loop: true, playlist: media.external_id, playsinline: true | external_video_tag: class: 'sf-media__iframe', title: m_alt }}
+            {%- else -%}
+              {{ media | external_video_url: autoplay: true, loop: video_loop, playsinline: true | external_video_tag: class: 'sf-media__iframe', title: m_alt }}
+            {%- endif -%}
           {%- endif -%}
         </template>
       </div>
@@ -57,11 +71,15 @@
           {%- if poster != blank -%}
             {%- render 'sf-image', image: poster, sizes: m_sizes, widths: m_widths, loading: m_loading, alt: '', class: 'sf-media__img' -%}
           {%- endif -%}
-          <span class="sf-media__play sf-media__play--model sf-micro" aria-hidden="true">{{ 'products.view_in_space' | t }}</span>
+          <span class="sf-media__play sf-media__play--model sf-micro" aria-hidden="true">{{ 'products.view_3d' | t }}</span>
         </button>
         <template>
           {{ media | model_viewer_tag: image_size: '1200x', reveal: 'interaction', toggleable: true, class: 'sf-media__model' }}
         </template>
       </div>
+      {%- comment -%} AR: Shopify XR reveals this button (removes data-shopify-xr-hidden) only where AR is supported. {%- endcomment -%}
+      <button type="button" class="sf-btn sf-btn--text sf-btn--sm sf-media__xr" data-shopify-xr data-shopify-model3d-id="{{ media.id }}" data-shopify-title="{{ product.title | escape }}" data-shopify-xr-hidden>
+        <span class="sf-btn__label">{{ 'products.view_in_space' | t }}</span>
+      </button>
   {%- endcase -%}
 </div>

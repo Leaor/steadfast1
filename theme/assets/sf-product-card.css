@@ -181,19 +181,29 @@
     width: 100%;
     min-width: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+    /* Up to five cells share ONE row (a 2-up mobile card is ~177 px wide: 4 × 40 px fits). */
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
     max-width: calc(5 * 56px);
     padding: 6px 1px 7px 0;
+  }
+  /* Six or more sizes cannot fit one row on a narrow card: wrap, with a row gap so the 44 px hit
+     areas of the two rows never overlap. */
+  .sf-quick-add__sizes:has(> :nth-child(6)) {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    row-gap: 12px;
   }
   .sf-quick-add__size {
     position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 44px;
+    min-width: 0;
     height: 32px;
     margin: 0 -1px -1px 0;
-    padding: 0 8px;
+    padding: 0 4px;
     border: 1px solid var(--sf-line);
     background: transparent;
     color: var(--sf-fg);
@@ -206,8 +216,8 @@
     cursor: pointer;
     transition: background-color calc(var(--sf-dur-instant) * var(--sf-motion)) linear, color calc(var(--sf-dur-instant) * var(--sf-motion)) linear;
   }
-  /* A 44 px tall hit area around the 32 px cell. */
-  .sf-quick-add__size::before { content: ""; position: absolute; inset: -6px 0; }
+  /* A 44 px tall (and ≥ 44 px wide at the 40 px cell minimum) hit area around the 32 px cell. */
+  .sf-quick-add__size::before { content: ""; position: absolute; inset: -6px -2px; }
   .sf-quick-add__size:focus-visible { z-index: 1; }
   @media (hover: hover) and (pointer: fine) {
     .sf-quick-add__size:not(:disabled):hover { background: var(--sf-fg); color: #000; border-color: var(--sf-fg); z-index: 1; }

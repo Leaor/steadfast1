@@ -50,7 +50,8 @@
       this._fetch = new AbortController();
       var self = this;
       var url = S.routes.predictive_search + '?q=' + encodeURIComponent(q) +
-        '&resources[type]=product,collection,page,article,query&resources[limit]=4' +
+        // limit_scope=each: the limit applies per resource type (Shopify's default scope is 'all', i.e. 4 in total).
+        '&resources[type]=product,collection,page,article,query&resources[limit]=4&resources[limit_scope]=each' +
         '&resources[options][unavailable_products]=last&section_id=sf-predictive-search';
       this.setAttribute('aria-busy', 'true');
       fetch(url, { credentials: 'same-origin', signal: this._fetch.signal }).then(function (r) {
@@ -94,7 +95,7 @@
         e.preventDefault();
         this._setActive(opts[current <= 0 ? opts.length - 1 : current - 1]);
       } else if (e.key === 'Enter' && current > -1) {
-        var link = opts[current].querySelector('a[href]');
+        var link = opts[current].matches('a[href]') ? opts[current] : opts[current].querySelector('a[href]');
         if (link) { e.preventDefault(); window.location.href = link.href; }
       }
     }

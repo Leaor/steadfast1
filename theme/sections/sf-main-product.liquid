@@ -30,7 +30,23 @@
             {%- when 'price' -%}
               <div class="sf-main-product__price" {{ block.shopify_attributes }}>
                 {%- render 'sf-price', product: product, variant: current, class: 'sf-price--pdp' -%}
-                <p class="sf-main-product__tax">{{ 'products.tax_at_checkout' | t }}</p>
+                {%- liquid
+                  # Tax/duties wording follows the market (Dawn: cart.taxes_included / cart.duties_included); the shipping link only when a policy exists.
+                  if cart.duties_included and cart.taxes_included
+                    assign tax_line = 'products.duties_and_taxes_included' | t
+                  elsif cart.duties_included
+                    assign tax_line = 'products.duties_included_taxes_at_checkout' | t
+                  elsif cart.taxes_included
+                    assign tax_line = 'products.tax_included' | t
+                  else
+                    assign tax_line = 'products.tax_at_checkout' | t
+                  endif
+                -%}
+                <p class="sf-main-product__tax">
+                  {%- if shop.shipping_policy.body == blank -%}{{ tax_line }}
+                  {%- elsif cart.taxes_included or cart.duties_included -%}{{ tax_line }} {{ 'products.shipping_policy_html' | t: link: shop.shipping_policy.url }}
+                  {%- else -%}{{ 'products.taxes_and_shipping_at_checkout_html' | t: link: shop.shipping_policy.url }}{%- endif -%}
+                </p>
               </div>
             {%- when 'variant_picker' -%}
               <div class="sf-main-product__picker" {{ block.shopify_attributes }}>
@@ -48,7 +64,7 @@
                 endfor
               -%}
               <div class="sf-main-product__buy" {{ block.shopify_attributes }}>
-                {%- render 'sf-product-form', product: product, section_id: section.id, show_quantity: show_qty, source: 'product-form' -%}
+                {%- render 'sf-product-form', product: product, section_id: section.id, show_quantity: show_qty, source: 'product-form', show_dynamic_checkout: block.settings.show_dynamic_checkout, buybar: section.settings.mobile_buy_bar -%}
               </div>
             {%- when 'description' -%}
               {%- if product.description != blank -%}
@@ -117,7 +133,9 @@
     { "type": "checkbox", "id": "enable_zoom", "label": "Enable full-screen image viewer", "default": true },
     { "type": "checkbox", "id": "sticky_info", "label": "Keep product information in view on desktop", "default": true },
     { "type": "checkbox", "id": "enable_video_loop", "label": "Loop product videos", "default": false },
-    { "type": "checkbox", "id": "hide_single_value_options", "label": "Hide options with a single value", "default": true }
+    { "type": "checkbox", "id": "hide_single_value_options", "label": "Hide options with a single value", "default": true },
+    { "type": "checkbox", "id": "mobile_buy_bar", "label": "Show a buy bar on mobile", "default": true,
+      "info": "A slim bar at the bottom of small screens while Add to cart is out of view." }
   ],
   "blocks": [
     { "type": "@app" },
@@ -133,7 +151,7 @@
     { "type": "quantity", "name": "Quantity selector", "limit": 1, "settings": [] },
     { "type": "buy_buttons", "name": "Buy buttons", "limit": 1, "settings": [
       { "type": "checkbox", "id": "show_dynamic_checkout", "label": "Show dynamic checkout buttons", "default": false,
-        "info": "Not rendered in this version: branded payment buttons break the monochrome button system." }
+        "info": "Shows Shopify's accelerated checkout buttons (e.g. Shop Pay) under Add to cart, in a monochrome frame. Some payment brands keep their own colours." }
     ] },
     { "type": "description", "name": "Description", "limit": 1, "settings": [] },
     { "type": "collapsible", "name": "Collapsible row", "settings": [

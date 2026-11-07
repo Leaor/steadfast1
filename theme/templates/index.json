@@ -53,6 +53,7 @@
       },
       "block_order": ["zip", "chest", "shoulder", "cuff"],
       "settings": {
+        "product": "zip-hoodie-washed-blue-grey",
         "eyebrow": "Signature piece",
         "heading": "The zip hoodie",
         "cta_label": "Shop the zip hoodie",
@@ -96,7 +97,7 @@
       "settings": {
         "heading": "About STEADFAST",
         "logo_display": "textured",
-        "text": "<p>Steadfast. Firm in purpose, unmoved by noise.</p>",
+        "text": "",
         "tone": "ink",
         "spacing": "standard"
       }

@@ -41,11 +41,17 @@
       assign img_src = image | image_url: width: max_w
     endif
   -%}
+  {%- comment -%}
+    RemoteAsset is a false positive here: img_src is the output of image_url (Shopify CDN), which
+    theme check cannot see through an assigned variable.
+  {%- endcomment -%}
+  {%- # theme-check-disable RemoteAsset -%}
   {%- if fetchpriority != blank -%}
     {{- img_src | image_tag: widths: img_widths, sizes: sizes, loading: img_loading, fetchpriority: fetchpriority, decoding: 'async', class: img_class, alt: img_alt -}}
   {%- else -%}
     {{- img_src | image_tag: widths: img_widths, sizes: sizes, loading: img_loading, decoding: 'async', class: img_class, alt: img_alt -}}
   {%- endif -%}
+  {%- # theme-check-enable RemoteAsset -%}
 {%- elsif asset != blank -%}
   {%- capture asset_rec -%}{% render 'sf-asset-data', asset: asset %}{%- endcapture -%}
   {%- assign asset_rec = asset_rec | strip -%}
