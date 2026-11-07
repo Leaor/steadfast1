@@ -124,7 +124,6 @@
       items.forEach(function (item) {
         var btn = item.querySelector('[data-sf-mega-trigger]');
         if (!btn) return;
-        var leaveT;
         btn.addEventListener('click', function () {
           clearTimeout(self._enterT);
           if (self.openItem === item) self.closeMega();
@@ -132,14 +131,14 @@
         }, sig);
         item.addEventListener('pointerenter', function (e) {
           if (e.pointerType !== 'mouse' || !mq(FINE)) return;
-          clearTimeout(leaveT);
+          clearTimeout(self._leaveT);
           clearTimeout(self._enterT);
           self._enterT = setTimeout(function () { self.openMega(item); }, 120);
         }, sig);
         item.addEventListener('pointerleave', function (e) {
           if (e.pointerType !== 'mouse') return;
           clearTimeout(self._enterT);
-          leaveT = setTimeout(function () { if (self.openItem === item) self.closeMega(); }, 200);
+          self._leaveT = setTimeout(function () { if (self.openItem === item) self.closeMega(); }, 200);
         }, sig);
         item.addEventListener('focusout', function (e) {
           if (self.openItem === item && !item.contains(e.relatedTarget)) self.closeMega();
@@ -175,6 +174,7 @@
       if (this.openItem === item) return;
       if (this.openItem) this.closeMega(true);
       clearTimeout(this._closeT);
+      clearTimeout(this._leaveT); // a pending hover-out must not close a menu opened since (click / Enter)
       item.classList.remove('is-closing');
       item.classList.add('is-open');
       var btn = item.querySelector('[data-sf-mega-trigger]');

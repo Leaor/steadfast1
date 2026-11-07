@@ -17,6 +17,10 @@
     padding: 0;
     background: var(--sf-bg-sunken);
   }
+  /* Pull the hero under the transparent header from this file, which loads only with the hero and just before
+     its markup. Blink can miss the header's body:has([data-sf-header-sentinel]) match while parsing, which
+     painted the hero 56/72 px low and then moved it (CLS 0.05 under CPU load). */
+  .shopify-section:has(> .sf-header[data-transparent="true"]) { margin-bottom: calc(var(--_reserve) * -1); }
 
   .sf-hero {
     --_h: max(100svh, 560px);

@@ -811,6 +811,7 @@ CORE custom elements in other files:
 - `<sf-header>` (`sf-header.js`). Spec: DESIGN §7.1 and §8.3 "Header".
   - Sticky modes; hides on scroll down and shows on scroll up for `on-scroll-up` (home: hide only once past the hero; elsewhere past 2× the header height).
   - **Transparent → solid without GSAP:** transparent while the hero's `[data-sf-header-sentinel]` (rendered by sf-hero-film at the hero's bottom edge) is intersecting the area below the header (`rootMargin: "-{header height}px 0px 0px 0px"`), solid otherwise. Solid = background, bottom hairline, condensed height and logo width, and the **header logo fades in (`--sf-dur-base`)**. Every other template is solid from load (server-rendered). There is no logo dock and no ScrollTrigger in the header or hero.
+  - **Pull-up under the hero:** the header section's negative `margin-bottom` (its `--_reserve`, 56 / 72 px) is set by `sf-header.css` behind `body:has([data-sf-header-sentinel])` **and** by `sf-hero-film.css`, which loads only with the hero, just before its markup. Blink can miss the `:has()` match while the document is still parsing; the hero then paints one header-height low and moves up (CLS 0.050–0.066 under CPU load, revision round 2). The stylesheet arriving forces the match before the hero's first paint.
   - The header is **visible and usable from t = 0, including during the hero intro** (DESIGN §7.1 state 1); only the logo slot is empty while transparent.
   - Writes `--sf-header-h` via ResizeObserver.
   - Desktop dropdowns use a disclosure pattern: `<button aria-expanded aria-controls>`, opening on click and on hover with intent (120 ms, pointer: fine), closing on Esc, outside click, focusout or 200 ms after the pointer leaves. The panel uses `--sf-z-dropdown`.
@@ -1666,7 +1667,7 @@ These four names are final (FILM A8's "name pending ARCH" is resolved). Any camp
 | `sf-apple-touch-icon-180` | — | `sf-apple-touch-icon-180.png` | 180×180 | n/a | apple-touch-icon fallback |
 | `sf-favicon-512` | — | `sf-favicon-512.png` | 512×512 | n/a | spare (not referenced) |
 | `sf-og-default` | — | `sf-og-default.jpg` | 1200×630 | n/a | `og:image` fallback |
-| `sf-category-hoodies` | 540, 900, 1080 | `sf-category-hoodies-900.jpg` | 900×1125 | Hoodies | E default; header mega tile default. The black heavyweight zip hoodie, night photo upper crop (DESIGN §5.6; source-limited to 1080) |
+| `sf-category-hoodies` | 540, 900, 1080 | `sf-category-hoodies-900.jpg` | 900×1125 | Hoodies | E default; header mega tile default. The black heavyweight zip hoodie, night photo upper crop (DESIGN §5.6; source-limited to 1080). Shown only when the Hoodies collection has no image; the preview fixture sets one (`stills/sf-collection-hoodies`, §10.2), so the preview does not show this still in E or the mega tile |
 | `sf-signature-hero` | 960, 1600, 2400, 2730 | `sf-signature-hero-1600.jpg` | 1600×900 | STEADFAST zip hoodie in washed blue-grey on black, front | C desktop stage, front |
 | `sf-category-new-arrivals` | 540, 720 | `sf-category-new-arrivals-720.jpg` | 720×900 | New arrivals | E default. from the graded IMG_4913 embossed charcoal close-up (DESIGN §5.6) |
 | `sf-signature-front` | 600, 900, 1200 | `sf-signature-front-900.jpg` | 900×1125 | Front of the washed blue-grey STEADFAST zip hoodie | C mobile/reduced front; placeholder card 1 |
@@ -1731,6 +1732,8 @@ Fixture product handles are fixed so HARNESS and MEDIA agree:
 - `wide-sweatpants-black`
 
 MEDIA writes the exact view list per handle to the manifest `fixtures` array, and HARNESS builds `products.json` media **only** from that array. Product media never includes a view that doesn't exist in the sources.
+
+**Preview-only stills.** `stills/sf-collection-hoodies-{540,900,1080}` (revision round 2) is the Hoodies collection image in `collections.json` and is **not** copied to `theme/assets/` or `sf-asset-data`. It is the embossed gothic hoodie back view from the 640 px back-grey plate; 900 and 1080 are ×1.41 / ×1.69 upscales, an accepted exception to the 1.5× limit for this fixture only, recorded in `stills.quality_notes` (DESIGN §5.6).
 
 ### 10.3 Generated asset data (MEDIA generates; CORE consumes)
 

@@ -367,3 +367,112 @@ Spec 16 measurements before first scroll, requests desktop · mobile / JS br / C
 - **Mobile 390×844** (30): the same home set, menu drawer, both collections, PDP + gallery slides 2–5, PDP scrolled to related products, cart drawer.
 
 Checked by eye: the hero's film frames and its end state (lockup, italic line on the left, CTAs, PAUSE); the signature ends on BACK with title, price and button; the sleeve-label step frames the left-cuff label centre-right with only black between it and the caption; the campaign still has no visible top or side edge at rest, mid-reveal or revealed; the mega menu is a list plus a 4:5 tile starting at column 7; "The collection" heading on `/collections/all`; the zip hoodie PDP leads with the clean hood-up front and shows its three details without an empty cell; the mobile gallery has 5 slides; the cart drawer has one line and one tax line. Issues found: only §10.5 item 1 (the repeated zip hoodie on the homepage), plus the cosmetic note that `desktop-13-home-newsletter.png` and `desktop-14-home-footer.png` are the same frame (both are the page bottom at 900 px).
+
+## 11. Revision round 2: integration after the MEDIA-HARNESS fixer (2026-11-07)
+
+Integrator pass on revision round 2. MEDIA-HARNESS delivered the two imagery items (Hoodies collection image, charcoal close-up halo); HOME and CORE-COMMERCE-DOCS had no items. Every number below comes from a command run in this pass against a fresh preview on `:9350` (smoke, screenshots, probes and all three Playwright runs, via `SF_PREVIEW_PORT=9350`). Progress log: `scratchpad/rev2-INTEGRATOR/progress.log`.
+
+### 11.1 Checklist (§11)
+
+| Step | Command | Result |
+|---|---|---|
+| 1 | `python3 tools/media/gen_asset_snippet.py` | exit 0: `sf-asset-data` up to date (29 bases); 129 bundled media files (13.21 MB), 0 copied, 0 removed; `theme/assets` 166 files, 13.70 MB. `sf-collection-hoodies` is not in `theme/assets` or `sf-asset-data` (preview-only, as reported) |
+| 1 | `node tools/locales/merge-locales.mjs` | exit 0: `en.default.json` (26 namespaces, 376 keys) |
+| 2 | `npx @shopify/cli theme check --path theme` | **0 errors, 0 warnings**, 105 files (run before and after this pass's edits) |
+| 3 | `node dev/preview/tools/smoke.mjs --base http://127.0.0.1:9350` | **56/56 routes clean** (before and after the edits) |
+| 4 | §11.5 greps | see §11.3 |
+| 5 | `npm --prefix dev test` (both projects) | run 1: 429 / **1 failed** / 158; run 2: 429 / **1 failed** / 158 (a different test); **run 3 (final, after both fixes): 430 passed, 0 failed, 0 flaky, 158 skipped** |
+
+### 11.2 Failures found and fixed (genuine theme bugs, no test changed)
+
+Both had shown up before as "batch-only" flakes (§10, TEST-REPORT §3). This time I reproduced each one outside the suite and traced it to theme code.
+
+1. **11-responsive `[desktop] 834x1112 home`: CLS 0.0505 (limit 0.05), run 1.**
+   - **Cause:** `sf-header.css` pulls the hero up under the transparent header with `body:has([data-sf-header-sentinel]) .shopify-section:has(> .sf-header[data-transparent="true"]) { margin-bottom: -reserve }`. While the document is still parsing, Blink sometimes misses that `:has()` match after the sentinel is inserted. A per-frame probe showed the sentinel present with `margin-bottom: 0px` and the hero at top 56. The match only applied at the next stylesheet insertion, which moved `picture.sf-hero__end` from y 56 to y 0.
+   - **Reproduction:** under 6× CPU throttling (`scratchpad/rev2-INTEGRATOR/cls.mjs`, `cls2.mjs`): 2 of 5 loads at 834×1112 (CLS 0.0506) and 1 of 4 to 1 of 10 loads at 390×844 (0.066–0.067).
+   - **What did not work:** moving the sentinel to the hero's first child still reproduced (1 of 8), so I reverted it.
+   - **Fix:** `theme/assets/sf-hero-film.css` now also sets the same pull-up, `.shopify-section:has(> .sf-header[data-transparent="true"]) { margin-bottom: calc(var(--_reserve) * -1); }`. That stylesheet loads only with the hero and just before its markup, so its arrival forces the match before the hero's first paint.
+   - **After:** 0 of 24 throttled loads shift (12 at 834×1112, 12 at 390×844; residual CLS 0.0002–0.0010).
+   - **Docs:** ARCHITECTURE `<sf-header>` bullets, "Pull-up under the hero".
+2. **02-nav-desktop "dropdown … Esc closes and restores focus": focus "inactive" after the second Esc, run 2.**
+   - **Cause:** each nav item kept its own 200 ms hover-out timer (`leaveT`), and opening the menu by click or Enter never cleared it. The test moves the mouse off the nav and then opens the menu with Enter within 200 ms. The stale timer then closed the newly opened menu, so the next Esc found nothing open and did not return focus, which stayed on a link inside the now-hidden panel.
+   - **Real-world impact:** a keyboard user who has just moved the mouse off the nav loses the menu they opened.
+   - **Reproduction:** `scratchpad/rev2-INTEGRATOR/mega.mjs` failed 4 of 4 times on the old `sf-header.js` (menu closed, focus lost) and passed 4 of 4 with the fix.
+   - **Fix:** `theme/assets/sf-header.js` uses one shared `self._leaveT`, which `openMega()` clears. `sf-header.js` is now 3,923 B br of its 4,096 B cap.
+
+### 11.3 Grep checks (§11.5)
+
+- Forbidden tags and filters (§8.6), `console.log`, `backdrop-filter`: none in `theme/`.
+- `box-shadow`: only the focus ring (`sf-base.css:76`, `sf-product-card.css:99`) and `none` resets.
+- `filter` in transitions, keyframes or JS tweens: none.
+- `/\bbag\b/i`: only the internal icon name `sf-icon name: 'bag'`.
+
+### 11.4 Other changes (docs, from the fixer's open notes)
+
+- `docs/DESIGN.md` §5.6: added a paragraph, "Preview fixture vs bundled default". The preview's Hoodies collection image is the non-bundled `stills/sf-collection-hoodies` (gothic hoodie back view). Its 900/1080 renditions are ×1.41/×1.69 upscales, accepted for this preview-only file and recorded in the manifest. The bundled `sf-category-hoodies` fallback is still the black zip hoodie, so a live store whose Hoodies collection has no image shows a different tile from the preview.
+- `docs/ARCHITECTURE.md` §10.1 `sf-category-hoodies` row: notes that it is shown only when the collection has no image. §10.2 gains a "Preview-only stills" note.
+- The orchestrator checkpoint `d42d833` already records the deletion of the two temporary `dev/.mh-r2-shots*.mjs` scripts; the working tree has no stray files from the fixers.
+
+### 11.5 Final test counts (run 3, `node dev/tests/helpers/summarize.mjs`)
+
+| Spec | Pass | Fail | Skip |
+|---|---:|---:|---:|
+| 00-theme-check | 1 | 0 | 1 |
+| 01-homepage | 12 | 0 | 0 |
+| 02-nav-desktop | 7 | 0 | 7 |
+| 03-nav-mobile | 5 | 0 | 5 |
+| 04-product | 50 | 0 | 0 |
+| 05-variants | 8 | 0 | 0 |
+| 06-cart | 20 | 0 | 0 |
+| 07-collection-filtering | 28 | 0 | 4 |
+| 08-hero-film | 22 | 0 | 2 |
+| 09-animation | 9 | 0 | 1 |
+| 10-reduced-motion | 8 | 0 | 0 |
+| 11-responsive | 58 | 0 | 56 |
+| 12-a11y-keyboard | 67 | 0 | 5 |
+| 13-search | 8 | 0 | 0 |
+| 14-quick-view | 4 | 0 | 0 |
+| 15-templates-smoke | 50 | 0 | 40 |
+| 16-performance | 27 | 0 | 1 |
+| 17-data-honesty | 46 | 0 | 36 |
+| **Total** | **430** | **0** | **158** |
+
+- **Run:** started 2026-11-07 04:00:37 UTC, 368 s, 2 workers, 0 retries, `flaky` 0.
+- **Change from round 1:** +4, which are MEDIA-HARNESS's two new strict tests in both projects. 01 checks that the zip hoodie appears only in the featured rail and the signature showcase. 07 checks that the collection banner is never a card's lead image.
+- **Spec 16 measurements** (desktop · mobile):
+  - Home: 32 · 29 requests; JS 22.7 KB br; CSS 25.7 KB br; transfer 513 · 450 KB.
+  - Product: 19 · 19 requests; JS 24.2 KB br; CSS 18.0 KB br; transfer 303 · 244 KB.
+  - Collection: 22 · 21 requests; transfer 186 · 303 KB.
+  - Render-blocking CSS: 3 files, 12.4 KB br.
+- **Per-file brotli:** `sf-header.css` 4,540 B of 4,608; `sf-header.js` 3,923 B of 4,096; `sf-core.js` 8,113 B.
+
+### 11.6 Screenshots (`dev/tests/screenshots/integration/`, overwritten, DPR 1)
+
+- **Capture:** 58 files from `scratchpad/rev2-INTEGRATOR/shots.mjs` against `:9350`. Captured after the CSS fix and before the `sf-header.js` timer fix, which changes no pixels in these states.
+- **Checks:** no console errors and no failed requests. `scrollWidth − innerWidth` is 0 on the homepage, `/collections/all`, `/collections/hoodies` and the PDP in both projects. Intro frames are keyed on the film's `currentTime`: 1.22, 2.47–2.48, 6.01–6.03 and 10.02–10.03 s. The end state is at 12.8 s.
+- **Desktop 1440×900 (28):** intro 1.2/2.45/6/10 s, hero end, featured, signature 0/25/50/75/100 %, campaign at rest/mid-reveal/revealed, categories, story, newsletter, footer, mega menu, collection all (+ grid), hoodies (+ grid), PDP + gallery 1–3, cart drawer.
+- **Mobile 390×844 (30):** the same homepage set, menu drawer, both collections, PDP + gallery slides 2–5, PDP scrolled to related, cart drawer.
+
+Checked by eye, from contact sheets and 1:1 crops:
+- **Hoodies image (item 1):** the Hoodies stage tile, the mega-menu tile and the `/collections/hoodies` banner now show the gothic hoodie back view, a different garment from every card on the same screen. The blue-grey zip hoodie appears on the homepage only in the featured rail and the signature showcase.
+- **Retouches:** no bystander or lit reflection right of the sleeve. The traced sleeve edge reads clean at 1:1.
+- **Charcoal close-up (item 2):** no halo at 1:1 on the homepage rail card and `/collections/all` card 2; the background is flat black up to the garment edge.
+- **Unchanged from round 1 and still correct:** hero end lockup, CTAs, signature BACK end state, campaign edges at rest, mid-reveal and revealed, mega menu, PDP gallery (no empty cell; 5 mobile slides), cart drawer (one line).
+
+### 11.7 Remaining items
+
+**No failing tests.** Open, none blocking:
+
+1. **Hoodies image framing (cosmetic, MEDIA/ORCH):**
+   - **Desktop:** on the category stage (`desktop-11`) and the collection banner (`desktop-32`), the 4:5 frame's top edge cuts across the back of the figure's head, leaving a visible horizontal edge in dark grey against black.
+   - **Mobile:** `mobile-11` is cropped lower and reads better.
+   - **Possible fix:** a burn on the top ~6 % of the still, like the existing left and top-left burns, would remove the edge.
+   - **Resolution:** the 900 and 1080 renditions are upscales (×1.41 / ×1.69) and look slightly soft on the ~480 px desktop stage at DPR 2. This is accepted and documented.
+2. **Live store vs preview for Hoodies:** documented in DESIGN §5.6 and ARCH §10.1/§10.2. A merchant who sets no Hoodies collection image gets the bundled black zip hoodie.
+3. **Brotli headroom:** `sf-header.css` has 68 B left and `sf-header.js` has 173 B.
+4. **Carried over from round 1:**
+   - Home makes 32 requests on desktop, against HOME's own target of 31 (budget 37).
+   - The zoom viewer's JS is still inside `sf-product.js`.
+   - `*-00-intro-t2.45` shows the CTAs nearly fully in because the capture follows the film clock (live timing in §10.5).
+   - `desktop-13` and `desktop-14` are the same frame.
+   - WebKit and real iOS were not run; no Shopify store was contacted.

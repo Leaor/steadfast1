@@ -1,62 +1,42 @@
 ---
 name: steadfast-premium
-description: Design preset for the Steadfast website. Use for any design, build, redesign, or review work on Steadfast pages, sections, components, navigation, hero, services or product cards, motion, or 3D. Applies the premium-web-experience standards with Steadfast-specific priorities (confident premium branding, a cinematic but restrained hero, scroll storytelling, selective 3D) while preserving existing Steadfast branding and business information.
+description: Design preset for the STEADFAST luxury streetwear Shopify theme in this repo. Use for any design, build, redesign, content, or review work on STEADFAST pages, sections, components, navigation, the hero film, product cards, motion, imagery, or copy. Applies premium-web-experience with STEADFAST's established brand system (FIXED POINT concept, black field, Spectral + Archivo, the client's wordmark artwork) and its data-honesty rules.
 ---
 
-# Steadfast Premium Preset
+# STEADFAST Premium Preset
 
-Steadfast should feel like it was built by a respected digital studio: **intentional, distinctive, credible, and expensive, never cluttered.** The name says it: steady, dependable, built to last. The design should feel that way too. It should be confident and composed, not flashy.
+STEADFAST is a dark, cinematic, underground luxury streetwear label. The site should read like a fashion film crossed with a quiet digital showroom: **intentional, restrained, mysterious, expensive**. Photography, composition, type, and light carry it, never effects.
 
-This preset layers on top of `premium-web-experience`. Load that skill too, and follow its motion, 3D gate, accessibility, and performance rules. Where they conflict, this preset wins for Steadfast.
+Load `premium-web-experience` alongside this preset. The system is already built, so read the docs before changing anything:
 
-## 0. Ground rules
+| Doc | Owns |
+|---|---|
+| `docs/BRIEF.md` | Client brief (source of truth) |
+| `docs/DESIGN.md` | Every visual and motion value (tokens §13, type §3, motion §8, homepage §9, signature showcase §10) |
+| `docs/ARCHITECTURE.md` | File ownership, names, IDs, APIs, allowed Liquid surface §8.6, budgets §6, rulings §15 |
+| `docs/FILM-STORYBOARD.md` | Hero edit (Part A) and the commissioned-shoot storyboard (Part B) |
+| `docs/DEPLOYMENT.md` | Store setup and publishing |
+| `docs/TEST-REPORT.md` | Latest executed test results |
 
-- **Preserve the brand and the facts.** Before designing, find and reuse the existing logo, colors, fonts, imagery, copy, services and products, contact details, service areas, hours, testimonials, and legal text. Never invent business facts (prices, certifications, years in business, reviews, phone numbers). If something is missing, use a clearly marked placeholder and list it for the owner.
-- If no brand tokens exist yet, propose them (Section 2) and record them in one place (for example `src/styles/tokens.css` or the Tailwind theme) before building pages.
-- Get the user's approval before changing the logo, brand colors, or primary messaging.
+## Brand system (summary; DESIGN.md has the values)
 
-## 1. Experience priorities (in order)
+- **Concept: FIXED POINT.** The figure stays and the light moves. Reveals happen through darkness lifting, a widening vertical aperture, or a light sweep, never through slides, spins, or bounces. ("FIXED POINT" is a proposed campaign name awaiting the owner's approval.)
+- **Field:** true black `#000`. Charcoal `#141619` for raised surfaces, graphite `#24272B` for hairlines, washed grey `#8B9096`, steel `#7C91A5` (sparing accent), silver `#C3C8CD`, bone `#F1E9DA` (matches the wordmark cream; used for text and the primary button, never as a background band).
+- **Type:** Spectral 300 (+ italic) for display and editorial lines, never uppercased. Archivo for UI, with Archivo Label for tracked uppercase micro-labels. All five woff2 files are self-hosted.
+- **Logo:** always the client's wordmark artwork. Use the textured raster at large sizes and the traced flat SVG (`sf-logo-wordmark.svg`, 7.24:1) below 200 px. Never retype it, redraw it, or set "STEADFAST" in a font as the logo.
+- **Imagery:** use only the client's photos and footage, graded with `tools/media/grade.sh` (cold, near-monochrome, crushed blacks, luma-only grain). Every still that sits on `#000` gets a black-point clamp and feathered edges, so no hard rectangle edges show on black. Product stills are 4:5. No stock photography, no invented garment views.
+- **Motion:** GSAP + ScrollTrigger only where a timeline earns it (the signature showcase pin, the campaign aperture, the brand-story sweep). CSS for everything else. No scroll hijacking, no filter animation, no parallax. Every effect has a reduced-motion state.
+- **Vocabulary:** "Add to cart" / "Cart" (never "bag").
 
-1. **Clarity and trust.** Visitors know within 5 seconds what Steadfast does, for whom, and how to act.
-2. **Hero presentation.** A composed, beautiful first screen. Strong headline, one supporting line, a primary CTA plus a secondary CTA, and a single striking visual (photography, or one tasteful 3D element if it passes the gate).
-3. **Scroll storytelling.** The page reads as a narrative: promise → proof → services/products → process → social proof → CTA. Use at most one pinned or scrubbed scroll sequence per page.
-4. **Interactive service/product cards.** Subtle lift (translateY −4px plus a shadow refinement), image scale 1.03–1.05 inside an overflow-hidden frame, an arrow nudge on the CTA, and full keyboard parity. The whole card is clickable via one real link (no nested interactive traps).
-5. **Elegant menu.** The desktop nav is crisp, with a sticky header that condenses on scroll (height and background, ≤300ms). The mobile menu is a full-height panel with staggered link reveals (≤40ms stagger, ≤450ms total), a focus trap, `Esc` to close, and the body scroll locked without layout shift.
-6. **Refined section transitions.** Use background tone shifts, clip-path or mask reveals on imagery, and generous spacing. No section should "pop" in.
-7. **Subtle depth and parallax.** Imagery parallax ≤10% offset, layered foreground and background in the hero, soft realistic shadows. Disabled under reduced motion and on low-power devices.
-8. **Strong CTAs.** One primary action style used consistently (for example "Get a quote" or "Book a consultation", matching the existing business). Repeat it at the hero, mid-page, and footer. Keep a sticky mobile CTA bar if the business depends on calls or leads.
-9. **Mobile excellence.** Design mobile-first. Thumb-reachable CTAs, tap-to-call where relevant, no hover-only information, and fast LCP on 4G.
+## Data honesty (non-negotiable)
 
-## 2. Visual direction (defaults if no brand system exists)
+- The theme ships no product data. Prices, sizes, stock and reviews come from Shopify. The preview fixtures in `dev/preview/fixtures` are placeholders.
+- Never claim construction or materials (embroidered, appliqué, embossed, reflective, crystal), brand history, scarcity, ratings, or "360°" until the owner confirms them.
+- The hero film is an **edit of the client's own phone footage and stills**. Never call it a campaign film, or say it was shot or directed by anyone.
 
-- **Mood:** architectural, solid, warm-professional. Think materials, structure, precision.
-- **Palette:** a deep, grounded base (ink, charcoal, or deep navy/forest) plus warm off-white surfaces and **one** confident accent used sparingly for CTAs and key highlights. No neon, no purple-blue gradients, no glows.
-- **Type:** a distinctive, sturdy display face (a refined grotesk or a strong serif with character) paired with a highly legible text face. Large, tight display headings and calm body copy.
-- **Imagery:** real work, people, and places with consistent grading. Use generous crops and let photos breathe edge to edge.
-- **Details:** thin hairline dividers, precise alignment, small-caps or tracked eyebrow labels, numbered process steps, restrained iconography (one line-icon set at a consistent stroke).
+## Working on it
 
-## 3. Where 3D is allowed (pick at most two)
-
-Use 3D only where it raises perceived quality. Good candidates:
-- **Hero signature object:** one slowly responsive, brand-relevant object (for example a structural form, material sample, or abstract mark built from the logo) that reacts subtly to pointer and scroll. Poster image first, lazy-loaded, and paused offscreen.
-- **Product or service showcase:** an inspectable model, if Steadfast sells or builds physical things.
-- **Process or story section:** a scroll-scrubbed 3D sequence explaining "how we work", only if it's clearer than 2D.
-
-Not allowed: 3D backgrounds behind text sections, particle fields, floating decorative shapes, or 3D on every page. Default to 2D craft. Everything in `premium-web-experience` → "3D gate" applies.
-
-## 4. Motion character
-
-- **Feel:** steady and assured. Decelerating ease-outs (`expo.out`, `power3.out`, or `cubic-bezier(0.22,1,0.36,1)`). No bounce, no elastic, no spin.
-- **Hero entrance:** ≤1.2s total. Eyebrow → headline (line mask reveal) → subcopy → CTAs, with an 80–120ms stagger. Content is visible immediately under reduced motion.
-- **Reveals:** short distance (16–24px) and an opacity fade, played once and never re-triggered on scroll-up.
-- **Numbers and stats:** count-up only on first view and only if the real figures exist.
-- Pick **GSAP + ScrollTrigger** for scroll storytelling and pinned sections. Use **Motion** for React component and menu transitions if the stack is React. Don't ship both unless both are needed.
-
-## 5. Definition of done (Steadfast)
-
-- [ ] Brand assets and every business fact were preserved or confirmed, and placeholders are listed for the owner
-- [ ] The hero communicates the offer and CTA at 375px without scrolling
-- [ ] Every page has one clear primary CTA, repeated at the hero, mid-page, and footer
-- [ ] All `premium-web-experience` checklist items pass (reduced motion, keyboard, CLS/LCP/INP budgets, no horizontal scroll)
-- [ ] 3D (if any) has a poster fallback, lazy-loads, holds a smooth frame rate on mobile, and is used in ≤2 places
-- [ ] Screenshots taken at mobile and desktop widths and reviewed against "intentional, distinctive, credible, expensive, uncluttered"
+- Run the preview with `npm --prefix dev run preview` (http://localhost:9292, sample data). Run tests with `npm --prefix dev test`. Validate with `npx --prefix dev shopify theme check --path theme`.
+- Regenerate media with `tools/media/process_stills.py`, `build_film.py`, `build_fonts.py`, then `gen_asset_snippet.py`. Regenerate locales with `tools/locales/merge-locales.mjs`.
+- Before calling work done: theme check reports 0 errors, the suite passes, and you've looked at screenshots at 1440×900 and 390×844.
+- Get the owner's approval before changing the logo, palette, campaign name, or any default copy that states a fact.

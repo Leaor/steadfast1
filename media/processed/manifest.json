@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-07T03:28:12+00:00",
+ "generated_at": "2026-11-07T04:15:38+00:00",
  "tool_versions": {
   "python": "3.13.18",
   "pillow": "12.3.0",
@@ -2580,36 +2580,6 @@
    "owner": "tools/media/process_stills.py"
   },
   {
-   "file": "sf-grain-256.webp",
-   "base": "sf-grain",
-   "path": "media/processed/stills/sf-grain-256.webp",
-   "width": 256,
-   "height": 256,
-   "bytes": 26666,
-   "sha1": "cdb32919a8ea4fcc0d1517ed399b417a7a6b2ed4",
-   "source": "generated (numpy normal noise, seed 20251106)",
-   "crop": null,
-   "ops": [
-    "mid-grey luma noise sigma 26"
-   ],
-   "owner": "tools/media/process_stills.py"
-  },
-  {
-   "file": "sf-grain.webp",
-   "base": "sf-grain",
-   "path": "media/processed/stills/sf-grain.webp",
-   "width": 256,
-   "height": 256,
-   "bytes": 26666,
-   "sha1": "cdb32919a8ea4fcc0d1517ed399b417a7a6b2ed4",
-   "source": "generated (numpy normal noise, seed 20251106)",
-   "crop": null,
-   "ops": [
-    "mid-grey luma noise sigma 26"
-   ],
-   "owner": "tools/media/process_stills.py"
-  },
-  {
    "file": "sf-lookbook-embossed-hoodie-400.webp",
    "base": "sf-lookbook-embossed-hoodie",
    "path": "media/processed/stills/sf-lookbook-embossed-hoodie-400.webp",
@@ -2762,6 +2732,36 @@
     "right burn 0.86-0.98 to 15 % (sleeve fades at the frame edge)",
     "resize lanczos x1.25",
     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+   ],
+   "owner": "tools/media/process_stills.py"
+  },
+  {
+   "file": "sf-grain-256.webp",
+   "base": "sf-grain",
+   "path": "media/processed/stills/sf-grain-256.webp",
+   "width": 256,
+   "height": 256,
+   "bytes": 26666,
+   "sha1": "cdb32919a8ea4fcc0d1517ed399b417a7a6b2ed4",
+   "source": "generated (numpy normal noise, seed 20251106)",
+   "crop": null,
+   "ops": [
+    "mid-grey luma noise sigma 26"
+   ],
+   "owner": "tools/media/process_stills.py"
+  },
+  {
+   "file": "sf-grain.webp",
+   "base": "sf-grain",
+   "path": "media/processed/stills/sf-grain.webp",
+   "width": 256,
+   "height": 256,
+   "bytes": 26666,
+   "sha1": "cdb32919a8ea4fcc0d1517ed399b417a7a6b2ed4",
+   "source": "generated (numpy normal noise, seed 20251106)",
+   "crop": null,
+   "ops": [
+    "mid-grey luma noise sigma 26"
    ],
    "owner": "tools/media/process_stills.py"
   }
@@ -3286,14 +3286,6 @@
    "reason": "source supports at most 810 px wide (1.5x upscale limit)"
   },
   {
-   "base": "zip-hoodie-washed-blue-grey--detail-zip",
-   "width": 1200,
-   "native_width": 540,
-   "max_width_allowed": 810,
-   "owner": "tools/media/process_stills.py",
-   "reason": "source supports at most 810 px wide (1.5x upscale limit)"
-  },
-  {
    "base": "sf-signature-detail-neck-label",
    "width": 800,
    "native_width": 480,
@@ -3303,22 +3295,6 @@
   },
   {
    "base": "sf-signature-detail-neck-label",
-   "width": 1200,
-   "native_width": 480,
-   "max_width_allowed": 720,
-   "owner": "tools/media/process_stills.py",
-   "reason": "source supports at most 720 px wide (1.5x upscale limit)"
-  },
-  {
-   "base": "zip-hoodie-washed-blue-grey--detail-neck-label",
-   "width": 800,
-   "native_width": 480,
-   "max_width_allowed": 720,
-   "owner": "tools/media/process_stills.py",
-   "reason": "source supports at most 720 px wide (1.5x upscale limit)"
-  },
-  {
-   "base": "zip-hoodie-washed-blue-grey--detail-neck-label",
    "width": 1200,
    "native_width": 480,
    "max_width_allowed": 720,
@@ -3334,14 +3310,6 @@
    "reason": "source supports at most 1050 px wide (1.5x upscale limit)"
   },
   {
-   "base": "zip-hoodie-washed-blue-grey--detail-chest-logo",
-   "width": 1200,
-   "native_width": 700,
-   "max_width_allowed": 1050,
-   "owner": "tools/media/process_stills.py",
-   "reason": "source supports at most 1050 px wide (1.5x upscale limit)"
-  },
-  {
    "base": "sf-signature-detail-shoulder",
    "width": 800,
    "native_width": 480,
@@ -3358,22 +3326,6 @@
    "reason": "source supports at most 720 px wide (1.5x upscale limit)"
   },
   {
-   "base": "zip-hoodie-washed-blue-grey--detail-shoulder",
-   "width": 800,
-   "native_width": 480,
-   "max_width_allowed": 720,
-   "owner": "tools/media/process_stills.py",
-   "reason": "source supports at most 720 px wide (1.5x upscale limit)"
-  },
-  {
-   "base": "zip-hoodie-washed-blue-grey--detail-shoulder",
-   "width": 1200,
-   "native_width": 480,
-   "max_width_allowed": 720,
-   "owner": "tools/media/process_stills.py",
-   "reason": "source supports at most 720 px wide (1.5x upscale limit)"
-  },
-  {
    "base": "sf-signature-detail-cuff-label",
    "width": 800,
    "native_width": 480,
@@ -3383,22 +3335,6 @@
   },
   {
    "base": "sf-signature-detail-cuff-label",
-   "width": 1200,
-   "native_width": 480,
-   "max_width_allowed": 720,
-   "owner": "tools/media/process_stills.py",
-   "reason": "source supports at most 720 px wide (1.5x upscale limit)"
-  },
-  {
-   "base": "zip-hoodie-washed-blue-grey--detail-cuff-label",
-   "width": 800,
-   "native_width": 480,
-   "max_width_allowed": 720,
-   "owner": "tools/media/process_stills.py",
-   "reason": "source supports at most 720 px wide (1.5x upscale limit)"
-  },
-  {
-   "base": "zip-hoodie-washed-blue-grey--detail-cuff-label",
    "width": 1200,
    "native_width": 480,
    "max_width_allowed": 720,
@@ -3414,12 +3350,20 @@
    "reason": "source supports at most 960 px wide (1.5x upscale limit)"
   },
   {
-   "base": "zip-hoodie-washed-blue-grey--detail-hem",
-   "width": 1200,
-   "native_width": 640,
-   "max_width_allowed": 960,
+   "base": "zip-hoodie-washed-blue-grey--detail-neck-label",
+   "width": 800,
+   "native_width": 320,
+   "max_width_allowed": 480,
    "owner": "tools/media/process_stills.py",
-   "reason": "source supports at most 960 px wide (1.5x upscale limit)"
+   "reason": "source supports at most 480 px wide (1.5x upscale limit)"
+  },
+  {
+   "base": "zip-hoodie-washed-blue-grey--detail-cuff-label",
+   "width": 800,
+   "native_width": 280,
+   "max_width_allowed": 420,
+   "owner": "tools/media/process_stills.py",
+   "reason": "source supports at most 420 px wide (1.5x upscale limit)"
   },
   {
    "base": "reflective-piping-tracksuit-black-speckle--front",
@@ -3512,7 +3456,7 @@
  ],
  "stills": {
   "script": "tools/media/process_stills.py",
-  "generated_at": "2026-11-07T03:28:12+00:00",
+  "generated_at": "2026-11-07T04:15:38+00:00",
   "count": 167,
   "logo": {
    "source": "media/source/photos/steadfast-wordmark.png",
@@ -3777,6 +3721,29 @@
     "scale": 1.0342,
     "overlay": "media/processed/_qa/showcase-front-back-alignment.jpg"
    },
+   "pdp_detail_edges": {
+    "chest-logo": {
+     "top": 90.07,
+     "bottom": 23.95,
+     "left": 78.77,
+     "right": 82.61,
+     "max_px_row_mean": 90.58
+    },
+    "neck-label": {
+     "top": 74.88,
+     "bottom": 23.44,
+     "left": 86.56,
+     "right": 91.38,
+     "max_px_row_mean": 92.91
+    },
+    "cuff-label": {
+     "top": 72.63,
+     "bottom": 13.19,
+     "left": 28.82,
+     "right": 38.08,
+     "max_px_row_mean": 73.07
+    }
+   },
    "reflective_plate_edges": {
     "front": {
      "top": 0.01,
@@ -3803,42 +3770,19 @@
     "pixels_changed": 312,
     "method": "diffusion fill from surrounding knit"
    },
-   "pdp_detail_edges": {
-    "chest-logo": {
-     "top": 90.07,
-     "bottom": 23.95,
-     "left": 78.77,
-     "right": 82.61,
-     "max_px_row_mean": 90.58
-    },
-    "neck-label": {
-     "top": 74.88,
-     "bottom": 23.44,
-     "left": 86.56,
-     "right": 91.38,
-     "max_px_row_mean": 92.91
-    },
-    "cuff-label": {
-     "top": 72.63,
-     "bottom": 13.19,
-     "left": 28.82,
-     "right": 38.08,
-     "max_px_row_mean": 73.07
-    }
-   },
    "night_matte": {
     "polygon_points": 85,
     "background_keep": 0.1,
     "figure_fraction": 0.1428
    },
+   "back_charcoal_background": {
+    "outside_silhouette_mean_luma": 0.003,
+    "edge_trace": "tools/media/masks/IMG_4913-f100-garment-edge.json"
+   },
    "back_grey_left": {
     "left_30pct_mean": 6.03,
     "top_left_25pct_mean": 5.34,
     "right_of_sleeve_mean_luma": 0.0
-   },
-   "back_charcoal_background": {
-    "outside_silhouette_mean_luma": 0.003,
-    "edge_trace": "tools/media/masks/IMG_4913-f100-garment-edge.json"
    }
   },
   "quality_notes": [
@@ -9440,46 +9384,6 @@
     "upscaled": true
    },
    {
-    "path": "media/processed/stills/sf-grain-256.webp",
-    "file": "sf-grain-256.webp",
-    "group": "texture",
-    "base": "sf-grain",
-    "width": 256,
-    "height": 256,
-    "bytes": 26666,
-    "sha1": "cdb32919a8ea4fcc0d1517ed399b417a7a6b2ed4",
-    "format": "webp",
-    "source": "generated (numpy normal noise, seed 20251106)",
-    "purpose": "Static grain tile (CSS background, <= 4% opacity)",
-    "crop": null,
-    "ops": [
-     "mid-grey luma noise sigma 26"
-    ],
-    "notes": "sf-grain.webp is the name CSS references; sf-grain-256.webp follows the {base}-{width} rule.",
-    "theme_asset": true,
-    "owner": "tools/media/process_stills.py"
-   },
-   {
-    "path": "media/processed/stills/sf-grain.webp",
-    "file": "sf-grain.webp",
-    "group": "texture",
-    "base": "sf-grain",
-    "width": 256,
-    "height": 256,
-    "bytes": 26666,
-    "sha1": "cdb32919a8ea4fcc0d1517ed399b417a7a6b2ed4",
-    "format": "webp",
-    "source": "generated (numpy normal noise, seed 20251106)",
-    "purpose": "Static grain tile (CSS background, <= 4% opacity)",
-    "crop": null,
-    "ops": [
-     "mid-grey luma noise sigma 26"
-    ],
-    "notes": "sf-grain.webp is the name CSS references; sf-grain-256.webp follows the {base}-{width} rule.",
-    "theme_asset": true,
-    "owner": "tools/media/process_stills.py"
-   },
-   {
     "path": "media/processed/frames/IMG_4913-t3.333s-f100.png",
     "file": "IMG_4913-t3.333s-f100.png",
     "group": "frame",
@@ -9904,8 +9808,8 @@
     "base": "embossed-gothic-hoodie--back-grey",
     "width": 400,
     "height": 500,
-    "bytes": 13620,
-    "sha1": "24c85486c15c5c82a0bfb8b30132b9c6e0b604e1",
+    "bytes": 13078,
+    "sha1": "a7bd0a0524f0a2d95fb89ce178ee0c5e52ed9fd4",
     "format": "webp",
     "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
     "purpose": "Product still from footage: Back view at night (washed grey): arched back panel, embossed lettering on the shoulders",
@@ -9933,6 +9837,7 @@
      "left burn 0.04-0.24 to black",
      "leaves left of the hood burnt to black (traced polygon 3-4 px off the hood, 1.5 px feather)",
      "everything right of the sleeve (bystander, car, speck) to #000: per-row edge trace (tools/media/masks/IMG_4376-f128-garment-right-edge.json), 1 px inset, 0.6 px feather",
+     "top-edge feather to #000 over 12% of the height (smoothstep): no hard cut through the head",
      "resize lanczos x0.625",
      "black-point clamp luma<=6 -> 0, smooth ramp to 12"
     ],
@@ -9949,8 +9854,8 @@
     "base": "embossed-gothic-hoodie--back-grey",
     "width": 800,
     "height": 1000,
-    "bytes": 29908,
-    "sha1": "21a2ed762ec9a18f36cc86fe05571ae1ffa8ab67",
+    "bytes": 28900,
+    "sha1": "ceddd8a4458c1798b3e47fa3ec820456f6b23468",
     "format": "webp",
     "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
     "purpose": "Product still from footage: Back view at night (washed grey): arched back panel, embossed lettering on the shoulders",
@@ -9978,6 +9883,7 @@
      "left burn 0.04-0.24 to black",
      "leaves left of the hood burnt to black (traced polygon 3-4 px off the hood, 1.5 px feather)",
      "everything right of the sleeve (bystander, car, speck) to #000: per-row edge trace (tools/media/masks/IMG_4376-f128-garment-right-edge.json), 1 px inset, 0.6 px feather",
+     "top-edge feather to #000 over 12% of the height (smoothstep): no hard cut through the head",
      "resize lanczos x1.25",
      "black-point clamp luma<=6 -> 0, smooth ramp to 12"
     ],
@@ -9994,8 +9900,8 @@
     "base": "embossed-gothic-hoodie--back-grey",
     "width": 800,
     "height": 1000,
-    "bytes": 68404,
-    "sha1": "c8fb1bdefc66e8387819f0f53389d8de503bf5cb",
+    "bytes": 66991,
+    "sha1": "30495a5967f7f62a264c9fb39d47ad78054d4680",
     "format": "jpeg",
     "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
     "purpose": "Product still from footage: Back view at night (washed grey): arched back panel, embossed lettering on the shoulders (JPG fallback/master)",
@@ -10023,6 +9929,7 @@
      "left burn 0.04-0.24 to black",
      "leaves left of the hood burnt to black (traced polygon 3-4 px off the hood, 1.5 px feather)",
      "everything right of the sleeve (bystander, car, speck) to #000: per-row edge trace (tools/media/masks/IMG_4376-f128-garment-right-edge.json), 1 px inset, 0.6 px feather",
+     "top-edge feather to #000 over 12% of the height (smoothstep): no hard cut through the head",
      "resize lanczos x1.25",
      "black-point clamp luma<=6 -> 0, smooth ramp to 12"
     ],
@@ -10039,8 +9946,8 @@
     "base": "sf-collection-hoodies",
     "width": 540,
     "height": 675,
-    "bytes": 19242,
-    "sha1": "24a34e7e311b9d6049cda3ece56dd271773c12bb",
+    "bytes": 18664,
+    "sha1": "2b33c0b08615395a19135f9f7b2ffe03d188a8ce",
     "format": "webp",
     "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
     "purpose": "Collection image: Hoodies (embossed gothic hoodie, night back view, graded + burnt)",
@@ -10068,6 +9975,7 @@
      "left burn 0.04-0.24 to black",
      "leaves left of the hood burnt to black (traced polygon 3-4 px off the hood, 1.5 px feather)",
      "everything right of the sleeve (bystander, car, speck) to #000: per-row edge trace (tools/media/masks/IMG_4376-f128-garment-right-edge.json), 1 px inset, 0.6 px feather",
+     "top-edge feather to #000 over 12% of the height (smoothstep): no hard cut through the head",
      "resize lanczos x0.8438",
      "black-point clamp luma<=6 -> 0, smooth ramp to 12"
     ],
@@ -10084,8 +9992,8 @@
     "base": "sf-collection-hoodies",
     "width": 900,
     "height": 1125,
-    "bytes": 34036,
-    "sha1": "014633e0f7adbb145822ef7408cbd1b6617d4910",
+    "bytes": 32686,
+    "sha1": "ca9ad8526a94bd0b6d118a147605b13e6365585b",
     "format": "webp",
     "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
     "purpose": "Collection image: Hoodies (embossed gothic hoodie, night back view, graded + burnt)",
@@ -10113,6 +10021,7 @@
      "left burn 0.04-0.24 to black",
      "leaves left of the hood burnt to black (traced polygon 3-4 px off the hood, 1.5 px feather)",
      "everything right of the sleeve (bystander, car, speck) to #000: per-row edge trace (tools/media/masks/IMG_4376-f128-garment-right-edge.json), 1 px inset, 0.6 px feather",
+     "top-edge feather to #000 over 12% of the height (smoothstep): no hard cut through the head",
      "resize lanczos x1.4062",
      "black-point clamp luma<=6 -> 0, smooth ramp to 12"
     ],
@@ -10129,8 +10038,8 @@
     "base": "sf-collection-hoodies",
     "width": 900,
     "height": 1125,
-    "bytes": 81153,
-    "sha1": "328eb9d2b4988f5a3f6f5648ee6e21c239be5142",
+    "bytes": 79439,
+    "sha1": "753a301e8ddaafddd65f134cb2a3d2879931f87b",
     "format": "jpeg",
     "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
     "purpose": "Collection image: Hoodies (embossed gothic hoodie, night back view, graded + burnt) (JPG fallback/master)",
@@ -10158,6 +10067,7 @@
      "left burn 0.04-0.24 to black",
      "leaves left of the hood burnt to black (traced polygon 3-4 px off the hood, 1.5 px feather)",
      "everything right of the sleeve (bystander, car, speck) to #000: per-row edge trace (tools/media/masks/IMG_4376-f128-garment-right-edge.json), 1 px inset, 0.6 px feather",
+     "top-edge feather to #000 over 12% of the height (smoothstep): no hard cut through the head",
      "resize lanczos x1.4062",
      "black-point clamp luma<=6 -> 0, smooth ramp to 12"
     ],
@@ -10174,8 +10084,8 @@
     "base": "sf-collection-hoodies",
     "width": 1080,
     "height": 1350,
-    "bytes": 41778,
-    "sha1": "f85589759202b35c59c9d797e8172776821c0f26",
+    "bytes": 40660,
+    "sha1": "fc874fa4a108974fef0e18c74a28d35e51d69ae7",
     "format": "webp",
     "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
     "purpose": "Collection image: Hoodies (embossed gothic hoodie, night back view, graded + burnt)",
@@ -10203,6 +10113,7 @@
      "left burn 0.04-0.24 to black",
      "leaves left of the hood burnt to black (traced polygon 3-4 px off the hood, 1.5 px feather)",
      "everything right of the sleeve (bystander, car, speck) to #000: per-row edge trace (tools/media/masks/IMG_4376-f128-garment-right-edge.json), 1 px inset, 0.6 px feather",
+     "top-edge feather to #000 over 12% of the height (smoothstep): no hard cut through the head",
      "resize lanczos x1.6875",
      "black-point clamp luma<=6 -> 0, smooth ramp to 12"
     ],
@@ -10213,14 +10124,54 @@
     "upscaled": true
    },
    {
+    "path": "media/processed/stills/sf-grain-256.webp",
+    "file": "sf-grain-256.webp",
+    "group": "texture",
+    "base": "sf-grain",
+    "width": 256,
+    "height": 256,
+    "bytes": 26666,
+    "sha1": "cdb32919a8ea4fcc0d1517ed399b417a7a6b2ed4",
+    "format": "webp",
+    "source": "generated (numpy normal noise, seed 20251106)",
+    "purpose": "Static grain tile (CSS background, <= 4% opacity)",
+    "crop": null,
+    "ops": [
+     "mid-grey luma noise sigma 26"
+    ],
+    "notes": "sf-grain.webp is the name CSS references; sf-grain-256.webp follows the {base}-{width} rule.",
+    "theme_asset": true,
+    "owner": "tools/media/process_stills.py"
+   },
+   {
+    "path": "media/processed/stills/sf-grain.webp",
+    "file": "sf-grain.webp",
+    "group": "texture",
+    "base": "sf-grain",
+    "width": 256,
+    "height": 256,
+    "bytes": 26666,
+    "sha1": "cdb32919a8ea4fcc0d1517ed399b417a7a6b2ed4",
+    "format": "webp",
+    "source": "generated (numpy normal noise, seed 20251106)",
+    "purpose": "Static grain tile (CSS background, <= 4% opacity)",
+    "crop": null,
+    "ops": [
+     "mid-grey luma noise sigma 26"
+    ],
+    "notes": "sf-grain.webp is the name CSS references; sf-grain-256.webp follows the {base}-{width} rule.",
+    "theme_asset": true,
+    "owner": "tools/media/process_stills.py"
+   },
+   {
     "path": "media/processed/stills/_contact-sheet.jpg",
     "file": "_contact-sheet.jpg",
     "group": "qa",
     "base": "_contact-sheet",
     "width": 1870,
     "height": 3512,
-    "bytes": 719863,
-    "sha1": "8b719c53baab3c6f564b52d5eb0a60a45c985886",
+    "bytes": 719088,
+    "sha1": "a5c8c4d9c5c2044dc7c480aef90dc09f8bd249c1",
     "format": "jpeg",
     "source": "(all)",
     "purpose": "Contact sheet of every processed still",

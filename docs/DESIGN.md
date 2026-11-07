@@ -351,6 +351,8 @@ preceded by a per-source **pre** stage (HLG→BT.709 tone-map for the HEVC clips
 
 The blue-grey zip hoodie appears once on the homepage as a hero garment: in the signature showcase (and as featured card 1 when it is the newest product). Hoodies, Tops and New Arrivals are regenerated from the sources above, and the header mega-menu tile default (`sf-category-hoodies`) therefore shows the black hoodie too. All zip-hoodie stills have the **hanger painted out** (MEDIA, FILM-STORYBOARD A1). A clean IMG_4913 crewneck frame is **not** used for Tops: the crewneck isn't one of the five evidenced garments (CONTEXT), and the frame carries the unidentified "S7" monogram.
 
+**Preview fixture vs bundled default (revision round 2).** The preview harness's Hoodies *collection image* (`collections.json`, handle `hoodies`) is a separate, non-bundled still, `stills/sf-collection-hoodies` (540/900/1080): the embossed gothic hoodie, night back view, from the 640 px back-grey video plate with the same grade and burns. It stands in for a merchant's own collection image and keeps the homepage from repeating the blue-grey zip hoodie. Its 900 and 1080 renditions are ×1.41 and ×1.69 upscales of the plate; that exceeds the 1.5× rule and is accepted for this preview-only file, by review request, and recorded in the manifest's `quality_notes`. The bundled fallback `sf-category-hoodies` above is unchanged (black zip hoodie). So a live store whose Hoodies collection has no image shows the black hoodie in Section E and the mega tile, not the gothic back view seen in the preview.
+
 ---
 
 ## 6. Iconography and primitives

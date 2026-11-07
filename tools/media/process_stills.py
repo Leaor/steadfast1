@@ -1458,6 +1458,10 @@ def stage_footage():
                    "everything right of the sleeve (bystander, car, speck) to #000: per-row edge trace "
                    "(tools/media/masks/IMG_4376-f128-garment-right-edge.json), 1 px inset, 0.6 px feather"]
             kind = "lifestyle"
+            # Review r2 sign-off: the 4:5 crop's top edge cut straight through the head and neck. Dissolve the top
+            # 12% of the frame into black (smoothstep), so no ruler-straight edge remains against the page.
+            pl = feather_frame(pl, top=0.12)
+            ops = ops + ["top-edge feather to #000 over 12% of the height (smoothstep): no hard cut through the head"]
         emit(pl, D_PROD, f"{handle}--{view}", PRODUCT_WIDTHS, "max", group="product",
              purpose=f"Product still from footage: {purpose}", source=rel(clip),
              crop=dict(crop_dict(bx, (720, 1280)), frame=n, t=t), ops=ops, notes=note, add_cap=True,
