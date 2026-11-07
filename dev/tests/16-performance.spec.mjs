@@ -18,8 +18,10 @@ const TEXT = /^(text\/|application\/(json|javascript)|image\/svg\+xml)/;
 // ARCHITECTURE §6.1 v1.2: measured on 2026-11-07 (this spec's own *-measure.json, max of the desktop and
 // mobile projects, connection pinned to 4g) + ~15 % margin, rounded up. Re-derive them the same way.
 const BUDGETS = {
-  home: { requests: 41, jsBr: 33.5 * KB, cssBr: 28.5 * KB, transfer: 465 * KB },
-  product: { requests: 29, jsBr: 27.5 * KB, cssBr: 20.5 * KB, transfer: 650 * KB },
+  // Home row: revision round 1 (HOME's data-sf-module loader for five sections: 32 req desktop / 23.2 KB JS br).
+  home: { requests: 37, jsBr: 27 * KB, cssBr: 28.5 * KB, transfer: 465 * KB },
+  // Product row: revision round 1 (COMMERCE lazy rail media + related products; ARCHITECTURE §6.1 product row).
+  product: { requests: 23, jsBr: 27.5 * KB, cssBr: 20.5 * KB, transfer: 285 * KB },
   collection: { requests: 26, jsBr: 24 * KB, cssBr: 20.5 * KB, transfer: 390 * KB },
   search: { requests: 23, jsBr: 24 * KB, cssBr: 22.5 * KB, transfer: 270 * KB },
   cart: { requests: 19, jsBr: 20.5 * KB, cssBr: 18.75 * KB, transfer: 117 * KB },
@@ -176,12 +178,41 @@ test('fonts: exactly the 5 DESIGN §3.1 files, each ≤ 40 KB; exactly 2 preload
   const fonts = readdirSync(dir).filter((f) => /\.(woff2?|ttf|otf)$/.test(f)).sort();
   expect(fonts).toEqual(['sf-font-display-300-italic.woff2', 'sf-font-display-300.woff2', 'sf-font-label-500.woff2', 'sf-font-text-400.woff2', 'sf-font-text-500.woff2']);
   for (const f of fonts) expect(statSync(path.join(dir, f)).size, `${f} ≤ 40 KB`).toBeLessThanOrEqual(40 * KB);
+  // PLAT-09: once the layout emits the font preloads with `preload_tag` (Shopify semantics), the same URLs
+  // must also be in the document's HTTP Link header, exactly like on Shopify.
+  const layout = readFileSync(path.join(fx.THEME_DIR, 'layout/theme.liquid'), 'utf8');
+  const viaPreloadTag = /sf-font-[\w-]+\.woff2'\s*\|\s*asset_url\s*\|\s*preload_tag/.test(layout);
   for (const url of ['/', '/collections/all']) {
-    await gotoOk(page, url);
+    const res = await gotoOk(page, url);
     const preloads = await page.locator('link[rel="preload"][as="font"]').evaluateAll((ls) => ls.map((l) => ({ f: l.href.split('/').pop().split('?')[0], type: l.type, co: l.hasAttribute('crossorigin') })));
     expect(preloads.map((p) => p.f).sort()).toEqual(['sf-font-label-500.woff2', 'sf-font-text-400.woff2']);
     for (const p of preloads) { expect(p.type).toBe('font/woff2'); expect(p.co).toBe(true); }
+    if (viaPreloadTag) {
+      const link = res.headers().link || '';
+      const fontsInHeader = [...link.matchAll(/<[^>]*\/(sf-font-[\w-]+\.woff2)\?[^>]*>;\s*rel=preload;\s*as=font/g)].map((m) => m[1]).sort();
+      expect(fontsInHeader, `Link header of ${url}`).toEqual(['sf-font-label-500.woff2', 'sf-font-text-400.woff2']);
+    }
   }
+});
+
+test('harness: preload_tag mirrors Shopify (PLAT-09: as required, attributes in order, rel last, Link header, Shopify-hosted URLs only)', async () => {
+  const { Liquid } = await import('liquidjs');
+  const { registerFilters, RQ } = await import('../preview/lib/filters.mjs');
+  const engine = new Liquid({ strictFilters: true });
+  registerFilters(engine, { themeDir: fx.THEME_DIR });
+  const rq = { warn: () => {} };
+  const render = (src) => engine.parseAndRender(src, {}, { globals: { [RQ]: rq } });
+  const font = await render("{{ 'sf-font-text-400.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: true }}");
+  expect(font).toMatch(/^<link href="\/cdn\/shop\/t\/preview\/assets\/sf-font-text-400\.woff2\?v=\d+" as="font" type="font\/woff2" crossorigin rel="preload">$/);
+  // shopify.dev example 2: custom attributes keep their order, rel="preload" comes last
+  expect(await render("{{ 'sf-cart.js' | asset_url | preload_tag: as: 'script', type: 'text/javascript' }}"))
+    .toMatch(/^<link href="[^"]+\/sf-cart\.js\?v=\d+" as="script" type="text\/javascript" rel="preload">$/);
+  expect(rq.preloadLinks).toEqual([
+    expect.stringMatching(/^<\/cdn\/shop\/t\/preview\/assets\/sf-font-text-400\.woff2\?v=\d+>; rel=preload; as=font; crossorigin; type="font\/woff2"$/),
+    expect.stringMatching(/^<[^>]+\/sf-cart\.js\?v=\d+>; rel=preload; as=script; type="text\/javascript"$/),
+  ]);
+  await expect(render("{{ 'sf-cart.js' | asset_url | preload_tag }}")).rejects.toThrow(/"as" parameter is required/);
+  await expect(render("{{ 'https://example.com/x.js' | preload_tag: as: 'script' }}")).rejects.toThrow(/asset_url or shopify_asset_url/);
 });
 
 test('theme folder ≤ 40 MB', async () => {

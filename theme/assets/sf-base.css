@@ -37,8 +37,7 @@
     --sf-sticky-offset: 0px;
     scroll-padding-top: calc(var(--sf-header-h, 56px) + var(--sf-sticky-offset) + 8px);
   }
-  /* The collection/search facets toolbar (sf-collection.css) is a 48 px sticky bar + 2 hairlines. */
-  html:has(.sf-facets__toolbar) { --sf-sticky-offset: 50px; }
+  /* A second sticky bar sets --sf-sticky-offset itself (the facets toolbar: sf-collection.css). */
   @media (prefers-reduced-motion: no-preference) {
     html:not([data-sf-motion="reduced"]) { scroll-behavior: smooth; }
   }

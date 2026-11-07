@@ -10,13 +10,13 @@
   @param {string} [fetchpriority] - 'high' for the LCP item.
   @param {boolean} [zoom] - Render the zoom trigger on images.
   @param {boolean} [video_loop] - Loop hosted video.
-  @param {string} [sizes] - sizes attribute. Default '(min-width: 990px) 58vw, 100vw'.
+  @param {string} [sizes] - sizes attribute. Default '(min-width: 990px) 53vw, (min-width: 750px) 72vw, 100vw'.
 
   @example
   {% render 'sf-product-media', media: media, product: product, index: forloop.index, zoom: true %}
 {%- enddoc -%}
 {%- liquid
-  assign m_sizes = sizes | default: '(min-width: 990px) 58vw, 100vw'
+  assign m_sizes = sizes | default: '(min-width: 990px) 53vw, (min-width: 750px) 72vw, 100vw'
   assign m_loading = loading | default: 'lazy'
   assign m_widths = '600,900,1200,1600,2000'
   assign fallback_alt = 'products.image_alt' | t: title: product.title, index: index

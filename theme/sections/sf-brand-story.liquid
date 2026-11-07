@@ -6,6 +6,7 @@
 <section
   class="sf-section sf-brand-story sf-tone-{{ s.tone }} sf-space-{{ s.spacing }} sf-brand-story--{{ s.logo_display }}"
   data-sf-section="brand-story"
+  data-sf-module="{{ 'sf-brand-story.js' | asset_url }}"
   aria-labelledby="{{ heading_id }}"
 >
   <div class="sf-container sf-brand-story__inner">
@@ -40,7 +41,6 @@
       </div>
     {%- endif -%}
   </div>
-  <script src="{{ 'sf-brand-story.js' | asset_url }}" defer></script>
 </section>
 
 {% schema %}

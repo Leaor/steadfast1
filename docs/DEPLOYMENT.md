@@ -88,7 +88,7 @@ Write these pages with STEADFAST's real information only. The theme never invent
 | Theme settings → Social media | `social_instagram_link` (and TikTok / YouTube / X / Facebook if used) | Footer FOLLOW column; blank links are not rendered |
 | Theme settings → Newsletter | `newsletter_consent` (default: "By subscribing you agree to receive emails. Unsubscribe a…"), `newsletter_success` | Newsletter band and footer form. Check the consent wording against the store's email-marketing terms and local law. Subscribers land in Customers with the `newsletter` tag and email-marketing consent. |
 | Settings → Markets | Enable the markets / currencies to sell in | The currency selector appears only when more than one country is available (`show_currency_selector`). |
-| Settings → Customer accounts | Classic or new customer accounts | Account icon and `/account` pages. |
+| Settings → Customer accounts | Classic or new customer accounts. Both work: **new** accounts use Shopify's hosted pages and Shopify's account component in the header (`<shopify-account>`, an avatar that opens the account sheet; menu chosen in Header → *Customer account menu*, default `customer-account-main-menu`); **classic** accounts use the theme's own login / register / account / order / addresses / activate / reset templates, which ship on purpose (ARCHITECTURE §12.8) | Account icon and `/account` pages. In the preview the component is never defined, so the plain `ACCOUNT` link is what you see; on a live store check the avatar appears on desktop and mobile once customer accounts are enabled. |
 | Theme settings → Logo | Leave **blank** to use the bundled STEADFAST wordmark artwork (recommended), or upload a replacement | Header, footer, hero |
 
 ---
@@ -121,7 +121,7 @@ Prepared product images (from the client's own photography; cropped, colour-mana
 
 | Where | Default | Action |
 |---|---|---|
-| Hero eyebrow | "FIXED POINT" (**proposed** campaign name) | Approve or replace |
+| Hero eyebrow | blank (the italic campaign line stands alone); FIXED POINT remains the **proposed** campaign name | Optionally set a campaign name; it shows only with the campaign line |
 | Brand story (Section F) text | blank (the wordmark alone) | Supply two or three sentences; no dates, origins or claims until confirmed |
 | Campaign editorial line / body | "Under one light." / "The tracksuit in stone, seen from behind." | Approve or replace |
 | Featured "next drop" tile | "Details to be announced." | Replace or hide |

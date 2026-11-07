@@ -157,8 +157,9 @@
     color: var(--sf-fg-muted);
   }
 
+  /* The campaign line shows on every layout except short landscape phones; the eyebrow is its label and only
+     renders with it (Liquid): a lone all-caps label under the wordmark reads as an orphan. */
   .sf-hero__sub {
-    display: none;
     margin: var(--sf-space-3) 0 0;
     font-family: var(--sf-font-display);
     font-weight: 300;
@@ -169,6 +170,8 @@
     color: var(--sf-fg);
     text-wrap: balance;
   }
+
+  .sf-hero__sub:first-child { margin-top: 0; }
 
   .sf-hero__ctas {
     display: flex;
@@ -183,7 +186,8 @@
   .sf-hero__ctas .sf-btn--primary { width: 100%; }
   .sf-hero__cta--secondary { align-self: center; min-height: 44px; }
 
-  /* Landscape phones (and 200 % zoom on a laptop): lockup, eyebrow and both CTAs inside the first screen. */
+  /* Landscape phones (and 200 % zoom on a laptop): wordmark and both CTAs inside the first screen; the campaign
+     line and its eyebrow step aside there. */
   @media (orientation: landscape) and (max-height: 500px) and (max-width: 989px) {
     .sf-hero {
       --_h: 100svh;
@@ -191,7 +195,7 @@
     }
 
     .sf-hero__content { padding-top: calc(var(--sf-header-h, 56px) + var(--sf-space-3)); }
-    .sf-hero__copy { margin-top: var(--sf-space-3); }
+    .sf-hero__copy { display: none; }
 
     .sf-hero__ctas {
       flex-direction: row;
@@ -270,18 +274,19 @@
   /* Never clickable while invisible. */
   html[data-sf-intro='play'] .sf-hero:not(.is-beat-9):not(.is-ui) .sf-hero__ctas { pointer-events: none; }
 
-  /* From the film's first cut (t ≥ 2.2 s, .is-ui from the script) the CTA row is present at 0.8, so a visitor
-     who neither scrolls nor presses a key can shop during the film (BRIEF §3). Only the wordmark waits for
-     beat 8; eyebrow and line wait for beat 9. Hover, focus or the end of the intro take it to 1. */
-  html[data-sf-intro='play'] .sf-hero.is-ui:not(.is-beat-9) .sf-hero__ctas .sf-hero__reveal {
-    opacity: 0.8;
-    transform: none;
-    transition:
-      opacity calc(700ms * var(--sf-motion, 1)) var(--sf-ease-out) calc(var(--_i, 2) * 80ms - 160ms),
-      transform calc(700ms * var(--sf-motion, 1)) var(--sf-ease-out) calc(var(--_i, 2) * 80ms - 160ms);
-  }
+  /* From the film's first cut (t ≥ 2.2 s, .is-ui from the script) the CTA row is there, so a visitor who
+     neither scrolls nor presses a key can shop during the film (BRIEF §3). It enters with one opacity fade
+     (500 ms, no translate) straight to full strength: the primary is the cream token from the moment it shows,
+     never a dimmed, disabled-looking state. Only the wordmark waits for beat 8; eyebrow and line for beat 9. */
+  html[data-sf-intro='play'] .sf-hero:not(.is-beat-9) .sf-hero__ctas .sf-hero__reveal { transform: none; }
 
-  html[data-sf-intro='play'] .sf-hero.is-ui:not(.is-beat-9) .sf-hero__ctas .sf-hero__reveal:is(:hover, :focus-visible) { opacity: 1; }
+  html[data-sf-intro='play'] .sf-hero.is-ui:not(.is-beat-9) .sf-hero__ctas .sf-hero__reveal {
+    opacity: 1;
+    transition: opacity calc(500ms * var(--sf-motion, 1)) var(--sf-ease-out),
+      color calc(var(--sf-dur-instant) * var(--sf-motion, 1)) linear,
+      background-color calc(var(--sf-dur-instant) * var(--sf-motion, 1)) linear,
+      text-decoration-color calc(var(--sf-dur-instant) * var(--sf-motion, 1)) linear;
+  }
 
   /* Beat 8: the wordmark appears centred; opacity over 500 ms, scale 1.035 → 1 over 1600 ms. The sweep is WAAPI. */
   .sf-hero.is-beat-8:not(.is-cut) .sf-hero__mark {
@@ -312,10 +317,20 @@
       text-decoration-color calc(var(--sf-dur-instant) * var(--sf-motion, 1)) linear;
   }
 
+  /* CTAs not yet shown when beat 9 arrives (ended before the first cut): the same single 500 ms opacity fade. */
+  .sf-hero.is-beat-9 .sf-hero__ctas .sf-hero__reveal {
+    transition:
+      opacity calc(500ms * var(--sf-motion, 1)) var(--sf-ease-out) calc((300ms + var(--_i, 0) * 80ms) * var(--sf-motion, 1)),
+      color calc(var(--sf-dur-instant) * var(--sf-motion, 1)) linear,
+      background-color calc(var(--sf-dur-instant) * var(--sf-motion, 1)) linear,
+      text-decoration-color calc(var(--sf-dur-instant) * var(--sf-motion, 1)) linear;
+  }
+
   /* Ending early jumps to the end of beat 9 in --sf-dur-base. */
   .sf-hero.is-cut .sf-hero__title,
   .sf-hero.is-cut .sf-hero__mark,
-  .sf-hero.is-cut .sf-hero__reveal {
+  .sf-hero.is-cut .sf-hero__reveal,
+  .sf-hero.is-cut .sf-hero__ctas .sf-hero__reveal {
     animation: none;
     transition-duration: var(--_d-cut);
     transition-delay: 0s;
@@ -426,8 +441,6 @@
       width: calc((100% - 2 * var(--sf-gutter) - 11 * var(--sf-grid-gap)) / 12 * 3 + 2 * var(--sf-grid-gap));
       margin: 0;
     }
-
-    .sf-hero__sub { display: block; }
 
     .sf-hero__ctas {
       position: absolute;

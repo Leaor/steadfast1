@@ -16,7 +16,15 @@
       <link rel="apple-touch-icon" href="{{ 'sf-apple-touch-icon-180.png' | asset_url }}">
     {%- endif -%}
 
+    {%- comment -%}
+      /collections/all: Shopify's default title ("Products") becomes collections.all_title, matching
+      the collection heading (sf-main-collection) and og:title (sf-meta-tags).
+    {%- endcomment -%}
     {%- liquid
+      assign doc_title = page_title
+      if request.page_type == 'collection' and collection.handle == 'all'
+        assign doc_title = 'collections.all_title' | t
+      endif
       assign title_suffix = ''
       if current_tags
         assign tags_joined = current_tags | join: ', '
@@ -28,9 +36,9 @@
       endif
     -%}
     <title>
-      {{- page_title -}}
+      {{- doc_title -}}
       {{- title_suffix -}}
-      {%- unless page_title contains shop.name %} – {{ shop.name }}{% endunless -%}
+      {%- unless doc_title contains shop.name %} – {{ shop.name }}{% endunless -%}
     </title>
     {%- if page_description -%}
       <meta name="description" content="{{ page_description | escape }}">
@@ -38,8 +46,8 @@
 
     {%- render 'sf-meta-tags' -%}
 
-    <link rel="preload" as="font" type="font/woff2" href="{{ 'sf-font-text-400.woff2' | asset_url }}" crossorigin>
-    <link rel="preload" as="font" type="font/woff2" href="{{ 'sf-font-label-500.woff2' | asset_url }}" crossorigin>
+    {{ 'sf-font-text-400.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
+    {{ 'sf-font-label-500.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
 
     {%- render 'sf-css-tokens' -%}
     {{ 'sf-base.css' | asset_url | stylesheet_tag }}

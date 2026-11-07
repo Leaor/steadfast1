@@ -1,5 +1,7 @@
 // Collection filtering, sorting, pagination (BRIEF §5, §12; ARCHITECTURE §9 row 07, §4.7 <sf-facets>, §8.5; DESIGN §7.9).
 import { test, expect, fx, gotoOk, projectContext, expectDialogOpen, isMobile } from './helpers/base.mjs';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 
 const ready = fx.fixturesReady();
 const URL_ALL = '/collections/all';
@@ -47,7 +49,12 @@ test.describe('collection filtering', () => {
 
   test('grid and count match the fixtures', async ({ page }) => {
     await gotoOk(page, URL_ALL);
-    await expect(page.locator('h1')).toHaveText('Products');
+    // /collections/all is Shopify's automatic catalogue (fixture title "Products"); the theme renders the
+    // locale string collections.all_title instead, in the h1 and the document title (revision round 1).
+    const allTitle = JSON.parse(readFileSync(path.join(fx.THEME_DIR, 'locales/en.default.json'), 'utf8')).collections.all_title;
+    expect(allTitle, 'collections.all_title locale key').toBe('The collection');
+    await expect(page.locator('h1')).toHaveText(allTitle);
+    await expect(page).toHaveTitle(new RegExp(`^${allTitle} – `));
     await expect(cards(page)).toHaveCount(Math.min(24, all().length));
     await expect(page.locator('[data-sf-facets-count]').first()).toContainText(String(all().length));
     for (const [i, c] of (await cards(page).all()).slice(0, 4).entries()) {

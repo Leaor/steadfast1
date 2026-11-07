@@ -114,20 +114,25 @@
 
   /* ── sticky toolbar (48px, hairlines) ───────────────────── */
   .sf-facets { display: block; }
+  /* Sticks directly under the header bar in every header state: top follows CORE's
+     --sf-header-offset (72 / 56 / 0 px) and transitions with the bar's own duration and easing, so
+     it never overlaps the bar while it hides nor leaves a gap while it reappears. Its height feeds
+     --sf-sticky-offset (scroll-padding in sf-base.css) so focused / scrolled-to targets clear it. */
+  html:has(.sf-facets__toolbar) { --sf-sticky-offset: calc(var(--_sf-toolbar-h, 48px) + 2 * var(--sf-hairline)); }
   .sf-facets__toolbar {
     position: sticky;
-    top: var(--sf-header-h);
+    top: var(--sf-header-offset, var(--sf-header-h));
     z-index: var(--sf-z-sticky);
     background: var(--sf-bg);
     border-block: var(--sf-hairline) solid var(--sf-line);
+    transition: top var(--sf-header-offset-dur, 0s) var(--sf-header-offset-ease, linear);
   }
-  html:has([data-sf-header][data-hidden="true"]) .sf-facets__toolbar { top: 0; }
   .sf-facets__toolbar-inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--sf-space-4);
-    min-height: 48px;
+    min-height: var(--_sf-toolbar-h, 48px);
   }
   .sf-facets__start, .sf-facets__end { display: flex; align-items: center; gap: var(--sf-space-5); min-width: 0; }
   .sf-facets__trigger {

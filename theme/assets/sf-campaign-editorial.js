@@ -1,5 +1,5 @@
 /* STEADFAST · Section D · Campaign editorial (HOME). DESIGN §8.2 device 2 (aperture), §8.3 D.
-   "full": a scrubbed vertical shaft on the frame (--_ap 30 → 0, so no horizontal edge ever crosses the haze;
+   "full": a scrubbed vertical shaft on the frame (--_ap 30 % of the width → 0, in whole px, so no horizontal edge ever crosses the haze;
    feathered side edges fade out at the end) + inner scale 1.15 → 1 (ScrollTrigger 1), and a one-time
    clip-mask text reveal at "top 40%" (ScrollTrigger 2). If GSAP arrives after the section has already
    crossed the scrub start (anchor jump, fast fling, slow network), the final state is kept: nothing that is
@@ -41,7 +41,8 @@
         defaults: { ease: 'none' },
         scrollTrigger: { trigger: el, start: 'top 90%', end: 'top 15%', scrub: 0.8, invalidateOnRefresh: true }
       })
-        .fromTo(frame, { '--_ap': ap, '--_feather': 1 }, { '--_ap': 0, duration: 1 }, 0)
+        // --_ap in whole px (snap): a fractional clip edge leaks a 1 px hairline of image past the feather.
+        .fromTo(frame, { '--_ap': () => Math.round(frame.offsetWidth * ap / 100), '--_feather': 1 }, { '--_ap': 0, duration: 1, snap: { '--_ap': 1 } }, 0)
         .to(frame, { '--_feather': 0, duration: 0.3 }, 0.7)
         .fromTo(media, { scale: 1.15 }, { scale: 1, duration: 1 }, 0);
       if (copy) {

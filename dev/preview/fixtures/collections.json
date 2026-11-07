@@ -8,15 +8,14 @@
       "title": "Hoodies",
       "description_html": "",
       "image": {
-        "base": "stills/sf-category-hoodies",
+        "base": "products/zip-hoodie-washed-blue-grey--detail-chest-logo",
         "ext": "webp",
         "widths": [
-          540,
-          900,
-          1080
+          400,
+          800
         ],
-        "width": 1080,
-        "height": 1350,
+        "width": 800,
+        "height": 1000,
         "alt": "Hoodies"
       },
       "product_handles": [

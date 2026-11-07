@@ -5,6 +5,11 @@
 {%- endcomment -%}
 {{ 'sf-collection.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'sf-facets.js' | asset_url }}" defer></script>
+{%- comment -%}
+  /collections/all is Shopify's automatic catalogue; its default title ("Products") is not STEADFAST
+  copy, so it reads as the homepage rail does (collections.all_title). theme.liquid <title> and
+  sf-meta-tags og:title follow the same rule.
+{%- endcomment -%}
 {%- paginate collection.products by section.settings.products_per_page -%}
 {%- liquid
   assign cols_d = section.settings.columns_desktop | plus: 0
@@ -32,6 +37,10 @@
   if collection.sort_by != blank and collection.sort_by != collection.default_sort_by
     assign clear_url = collection.url | append: '?sort_by=' | append: collection.sort_by
   endif
+  assign collection_title = collection.title
+  if collection.handle == 'all'
+    assign collection_title = 'collections.all_title' | t
+  endif
   assign show_banner = false
   if section.settings.show_banner_image and collection.image != blank
     assign show_banner = true
@@ -51,7 +60,7 @@
       </div>
     {%- endif -%}
     <div class="sf-collection-header__text">
-      <h1 class="sf-collection-header__title sf-display-lg" id="sf-collection-title-{{ section.id }}">{{ collection.title | escape }}</h1>
+      <h1 class="sf-collection-header__title sf-display-lg" id="sf-collection-title-{{ section.id }}">{{ collection_title | escape }}</h1>
       {%- if section.settings.show_description and collection.description != blank -%}
         <div class="sf-collection-header__description sf-rte">{{ collection.description }}</div>
       {%- endif -%}

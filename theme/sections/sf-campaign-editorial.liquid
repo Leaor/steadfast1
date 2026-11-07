@@ -8,6 +8,7 @@
   id="{{ anchor }}"
   class="sf-section sf-campaign-editorial sf-tone-{{ s.tone }} sf-space-{{ s.spacing }} sf-campaign-editorial--{{ s.text_position }}"
   data-sf-section="campaign-editorial"
+  data-sf-module="{{ 'sf-campaign-editorial.js' | asset_url }}"
   {% if s.heading != blank %}aria-labelledby="{{ heading_id }}"{% endif %}
 >
   <div class="sf-campaign-editorial__inner">
@@ -41,7 +42,6 @@
     </div>
   {%- endif -%}
   </div>
-  <script src="{{ 'sf-campaign-editorial.js' | asset_url }}" defer></script>
 </section>
 
 {% schema %}

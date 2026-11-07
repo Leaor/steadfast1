@@ -60,14 +60,13 @@
         {%- endif -%}
       </{{ title_tag }}>
 
-      {%- if s.eyebrow != blank or s.subheading != blank -%}
+      {%- comment -%} The eyebrow labels the campaign line, so it never renders alone. {%- endcomment -%}
+      {%- if s.subheading != blank -%}
         <div class="sf-hero__copy">
           {%- if s.eyebrow != blank -%}
             <p class="sf-hero__eyebrow sf-hero__reveal" style="--_i: 0">{{ s.eyebrow | escape }}</p>
           {%- endif -%}
-          {%- if s.subheading != blank -%}
-            <p class="sf-hero__sub sf-hero__reveal" style="--_i: 1">{{ s.subheading | escape }}</p>
-          {%- endif -%}
+          <p class="sf-hero__sub sf-hero__reveal" style="--_i: 1">{{ s.subheading | escape }}</p>
         </div>
       {%- endif -%}
 
@@ -157,8 +156,8 @@
     { "type": "checkbox", "id": "show_logo", "label": "Show logo", "default": true },
     { "type": "range", "id": "logo_width", "label": "Logo width", "min": 240, "max": 640, "step": 10, "unit": "px", "default": 640, "info": "Width of the textured wordmark box on desktop. Capped at 640 to stay sharp." },
     { "type": "header", "content": "Text" },
-    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "FIXED POINT", "info": "Proposed campaign name. Approve or replace." },
-    { "type": "text", "id": "subheading", "label": "Campaign line", "default": "The figure stays. The light moves.", "info": "Desktop only. One short line. No claims." },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "info": "Optional short label above the campaign line, e.g. a campaign name. Blank by default: the italic line works alone. Shows only with the campaign line." },
+    { "type": "text", "id": "subheading", "label": "Campaign line", "default": "The figure stays. The light moves.", "info": "One short line under the wordmark. No claims. Hidden on short landscape phones." },
     { "type": "header", "content": "Buttons" },
     { "type": "text", "id": "cta_primary_label", "label": "Primary button label", "default": "Explore collection" },
     { "type": "url", "id": "cta_primary_link", "label": "Primary button link", "info": "Blank links to all products." },

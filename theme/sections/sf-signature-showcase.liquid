@@ -28,6 +28,7 @@
 <section
   class="sf-section sf-signature-showcase sf-tone-{{ s.tone }} sf-space-{{ s.spacing }}{% if s.pin_on_desktop %} sf-signature-showcase--pin{% endif %}"
   data-sf-section="signature-showcase"
+  data-sf-module="{{ 'sf-signature-showcase.js' | asset_url }}"
   data-scroll-length="{{ s.scroll_length }}"
   aria-label="{{ 'home.signature.label' | t: title: label_title | escape }}"
 >
@@ -102,7 +103,6 @@
       </ul>
     {%- endif -%}
   </div>
-  <script src="{{ 'sf-signature-showcase.js' | asset_url }}" defer></script>
 </section>
 
 {% schema %}

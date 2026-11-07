@@ -7,12 +7,15 @@
   if (S.modules['signature-showcase']) return;
   S.modules['signature-showcase'] = true;
 
-  /* Detail centre (fractions of sf-signature-hero) and zoom, keyed by the block's asset_crop (DESIGN §10.2). */
+  /* Detail centre (fractions of sf-signature-hero) and zoom, keyed by the block's asset_crop (DESIGN §10.2).
+     Measured on the retouched, hanger-free stills (CD-01). The sleeve label is the garment's LEFT cuff
+     (label rect ≈ 0.330–0.376 × 0.813–0.840): it is the more frontal, legible of the two, and with it at the
+     target point only black lies between the label and the caption column, instead of the pocket. */
   const CROPS = {
     zip: { cx: 0.5, cy: 0.32, z: 2.2, v: 0.6 },
     'chest-logo': { cx: 0.5, cy: 0.51, z: 1.8, v: 0.6 },
     shoulder: { cx: 0.42, cy: 0.3, z: 2.4, v: 0.6 },
-    'cuff-label': { cx: 0.665, cy: 0.83, z: 2.4, v: 0.5 },
+    'cuff-label': { cx: 0.353, cy: 0.826, z: 2.4, v: 0.5 },
     'neck-label': { cx: 0.5, cy: 0.22, z: 2.4, v: 0.6 }
   };
   /* DESIGN §10.2 beat boundaries for the preset's four details; other counts share 0.22–0.74 evenly. */

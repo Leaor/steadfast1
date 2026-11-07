@@ -19,7 +19,7 @@ export const STANDARD_FILTERS = ('abs append at_least at_most capitalize ceil co
 export const SHOPIFY_FILTERS = ('asset_url inline_asset_content shopify_asset_url stylesheet_tag script_tag image_url image_tag ' +
   'video_tag external_video_url external_video_tag model_viewer_tag placeholder_svg_tag money money_with_currency ' +
   'money_without_currency money_without_trailing_zeros t json handleize handle pluralize default_errors format_address ' +
-  'highlight structured_data time_tag url_param_escape item_count_for_variant payment_button').split(' ');
+  'highlight structured_data time_tag url_param_escape item_count_for_variant payment_button preload_tag').split(' ');
 
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const v = (x) => toValue(x);
@@ -300,6 +300,35 @@ export function registerFilters(engine, { themeDir }) {
   engine.registerFilter('shopify_asset_url', (name) => `/cdn/shopify-assets/${String(v(name))}`);
   engine.registerFilter('stylesheet_tag', (url) => `<link href="${esc(v(url))}" rel="stylesheet" type="text/css" media="all" />`);
   engine.registerFilter('script_tag', (url) => `<script src="${esc(v(url))}" type="text/javascript"></script>`);
+  // preload_tag (PLAT-09, https://shopify.dev/docs/api/liquid/filters/preload_tag):
+  //   {{ 'x.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
+  // -> <link href="URL" as="font" type="font/woff2" crossorigin="anonymous" rel="preload">
+  // `as` is required; any other named parameter becomes a <link> attribute in the order given and
+  // rel="preload" comes last (Shopify's output order). The input must be a Shopify-hosted asset URL
+  // (asset_url / shopify_asset_url; global_asset_url is outside the allowed surface), and, like Shopify,
+  // the URL is also added to the response's HTTP Link header (rel=preload).
+  engine.registerFilter('preload_tag', function (url, ...args) {
+    const href = String(v(url) ?? '');
+    const { pos, kw } = splitArgs(args);
+    if (pos.length) throw new Error('preload_tag: only named parameters are accepted (as: ..., attribute: ...)');
+    const K = Object.fromEntries(Object.entries(kw).map(([k, x]) => [k, v(x)]));
+    if (K.as == null || K.as === '') throw new Error('preload_tag: the "as" parameter is required');
+    if (!href) throw new Error('preload_tag: empty URL');
+    if (!/^\/cdn\/(shop\/t\/preview\/assets|shopify-assets)\//.test(href)) {
+      throw new Error(`preload_tag: input must be a URL from asset_url or shopify_asset_url ("${href}")`);
+    }
+    if ('rel' in K) throw new Error('preload_tag: "rel" cannot be overridden (always rel="preload")');
+    const { as, ...rest } = K;
+    const rq = rqOf(this);
+    if (rq) {
+      rq.preloadLinks ||= [];
+      const extra = ['crossorigin', 'type'].filter((k) => rest[k] != null && rest[k] !== false)
+        .map((k) => (rest[k] === true || rest[k] === '' ? `; ${k}` : `; ${k}="${rest[k]}"`)).join('');
+      const h = `<${href}>; rel=preload; as=${as}${extra}`;
+      if (!rq.preloadLinks.includes(h)) rq.preloadLinks.push(h);
+    }
+    return `<link${attrs({ href, as, ...rest })} rel="preload">`;
+  });
   engine.registerFilter('image_url', imageUrlFilter);
   engine.registerFilter('image_tag', imageTagFilter);
   engine.registerFilter('placeholder_svg_tag', (name, cls) => PLACEHOLDER_SVG(v(cls) || `placeholder-svg placeholder-svg--${v(name)}`));

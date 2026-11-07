@@ -18,14 +18,16 @@ const NOTE = 'Sample data derived only from the garments visible in the supplied
 const DESCRIPTION = '<p>Placeholder description. Product details to be confirmed by STEADFAST.</p>';
 
 // Views in display order per handle, with neutral, visible-only alt text.
+// Review r1 item 5: the zip hoodie gallery is front, back + three 4:5 details (chest logo, neck label with zip,
+// sleeve label); MEDIA no longer publishes front-alt / zip / shoulder / hem views.
 const VIEW_ALTS = {
-  front: 'front', back: 'back', 'front-alt': 'front, on black', lifestyle: 'worn, night photograph',
+  front: 'front', back: 'back', lifestyle: 'worn, night photograph',
   'back-charcoal': 'back, washed charcoal', 'back-grey': 'back, washed grey',
-  'detail-chest-logo': 'detail, chest logo', 'detail-zip': 'detail, zip', 'detail-neck-label': 'detail, neck label',
-  'detail-shoulder': 'detail, shoulder', 'detail-cuff-label': 'detail, sleeve label', 'detail-hem': 'detail, hem',
+  'detail-chest-logo': 'detail, chest logo', 'detail-neck-label': 'detail, neck label and zip',
+  'detail-cuff-label': 'detail, sleeve label',
 };
-const VIEW_ORDER = ['front', 'back', 'back-charcoal', 'back-grey', 'lifestyle', 'front-alt', 'detail-chest-logo',
-  'detail-zip', 'detail-neck-label', 'detail-shoulder', 'detail-cuff-label', 'detail-hem'];
+const VIEW_ORDER = ['front', 'back', 'back-charcoal', 'back-grey', 'lifestyle', 'detail-chest-logo',
+  'detail-neck-label', 'detail-cuff-label'];
 
 // size, available?, inventory
 const SIZES = (soldOut = [], low = {}) => ['S', 'M', 'L', 'XL'].map((s) => ({
@@ -133,8 +135,17 @@ function stillRef(base, alt) {
   return files.length ? imageRefFromFiles(files, alt) : null;
 }
 
+// A product fixture view as a collection image (4:5, from MEDIA's manifest fixtures, largest WebP + widths).
+function fixtureRef(handle, view, alt) {
+  const files = manifest.fixtures.filter((f) => f.handle === handle && f.view === view);
+  return files.length ? imageRefFromFiles(files, alt) : null;
+}
+
+// Review r1 item 6: the Hoodies collection image (collection banner, and the category grid / mega-menu tile when
+// their own image is blank) is the 4:5 chest-logo fabric close-up, not the night photo that already leads the
+// black zip hoodie card on the same page (that photo also feeds Bottoms, the lookbook and the editorial stills).
 const collections = [
-  { id: 4001, handle: 'hoodies', title: 'Hoodies', products: [1001, 1004, 1005], image: stillRef('sf-category-hoodies', 'Hoodies') },
+  { id: 4001, handle: 'hoodies', title: 'Hoodies', products: [1001, 1004, 1005], image: fixtureRef('zip-hoodie-washed-blue-grey', 'detail-chest-logo', 'Hoodies') },
   { id: 4002, handle: 'tracksuits', title: 'Tracksuits', products: [1002, 1003], image: stillRef('sf-category-tracksuits', 'Tracksuits') },
   { id: 4003, handle: 'tops', title: 'Tops', products: [], image: null },
   { id: 4004, handle: 'bottoms', title: 'Bottoms', products: [1006], image: stillRef('sf-category-bottoms', 'Bottoms') },

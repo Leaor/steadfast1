@@ -28,6 +28,24 @@
     .shopify-section:has(> .sf-header) { --_reserve: 72px; }
   }
 
+  /* --sf-header-offset: settled height the sticky bar covers (72/56/0); transition `top` with
+     -dur/-ease to move with the bar (ARCHITECTURE §3.4). */
+  html {
+    --sf-header-offset: 56px;
+    --sf-header-offset-dur: calc(var(--sf-dur-base) * var(--sf-motion));
+    --sf-header-offset-ease: var(--sf-ease-standard);
+  }
+  @media (min-width: 990px) {
+    html:has(.sf-header) { --sf-header-offset: 72px; }
+    html:has(.sf-header[data-condensed="true"]) { --sf-header-offset: 56px; }
+  }
+  html:has(.sf-header[data-hidden="true"]) {
+    --sf-header-offset: 0px;
+    --sf-header-offset-dur: calc(var(--sf-dur-fast) * var(--sf-motion));
+    --sf-header-offset-ease: var(--sf-ease-in-out);
+  }
+  html:has(.sf-header[data-sticky="none"]), html:not(:has(.sf-header)) { --sf-header-offset: 0px; }
+
   .sf-header {
     --_bar-h: 56px;
     --_fg: var(--sf-fg);
@@ -271,9 +289,9 @@
   /* Closing: opacity 1 → 0 in --sf-dur-fast, no stagger (DESIGN §8.3). */
   .sf-nav__item.is-closing .sf-mega { clip-path: inset(0); opacity: 0; }
 
-  /* Panel = Section E's index device (DESIGN §8.3 E): Spectral rows in cols 1–5, an optional quiet
-     label column in cols 6–8, a 3:4 stage in cols 9–12. Capped near 440 px tall. */
+  /* Panel (DESIGN §7.2): rows cols 1–5, 4:5 stage from col 7 (9 with labels), rows stretch to it. */
   .sf-mega__inner {
+    --_mega-h: min(420px, 100svh - var(--sf-header-h, 72px) - 2 * var(--sf-space-7) - 48px);
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
     column-gap: var(--sf-grid-gap);
@@ -300,15 +318,24 @@
 
   .sf-mega__index {
     grid-column: 1 / span 5;
-    max-height: calc(6 * 56px + 1px);
+    display: flex;
+    flex-direction: column;
+    min-height: var(--_mega-h);
+    max-height: max(var(--_mega-h), calc(6 * 56px + 1px));
     overflow-y: auto;
     overscroll-behavior: contain;
     border-top: var(--sf-hairline) solid var(--sf-line);
   }
-  .sf-mega--no-stage .sf-mega__index { grid-column: 1 / span 6; }
-  .sf-mega__row { border-bottom: var(--sf-hairline) solid var(--sf-line); }
+  .sf-mega--no-stage .sf-mega__index { grid-column: 1 / span 6; min-height: 0; }
+  .sf-mega__row {
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 auto;
+    border-bottom: var(--sf-hairline) solid var(--sf-line);
+  }
   .sf-mega__link {
     display: flex;
+    flex: 1 0 auto;
     align-items: center;
     min-height: 55px;
     color: var(--sf-fg-subtle);
@@ -345,13 +372,13 @@
     .sf-mega__link:hover, .sf-mega__sublink:hover, .sf-mega__label-link:hover { color: var(--sf-fg); }
   }
 
-  .sf-mega__stage-col { grid-column: 9 / span 4; justify-self: end; display: grid; gap: var(--sf-space-3); }
+  .sf-mega__stage-col { grid-column: 7 / span 6; display: grid; justify-items: start; gap: var(--sf-space-3); }
+  .sf-mega__secondary ~ .sf-mega__stage-col { grid-column: 9 / span 4; }
   .sf-mega__stage {
     position: relative;
     display: block;
-    height: calc(6 * 56px + 1px);
-    aspect-ratio: 3 / 4;
-    max-width: 100%;
+    width: min(100%, calc(var(--_mega-h) * 0.8));
+    aspect-ratio: 4 / 5;
     overflow: hidden;
     background: var(--sf-bg-sunken);
   }

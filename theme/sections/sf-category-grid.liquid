@@ -10,6 +10,7 @@
 <section
   class="sf-section sf-category-grid sf-category-grid--{{ s.layout }} sf-tone-{{ s.tone }} sf-space-{{ s.spacing }}"
   data-sf-section="category-grid"
+  data-sf-module="{{ 'sf-category-grid.js' | asset_url }}"
   aria-labelledby="{{ heading_id }}"
 >
   <div class="sf-container">
@@ -81,7 +82,6 @@
       {%- endif -%}
     </sf-category-index>
   </div>
-  <script src="{{ 'sf-category-grid.js' | asset_url }}" defer></script>
 </section>
 
 {% schema %}

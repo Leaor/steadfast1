@@ -10,15 +10,18 @@
     width: 100%;
     aspect-ratio: 4 / 5;
     overflow: hidden;
-    background: var(--sf-bg-sunken);
+    /* Same field as the section, so the frame itself never draws a rectangle around the masked still. */
+    background: var(--sf-bg);
   }
 
-  /* Aperture (motion "full", armed by JS): a vertical shaft only, inset(0 --_ap%) → inset(0). Two feathers
-     ride the moving side edges (translate, composited) so the shaft has soft edges, and fade out at the end. */
+  /* Aperture (motion "full", armed by JS): a vertical shaft only, inset(0 --_ap px) → inset(0). Two feathers
+     ride the moving side edges (translate, composited) so the shaft has soft edges, and fade out at the end.
+     --_ap is in whole CSS px (JS snaps it): at a fractional position both the clipped image and the clipped
+     feather are anti-aliased on the same edge pixel, and the image leaks through as a 1 px hairline. */
   .sf-campaign-editorial.is-aperture .sf-campaign-editorial__frame {
     --_ap: 0;
     --_feather: 0;
-    clip-path: inset(0% calc(var(--_ap) * 1%));
+    clip-path: inset(0 calc(var(--_ap) * 1px));
   }
 
   .sf-campaign-editorial.is-aperture .sf-campaign-editorial__frame::before,
@@ -33,18 +36,37 @@
 
   .sf-campaign-editorial.is-aperture .sf-campaign-editorial__frame::before {
     background: linear-gradient(to right, var(--sf-bg) 0, transparent 96px);
-    translate: calc(var(--_ap) * 1%) 0;
+    translate: calc(var(--_ap) * 1px) 0;
   }
 
   .sf-campaign-editorial.is-aperture .sf-campaign-editorial__frame::after {
     background: linear-gradient(to left, var(--sf-bg) 0, transparent 96px);
-    translate: calc(var(--_ap) * -1%) 0;
+    translate: calc(var(--_ap) * -1px) 0;
   }
 
+  /* Edge mask (CD-05, complements the feather baked into the still): the still dissolves into the field on all
+     four sides, so no straight edge shows at any point of the aperture. The outer 6.5 % of each side is fully
+     transparent because the scrub scales the media 1.15 → 1 and the frame (overflow hidden) cuts it at
+     (1 − 1/1.15) / 2 ≈ 6.5 % in its own coordinates; the eased ramps after that have no visible start line.
+     Static, so it is painted once with the layer; the side ramps also swallow the last few % of the shaft's
+     clip edges while the feathers fade out. */
   .sf-campaign-editorial__media {
     position: absolute;
     inset: 0;
     transform-origin: 50% 50%;
+    --_mask-y: linear-gradient(to bottom,
+      transparent 0, transparent 6.5%, rgb(0 0 0 / .1) 9%, rgb(0 0 0 / .32) 12%, rgb(0 0 0 / .6) 15.5%,
+      rgb(0 0 0 / .84) 19%, #000 23%, #000 76%, rgb(0 0 0 / .84) 80%, rgb(0 0 0 / .6) 83.5%,
+      rgb(0 0 0 / .32) 87%, rgb(0 0 0 / .1) 90.5%, transparent 93.5%, transparent 100%);
+    --_mask-x: linear-gradient(to right,
+      transparent 0, transparent 3%, rgb(0 0 0 / .2) 6%, rgb(0 0 0 / .55) 9%, rgb(0 0 0 / .85) 12%, #000 15%,
+      #000 85%, rgb(0 0 0 / .85) 88%, rgb(0 0 0 / .55) 91%, rgb(0 0 0 / .2) 94%, transparent 97%, transparent 100%);
+    -webkit-mask-image: var(--_mask-y), var(--_mask-x);
+    -webkit-mask-composite: source-in;
+    mask-image: var(--_mask-y), var(--_mask-x);
+    mask-composite: intersect;
+    mask-size: 100% 100%;
+    mask-repeat: no-repeat;
   }
 
   .sf-campaign-editorial__img { position: absolute; inset: 0; }

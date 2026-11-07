@@ -50,6 +50,7 @@
     "empty": "This collection is empty.",
     "empty_hint": "New pieces will appear here when they are added.",
     "all_collections": "Collections",
+    "all_title": "The collection",
     "products_count": {
       "one": "{{ count }} piece",
       "other": "{{ count }} pieces"

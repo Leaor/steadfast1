@@ -7,6 +7,9 @@
 {%- enddoc -%}
 {%- liquid
   assign og_title = page_title | default: shop.name
+  if request.page_type == 'collection' and collection.handle == 'all'
+    assign og_title = 'collections.all_title' | t
+  endif
   assign og_url = canonical_url | default: request.origin
   assign og_type = 'website'
   assign og_description = page_description | default: shop.description | default: shop.name

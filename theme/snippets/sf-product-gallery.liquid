@@ -18,15 +18,24 @@
   assign g_layout = layout | default: 'stacked'
   assign featured = product.selected_or_first_available_variant.featured_media | default: product.featured_media
   assign total = product.media.size
-  assign g_sizes = '(min-width: 990px) 58vw, 100vw'
+  assign g_sizes = '(min-width: 990px) 53vw, (min-width: 750px) 72vw, 100vw'
   if g_layout == 'quick-view'
     assign g_sizes = '(min-width: 990px) 560px, 100vw'
   endif
-  # Desktop stacked: the first 2 media (front, back) are full-column 4:5 wells; the rest sit in a
-  # 2-up grid at their own ratio (ARCHITECTURE §6.2 sizes), so detail crops display at about 1x.
+  # Desktop stacked: the first 2 media (front, back) are full-column 4:5 wells (measured 52.5vw at
+  # 1024–1440); the rest sit in a 2-up grid at their own ratio (ARCHITECTURE §6.2 sizes), so detail
+  # crops display at about 1x. 750–989: rail items are 72% wide (sf-product.css).
   assign detail_sizes = g_sizes
   if g_layout == 'stacked'
-    assign detail_sizes = '(min-width: 990px) 26vw, 100vw'
+    assign detail_sizes = '(min-width: 990px) 26vw, (min-width: 750px) 72vw, 100vw'
+  endif
+  assign detail_count = total | minus: 2
+  assign odd_details = false
+  if detail_count > 0
+    assign detail_mod = detail_count | modulo: 2
+    if detail_mod == 1
+      assign odd_details = true
+    endif
   endif
   assign first_loading = 'eager'
   assign first_priority = 'high'
@@ -62,11 +71,18 @@
         {%- else -%}
           {%- liquid
             assign item_sizes = g_sizes
+            assign item_wide = false
             if position > 2
               assign item_sizes = detail_sizes
             endif
+            # Stacked desktop: with an odd number of detail media the first one spans both columns, so the
+            # 2-up grid below it never ends on an empty cell.
+            if g_layout == 'stacked' and position == 3 and odd_details
+              assign item_sizes = g_sizes
+              assign item_wide = true
+            endif
           -%}
-          <li class="sf-gallery__item" data-media-id="{{ media.id }}" data-index="{{ position }}">
+          <li class="sf-gallery__item{% if item_wide %} sf-gallery__item--wide{% endif %}" data-media-id="{{ media.id }}" data-index="{{ position }}">
             {%- render 'sf-product-media', media: media, product: product, index: position, loading: 'lazy', zoom: zoom, video_loop: video_loop, sizes: item_sizes -%}
           </li>
         {%- endif -%}

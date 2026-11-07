@@ -63,6 +63,7 @@
   },
   "collections": {
     "all_collections": "Collections",
+    "all_title": "The collection",
     "density": "Grid density",
     "density_large": "Larger images",
     "density_small": "More per row",

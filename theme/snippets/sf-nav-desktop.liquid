@@ -50,7 +50,7 @@
             {%- capture frames -%}
               {%- if frame_count == 1 -%}
                 <span class="sf-mega__frame is-active" data-sf-mega-frame="0" {{ promo.shopify_attributes }}>
-                  {%- render 'sf-image', image: promo.settings.image, sizes: '(min-width: 990px) 280px, 1px', widths: '360,540,720', ratio: 0.75, crop: 'center', class: 'sf-mega__img', alt: '' -%}
+                  {%- render 'sf-image', image: promo.settings.image, sizes: '(min-width: 990px) 336px, 1px', widths: '360,540,720', ratio: 0.8, crop: 'center', class: 'sf-mega__img', alt: '' -%}
                 </span>
               {%- endif -%}
               {%- for child in link.links -%}
@@ -74,9 +74,9 @@
                 {%- if frame_idx > -1 -%}
                   <span class="sf-mega__frame{% if frame_idx == 0 %} is-active{% endif %}" data-sf-mega-frame="{{ frame_idx }}">
                     {%- if child_has_img -%}
-                      {%- render 'sf-image', image: child.object.image, sizes: '(min-width: 990px) 280px, 1px', widths: '360,540,720', ratio: 0.75, crop: 'center', class: 'sf-mega__img', alt: '' -%}
+                      {%- render 'sf-image', image: child.object.image, sizes: '(min-width: 990px) 336px, 1px', widths: '360,540,720', ratio: 0.8, crop: 'center', class: 'sf-mega__img', alt: '' -%}
                     {%- else -%}
-                      {%- render 'sf-image', asset: child_asset, sizes: '(min-width: 990px) 280px, 1px', class: 'sf-mega__img', alt: '' -%}
+                      {%- render 'sf-image', asset: child_asset, sizes: '(min-width: 990px) 336px, 1px', class: 'sf-mega__img', alt: '' -%}
                     {%- endif -%}
                   </span>
                 {%- endif -%}

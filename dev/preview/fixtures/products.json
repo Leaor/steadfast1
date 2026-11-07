@@ -176,25 +176,6 @@
           "id": 3003,
           "media_type": "image",
           "position": 3,
-          "alt": "Zip hoodie, washed blue-grey, front, on black",
-          "image": {
-            "base": "products/zip-hoodie-washed-blue-grey--front-alt",
-            "ext": "webp",
-            "widths": [
-              400,
-              800,
-              1200,
-              1600
-            ],
-            "width": 1600,
-            "height": 2000,
-            "alt": "Zip hoodie, washed blue-grey, front, on black"
-          }
-        },
-        {
-          "id": 3004,
-          "media_type": "image",
-          "position": 4,
           "alt": "Zip hoodie, washed blue-grey, detail, chest logo",
           "image": {
             "base": "products/zip-hoodie-washed-blue-grey--detail-chest-logo",
@@ -204,63 +185,31 @@
               800
             ],
             "width": 800,
-            "height": 800,
+            "height": 1000,
             "alt": "Zip hoodie, washed blue-grey, detail, chest logo"
+          }
+        },
+        {
+          "id": 3004,
+          "media_type": "image",
+          "position": 4,
+          "alt": "Zip hoodie, washed blue-grey, detail, neck label and zip",
+          "image": {
+            "base": "products/zip-hoodie-washed-blue-grey--detail-neck-label",
+            "ext": "webp",
+            "widths": [
+              400,
+              480
+            ],
+            "width": 480,
+            "height": 600,
+            "alt": "Zip hoodie, washed blue-grey, detail, neck label and zip"
           }
         },
         {
           "id": 3005,
           "media_type": "image",
           "position": 5,
-          "alt": "Zip hoodie, washed blue-grey, detail, zip",
-          "image": {
-            "base": "products/zip-hoodie-washed-blue-grey--detail-zip",
-            "ext": "webp",
-            "widths": [
-              400,
-              800
-            ],
-            "width": 800,
-            "height": 800,
-            "alt": "Zip hoodie, washed blue-grey, detail, zip"
-          }
-        },
-        {
-          "id": 3006,
-          "media_type": "image",
-          "position": 6,
-          "alt": "Zip hoodie, washed blue-grey, detail, neck label",
-          "image": {
-            "base": "products/zip-hoodie-washed-blue-grey--detail-neck-label",
-            "ext": "webp",
-            "widths": [
-              400
-            ],
-            "width": 400,
-            "height": 400,
-            "alt": "Zip hoodie, washed blue-grey, detail, neck label"
-          }
-        },
-        {
-          "id": 3007,
-          "media_type": "image",
-          "position": 7,
-          "alt": "Zip hoodie, washed blue-grey, detail, shoulder",
-          "image": {
-            "base": "products/zip-hoodie-washed-blue-grey--detail-shoulder",
-            "ext": "webp",
-            "widths": [
-              400
-            ],
-            "width": 400,
-            "height": 400,
-            "alt": "Zip hoodie, washed blue-grey, detail, shoulder"
-          }
-        },
-        {
-          "id": 3008,
-          "media_type": "image",
-          "position": 8,
           "alt": "Zip hoodie, washed blue-grey, detail, sleeve label",
           "image": {
             "base": "products/zip-hoodie-washed-blue-grey--detail-cuff-label",
@@ -269,25 +218,8 @@
               400
             ],
             "width": 400,
-            "height": 400,
+            "height": 500,
             "alt": "Zip hoodie, washed blue-grey, detail, sleeve label"
-          }
-        },
-        {
-          "id": 3009,
-          "media_type": "image",
-          "position": 9,
-          "alt": "Zip hoodie, washed blue-grey, detail, hem",
-          "image": {
-            "base": "products/zip-hoodie-washed-blue-grey--detail-hem",
-            "ext": "webp",
-            "widths": [
-              400,
-              800
-            ],
-            "width": 800,
-            "height": 800,
-            "alt": "Zip hoodie, washed blue-grey, detail, hem"
           }
         }
       ],
@@ -368,7 +300,7 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3010
+          "featured_media_id": 3006
         },
         {
           "id": 2006,
@@ -388,7 +320,7 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3010
+          "featured_media_id": 3006
         },
         {
           "id": 2007,
@@ -408,7 +340,7 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3010
+          "featured_media_id": 3006
         },
         {
           "id": 2008,
@@ -428,12 +360,12 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3010
+          "featured_media_id": 3006
         }
       ],
       "media": [
         {
-          "id": 3010,
+          "id": 3006,
           "media_type": "image",
           "position": 1,
           "alt": "Piped tracksuit, black speckle, front",
@@ -450,7 +382,7 @@
           }
         },
         {
-          "id": 3011,
+          "id": 3007,
           "media_type": "image",
           "position": 2,
           "alt": "Piped tracksuit, black speckle, back",
@@ -544,7 +476,7 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3012
+          "featured_media_id": 3008
         },
         {
           "id": 2010,
@@ -564,7 +496,7 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3012
+          "featured_media_id": 3008
         },
         {
           "id": 2011,
@@ -584,7 +516,7 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3012
+          "featured_media_id": 3008
         },
         {
           "id": 2012,
@@ -604,12 +536,12 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3012
+          "featured_media_id": 3008
         }
       ],
       "media": [
         {
-          "id": 3012,
+          "id": 3008,
           "media_type": "image",
           "position": 1,
           "alt": "Gothic-arch tracksuit, stone, back",
@@ -708,7 +640,7 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3013
+          "featured_media_id": 3009
         },
         {
           "id": 2014,
@@ -728,7 +660,7 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3013
+          "featured_media_id": 3009
         },
         {
           "id": 2015,
@@ -748,7 +680,7 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3013
+          "featured_media_id": 3009
         },
         {
           "id": 2016,
@@ -768,7 +700,7 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3014
+          "featured_media_id": 3010
         },
         {
           "id": 2017,
@@ -788,7 +720,7 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3014
+          "featured_media_id": 3010
         },
         {
           "id": 2018,
@@ -808,12 +740,12 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3014
+          "featured_media_id": 3010
         }
       ],
       "media": [
         {
-          "id": 3013,
+          "id": 3009,
           "media_type": "image",
           "position": 1,
           "alt": "Gothic hoodie, back, washed charcoal",
@@ -830,7 +762,7 @@
           }
         },
         {
-          "id": 3014,
+          "id": 3010,
           "media_type": "image",
           "position": 2,
           "alt": "Gothic hoodie, back, washed grey",
@@ -925,7 +857,7 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3015
+          "featured_media_id": 3011
         },
         {
           "id": 2020,
@@ -945,7 +877,7 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3015
+          "featured_media_id": 3011
         },
         {
           "id": 2021,
@@ -965,7 +897,7 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3015
+          "featured_media_id": 3011
         },
         {
           "id": 2022,
@@ -985,12 +917,12 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3015
+          "featured_media_id": 3011
         }
       ],
       "media": [
         {
-          "id": 3015,
+          "id": 3011,
           "media_type": "image",
           "position": 1,
           "alt": "Zip hoodie, black, worn, night photograph",
@@ -1086,7 +1018,7 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3016
+          "featured_media_id": 3012
         },
         {
           "id": 2024,
@@ -1106,7 +1038,7 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3016
+          "featured_media_id": 3012
         },
         {
           "id": 2025,
@@ -1126,7 +1058,7 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3016
+          "featured_media_id": 3012
         },
         {
           "id": 2026,
@@ -1146,12 +1078,12 @@
             "max": null,
             "increment": 1
           },
-          "featured_media_id": 3016
+          "featured_media_id": 3012
         }
       ],
       "media": [
         {
-          "id": 3016,
+          "id": 3012,
           "media_type": "image",
           "position": 1,
           "alt": "Wide sweatpants, black, worn, night photograph",

@@ -277,7 +277,15 @@
       }, { passive: true, signal: this._ac.signal });
       this.addEventListener('click', this._onClick.bind(this), sig);
       this._off = S.bus.on('variant:change', this._onVariant.bind(this));
+      // Rails keep media 3+ display:none (sf-product.css) so their lazy images are not fetched before
+      // the visitor uses the gallery; the first touch, scroll, focus or step reveals them.
+      if (!this.hasAttribute('data-primed')) {
+        var prime = function () { self._prime(); };
+        ['pointerdown', 'focusin', 'keydown'].forEach(function (t) { self.addEventListener(t, prime, { passive: true, once: true, signal: self._ac.signal }); });
+        this.list.addEventListener('scroll', prime, { passive: true, once: true, signal: this._ac.signal });
+      }
     }
+    _prime() { if (!this.hasAttribute('data-primed')) this.setAttribute('data-primed', ''); }
     disconnectedCallback() {
       if (this._ac) this._ac.abort();
       if (this._off) this._off();
@@ -301,6 +309,7 @@
     }
     /* Previous/Next on rails: keyboard- and mouse-reachable without a horizontal scroll gesture. */
     step(dir) {
+      this._prime();
       var items = this.items;
       var i = Math.max(0, Math.min(items.length - 1, this._index() + dir));
       this.list.scrollTo({ left: items[i].offsetLeft - this.list.offsetLeft, behavior: smooth() });
@@ -373,6 +382,7 @@
       var id = String(mediaId);
       var item = this.list.querySelector('[data-media-id="' + id + '"]');
       if (!item) return;
+      this._prime();
       var first = this.list.firstElementChild;
       this.items.forEach(function (el) { el.classList.toggle('is-active', el === item); });
       var self = this;
@@ -512,11 +522,22 @@
       if (!url || this.dataset.loaded) return;
       var self = this;
       // Observe the section root: while pending it is a 1px box (this element is display: none).
+      // Fetch when it is really in view, or within 400px of it once the visitor has scrolled: on a
+      // phone the pending box sits about one screen down, and a 400px look-ahead at load time would
+      // spend ~200 KB of recommendation images before the first scroll (ARCHITECTURE §6.1 product).
       var target = this.closest('[data-sf-related-root]') || this;
-      this._stop = S.inView(target, function () { self._load(url); }, { rootMargin: '0px 0px 400px 0px' });
+      var load = function () { self._load(url); };
+      var stops = [S.inView(target, load, { rootMargin: '0px' })];
+      var onScroll = function () { stops.push(S.inView(target, load, { rootMargin: '0px 0px 400px 0px' })); };
+      window.addEventListener('scroll', onScroll, { passive: true, once: true });
+      stops.push(function () { window.removeEventListener('scroll', onScroll); });
+      this._stop = function () { stops.forEach(function (f) { if (typeof f === 'function') f(); }); };
     }
     disconnectedCallback() { if (this._stop) this._stop(); }
     _load(url) {
+      if (this._loading) return;
+      this._loading = true;
+      if (this._stop) this._stop();
       var self = this;
       var root = this.closest('[data-sf-related-root]');
       fetch(url, { credentials: 'same-origin' }).then(function (r) {

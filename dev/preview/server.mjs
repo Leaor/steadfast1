@@ -280,7 +280,9 @@ async function respondHTMLRoute(req, res, url, sess, { formStates = {}, statusOv
   }
   const html = await rq.renderer.renderPage();
   reportRequestProblems(rq);
-  return send(res, status, injectChrome(html), { ...baseHeaders, 'X-Preview-Liquid-Errors': String(rq.errors.length) });
+  // preload_tag adds each URL to the HTTP Link header as well (Shopify semantics, PLAT-09).
+  const link = rq.preloadLinks?.length ? { Link: rq.preloadLinks.join(', ') } : {};
+  return send(res, status, injectChrome(html), { ...baseHeaders, ...link, 'X-Preview-Liquid-Errors': String(rq.errors.length) });
 }
 
 /** Render named sections in the context of another URL (cart Ajax `sections` + `sections_url`). */

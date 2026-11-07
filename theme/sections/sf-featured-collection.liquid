@@ -36,6 +36,7 @@
 <section
   class="sf-section sf-featured-collection sf-tone-{{ s.tone }} sf-space-{{ s.spacing }}"
   data-sf-section="featured-collection"
+  data-sf-module="{{ 'sf-featured-collection.js' | asset_url }}"
   aria-labelledby="{{ heading_id }}"
 >
   <div class="sf-container sf-featured-collection__head">
@@ -104,7 +105,6 @@
       </div>
     {%- endif -%}
   </sf-product-rail>
-  <script src="{{ 'sf-featured-collection.js' | asset_url }}" defer></script>
 </section>
 
 {% schema %}

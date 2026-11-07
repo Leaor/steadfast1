@@ -217,13 +217,15 @@ Rules:
 
 | Context | Asset | Box width | Letter width that results |
 |---|---|---|---|
-| Header ≥990 | SVG, `color: var(--sf-fg)` | `logo_width_desktop` = **148px** (condensed 120px) | same |
+| Header ≥990, full height (72px bar) | **Textured raster** (F9; only with the bundled mark, no merchant upload, and `logo_width_desktop` ≥ 148) | `logo_width_desktop / 0.9215` = **161px** (`sizes` = that px) | **148px** |
+| Header ≥990, condensed (56px bar) | SVG, `color: var(--sf-fg)`; crossfades with the textured box over `--sf-dur-base` | 148px scaled to **120px** | same |
 | Header <990 | SVG | `logo_width_mobile` = **112px** | same |
+| Mobile menu bar, menu drawer, any header with a merchant logo | SVG (or the merchant image) | as the header row | same |
 | Hero (Section A) desktop | Textured raster | **`min(44vw, 640px)`** (hard cap 640) | ≤ 590px |
 | Hero mobile (<990) | Textured raster | **`min(84vw, 640px)`** | ≈ 77vw |
 | Brand story (Section F) <990 | Textured raster | `min(84vw, 880px)` | |
 | Brand story (Section F) ≥990 | **Layered lockup**: streak-only raster + SVG letters on top | **`min(60vw, 880px)`** (hard cap 880) | ≤ 811px |
-| Footer bottom bar | SVG | 148px | same |
+| Footer brand block | **Textured raster** (F9) | **161px** (`sizes: 161px`) | **148px** |
 | Next-drop tile | SVG at 30% opacity | 40% of the tile | same |
 | Film logo reveal (DOM) | = hero size | = hero | |
 
@@ -234,7 +236,7 @@ Rules:
   - SVG: H = 0.138 × box width (154/1115). Header 148px → H 20.4px; 3H = 61px fits the 72px header. Condensed 120px → 50px of 56. Mobile 112px → 46px of 56.
   - Textured: H = 0.1273 × box width. The streaks already cover most of it, so the **minimum margin around the textured box** is 0.083 × box width left and right and 0.017 × box width top and bottom. Streaks may overlap neighbours only in the hero and Section F.
 - Never recolour except bone (or `currentColor` = bone) on black. Never outline, add effects, rotate, stretch, or crop the letters.
-- Below 200px rendered width, always use the traced SVG. The texture turns to mush at small sizes.
+- **Small-size rule (revised, F9).** Brief §2 asks to keep the distressed texture wherever the mark is the brand signature, so the texture is used down to **148px of letters** (161px box): the full-height desktop header and the footer. Below that (condensed header 120px, mobile header 112px, mobile menu bar, drop tile, empty collection tiles) always use the traced SVG; the texture turns to mush there. At 161 CSS px the 600w rendition serves DPR ≤ 3 (≤ 483 device px), well inside the 1.5× resolution rule.
 - Hero instance: inside the `h1`, `alt="{{ shop.name }}"`. Header logo: `<a aria-label="{{ shop.name }} home">`.
 
 ---
@@ -293,7 +295,7 @@ Full-bleed media (hero, Section D, showcase stage, category tiles on mobile) ign
 | Category stage and tiles (Section E) | 4:5 | |
 | Signature showcase stage | full viewport (desktop); 4:5 tiles (mobile) | |
 | Collection banner (optional) | 21:9 desktop, 4:5 mobile | |
-| Mega-menu tiles | 3:4 | |
+| Mega-menu stage | **4:5** (revision round 1; was 3:4) | ~336 × 420 px at ≥ 1024, the same ratio as the category stills it shows (Section E) |
 
 ### 5.2 Product photo crops from the supplied stills (media pipeline and fixtures)
 
@@ -416,7 +418,7 @@ The black separator keeps the ring at ≥ 3:1 over imagery and next to bone butt
 
 ### 7.2 Mega menu (desktop, `SHOP`)
 - Opens on click, Enter or Space, or on hover with a 120ms intent delay. Closes on Esc, click outside, or 200ms after the pointer leaves. The trigger is a `<button aria-expanded>`; disclosure pattern, not ARIA menu roles.
-- Full width under the header, bg `--sf-bg`, hairline top, padding `--sf-space-8` × gutter. Grid: cols 1–3 `CATEGORIES` (Hoodies, Tracksuits, Tops, Bottoms, New arrivals) at `--sf-text-xs`, 18px row gap. Cols 4–6 `COLLECTIONS` (merchant menu). Cols 7–12: up to two 3:4 tiles from the header's `menu_promo` blocks, name in `--sf-text-2xs` under each.
+- Full width under the header, bg `--sf-bg`, hairline top, padding `--sf-space-7` × gutter. **As built (Section E's index device, CD-11):** cols 1–5 the category rows in Spectral `--sf-display-sm` with hairlines; an optional quiet `COLLECTIONS` label column (merchant menu) in cols 6–8; the **stage starts directly after the list**: col 7 (col 9 when the label column is present), **4:5, ~420px tall** (`min(420px, viewport − header − padding)`), showing the hovered / focused row's still (or a `menu_promo` block's image first, its heading in `--sf-text-2xs` under it). The index rows stretch to the stage height, so list and image read as one block; no empty half-panel between them (revision round 1, checked at 1024 and 1440).
 - Scrim under the panel covers the page (black 50%).
 
 ### 7.3 Mobile menu
@@ -536,7 +538,7 @@ The black separator keeps the ring at ≥ 3:1 over imagery and next to bone butt
 
 ### 8.3 Choreography by section and component
 
-**A. Hero (intro eligible: first visit in the session, motion `full` or `subtle`, not save-data).** The store is never behind the film: from the first cut (film `t ≥ 2.2s`) the CTA row is present at opacity 0.8 (1 on hover or focus) and clickable; before that it has `pointer-events: none`. Only the wordmark waits for beat 8, and the eyebrow and line for beat 9. The hero uses **no GSAP**: CSS transitions/keyframes keyed off ARCHITECTURE's `data-state` plus two beat classes the hero script sets from `timeupdate`. Film details: `FILM-STORYBOARD.md`.
+**A. Hero (intro eligible: first visit in the session, motion `full` or `subtle`, not save-data).** The store is never behind the film: from the first cut (film `t ≥ 2.2s`) the CTA row fades in once (opacity only, 500 ms, no translate) straight to full strength (opacity 1, the primary in its cream token, never a dimmed state) and is clickable; it has `pointer-events: none` only while fully invisible, before that cut. Only the wordmark waits for beat 8, and the eyebrow and line for beat 9. The hero uses **no GSAP**: CSS transitions/keyframes keyed off ARCHITECTURE's `data-state` plus two beat classes the hero script sets from `timeupdate`. Film details: `FILM-STORYBOARD.md`.
 - `t = 0` (`data-state="playing"`): the header is already visible in its minimal transparent state (§7.1): nav, search, account and cart usable, logo slot empty. The film plays inside the black stage. The hero content (wordmark `h1`, eyebrow, campaign line, CTAs) is **in the DOM and focusable**, visually at `opacity: 0` (never `visibility: hidden` or `display: none`). `SKIP INTRO` fades to 1 at t = 0.8s (`--sf-dur-slow`).
 - **Ending the intro early.** Any of these ends it at once: `SKIP INTRO`; **focus entering the hero content** (e.g. tabbing to a CTA); **any keydown**; **any scroll** of the page (or wheel/touchmove); the pause toggle. The hero jumps to the end of beat 9 in `--sf-dur-base`: film opacity → 0, end still/loop visible, wordmark at rest, eyebrow/line/CTAs visible. It writes `sf:intro-seen`. Nothing blocks scrolling at any time. (ARCHITECTURE's skip behaviour, focus to the primary CTA, applies to `SKIP INTRO`.)
 - `t = duration − 0.4s` (12.4s for the bundled 12.8s edit; the film always ends on ≥ 0.4s of black): **beat 8** (`.is-beat-8`). The hero wordmark appears centred with the light sweep (`--sweep` −30%→130% over `--sf-dur-cinematic`, `--sf-ease-in-out`), opacity 0→1 over the first 500ms, scale 1.035→1 over 1600ms `--sf-ease-out`.
@@ -548,7 +550,7 @@ The black separator keeps the ring at ≥ 3:1 over imagery and next to bone butt
 
 **C. Signature showcase:** a pinned scroll timeline (§10).
 
-**D. Campaign editorial:** *aperture open*, scrubbed: `start: "top 90%", end: "top 15%", scrub: 0.8`. A **vertical shaft only**: `clip-path: inset(0 30%)` → `inset(0)` on the frame (never inset top or bottom, so no horizontal edge crosses the haze); the inner image scales 1.15→1.00. The two side edges are feathered: 96px gradients from the section background to transparent ride the moving edges (translate) and fade to 0 over the last 30% of the scrub. Mobile: `inset(0 14%)` → `inset(0)`. If GSAP arrives after the section has already crossed `top 90%` (anchor jump, fast fling, slow network), the frame and text stay in their final state; nothing on screen shrinks or re-hides (the same rule applies to the brand-story sweep at `top 75%`). The text block reveals once at `start: "top 40%"` with `clip-path: inset(0 0 100% 0)` → `inset(0)`, 900ms `--sf-ease-out`. No parallax.
+**D. Campaign editorial:** *aperture open*, scrubbed: `start: "top 90%", end: "top 15%", scrub: 0.8`. A **vertical shaft only**: `clip-path: inset(0 30%)` → `inset(0)` (applied in whole px, §5 D) on the frame (never inset top or bottom, so no horizontal edge crosses the haze); the inner image scales 1.15→1.00. The two side edges are feathered: 96px gradients from the section background to transparent ride the moving edges (translate) and fade to 0 over the last 30% of the scrub. Mobile: `inset(0 14%)` → `inset(0)`. If GSAP arrives after the section has already crossed `top 90%` (anchor jump, fast fling, slow network), the frame and text stay in their final state; nothing on screen shrinks or re-hides (the same rule applies to the brand-story sweep at `top 75%`). The text block reveals once at `start: "top 40%"` with `clip-path: inset(0 0 100% 0)` → `inset(0)`, 900ms `--sf-ease-out`. No parallax.
 
 **E. Shop by category (desktop index):** hover or focus on a name changes it washed-grey → bone (`--sf-dur-instant`). The stage crossfades to that category's image (opacity 480ms `--sf-ease-in-out`) and the incoming image scales 1.03→1 (900ms `--sf-ease-out`). Mobile tiles: press state only (overlay +0.15, `--sf-dur-instant`).
 
@@ -625,7 +627,7 @@ Desktop (≥990):
 │ SHOP  CAMPAIGN                    (logo slot empty)       SEARCH ACCOUNT CART (0) │ header 72, transparent, visible from t=0
 │                                    ┊░░░░░░░░░┊                                │
 │                                    ┊░ aper- ░┊                                │ loop: 16:9 file, contain on black,
-│ FIXED POINT                        ┊░ ture  ░┊                                │ aperture centred
+│ (eyebrow, blank by default)        ┊░ ture  ░┊                                │ aperture centred
 │ The figure stays. The light moves. ┊░ loop  ░┊                                │
 │                                    ┊░░░░░░░░░┊                                │
 │                 ▓▓▓  S T E Λ D F Λ S T  (wordmark h1, textured) ▓▓▓           │ wordmark centre at y 66%
@@ -633,7 +635,7 @@ Desktop (≥990):
 │ [ EXPLORE COLLECTION ]   VIEW THE CAMPAIGN                            ‖ PAUSE │ bottom row at 56px
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
-- Left text column starts at the gutter, cols 1–3, at y 44%: the **eyebrow** (`--sf-text-2xs`, washed-grey) "FIXED POINT", then 12px below it the **campaign line** (Spectral 300 italic, `--sf-text-xl`, bone) "The figure stays. The light moves."
+- Left text column starts at the gutter, cols 1–3, at y 44%: the optional **eyebrow** (`--sf-text-2xs`, washed-grey; **blank by default**, revision round 1: a lone all-caps label read as an orphan), then 12px below it the **campaign line** (Spectral 300 italic, `--sf-text-xl`, bone) "The figure stays. The light moves." The eyebrow renders only together with the campaign line (Liquid), never alone.
 - Wordmark: textured, box `min(44vw, 640px)`, centred, crossing the lower third of the aperture.
 - Bottom row: EXPLORE COLLECTION (Primary) and VIEW THE CAMPAIGN (Text link-button), left-aligned, 32px gap. `SKIP INTRO` / `PAUSE` at the right (`--sf-text-2xs`, 44px hit area).
 
@@ -645,23 +647,23 @@ Mobile (<990):
 │   loop 9:16 cover    │
 │                      │
 │  STEΛDFΛST artwork   │  box min(84vw, 640px), centre at y 58%
-│     FIXED POINT      │  eyebrow only (Archivo Label), centred, 16px under
+│ The figure stays. …  │  campaign line (+ eyebrow if set), centred, 16px under
 │ [ EXPLORE COLLECTION ]│ full width, 52px, 24px under
 │   VIEW THE CAMPAIGN  │  centred link
 │                   ‖  │  pause, bottom-right
 └──────────────────────┘
 ```
-- **No Spectral italic line on mobile.** Stacking the italic line directly under the serif wordmark puts two serifs head to head. The campaign line exists only in the desktop left column (`display: none` below 990).
+- **Campaign line on mobile (revision round 1).** With the eyebrow blank by default, the italic campaign line now also shows below 990 (centred under the wordmark), so the mobile lockup is never an orphan label. The eyebrow, if the merchant sets one, sits above it. Both are hidden on short landscape phones (below).
 - Bottom scrim (§5.5). CTAs sit 24px above `env(safe-area-inset-bottom)`.
 - Below 990 the hero is `min-height: max(100svh, 560px)` and grows with its content; the bottom row of the PAUSE control is reserved under the CTAs, so at 200% zoom or with large text the CTAs never sit under PAUSE and are never clipped.
-- Landscape phones (`orientation: landscape` and height ≤ 500px): hero exactly `100svh`, wordmark `min(60vw, 30svh × 2.944)` placed under the header, eyebrow 12px below, then both CTAs in one centred row (24px gap), so lockup, eyebrow and both CTAs fit the first screen.
+- Landscape phones (`orientation: landscape` and height ≤ 500px): hero exactly `100svh`, wordmark `min(60vw, 30svh × 2.944)` placed under the header, then both CTAs in one centred row (24px gap); the campaign line and eyebrow are hidden there, so wordmark and both CTAs fit the first screen.
 - EXPLORE COLLECTION → `cta_primary_link`, default `routes.all_products_collection_url`. VIEW THE CAMPAIGN → **`cta_secondary_action: link`** (default; ARCHITECTURE currently defaults to `replay`, §14), link default `#campaign` (Section D). `replay` remains an option.
-- The eyebrow is the **only** campaign label on the page. Section D has no eyebrow by default.
+- The hero eyebrow (if set) is the **only** campaign label on the page. Section D has no eyebrow by default.
 
 | Setting (ARCH id) | Default | Info text (editor only) |
 |---|---|---|
-| `eyebrow` | `FIXED POINT` | "Proposed campaign name. Approve or replace." |
-| `subheading` | `The figure stays. The light moves.` | "Desktop only. One short line. No claims." |
+| `eyebrow` | blank | "Optional short label above the campaign line, e.g. a campaign name. Blank by default: the italic line works alone. Shows only with the campaign line." |
+| `subheading` | `The figure stays. The light moves.` | "One short line under the wordmark. No claims. Hidden on short landscape phones." |
 | `logo_width` | 640 (range 240–640) | "Width of the textured wordmark box on desktop. Capped at 640 to stay sharp." |
 
 ### B. Featured collection
@@ -683,6 +685,8 @@ Mobile (<990):
   - eyebrow: blank by default (the hero carries the only label).
   - Spectral 300 italic `--sf-display-xl`: **"Under one light."**
   - `--sf-text-sm` silver, max 32ch: **"The tracksuit in stone, seen from behind."**
+- **Edge mask (revision round 1, CD-05):** the media layer carries a static four-sided `mask-image` (two eased linear gradients, intersected): fully transparent over the outer 6.5 % top/bottom and 3 % left/right, ramping to opaque by 23 % / 15 %, so the still dissolves into the field and no straight edge (the old luma 0 → 33 step at its top) shows at any point of the aperture. The frame background is `--sf-bg` (not sunken) so the frame itself draws no rectangle. This complements the fade MEDIA bakes into every campaign rendition (top 15 %, sides 12 %).
+- **Whole-pixel aperture:** the shaft's inset and the two feathers move in whole CSS px (JS snaps `--_ap`); a fractional clip edge anti-aliased the image and the feather on the same pixel and leaked a 1 px bright line (luma up to 88).
 - **Mobile:** image first; the text block below it with gutters, same order.
 - **Nothing else goes in this section.** No lookbook blocks (ARCHITECTURE's `look` blocks are removed from the preset, §14), no CTA button. An optional `link_label`/`link` text link (e.g. `VIEW THE LOOK`) renders only if set.
 
@@ -724,7 +728,7 @@ Mobile (<990):
 
 | Where | Rendered default | Owner action |
 |---|---|---|
-| Hero eyebrow / campaign line | FIXED POINT / The figure stays. The light moves. | Approve the campaign name or replace |
+| Hero eyebrow / campaign line | (blank) / The figure stays. The light moves. | Approve the line; optionally add a campaign name (e.g. the proposed FIXED POINT) as eyebrow |
 | B heading | The collection | Optional |
 | B next-drop tile | Details to be announced. | Replace or hide |
 | D line / body | Under one light. / The tracksuit in stone, seen from behind. | Supply |
@@ -760,7 +764,7 @@ Rects are (x0, y0, x1, y1) fractions of `sf-signature-hero`.
 | 0.22–0.36 | **Detail 1** (block `zip`): rect (0.445, 0.17, 0.555, 0.47), centre (0.50, 0.32) | rotate→0, **z = 2.2** | vignette layer →0.6 | Title out. Caption "ZIP AND NECK LABEL" |
 | 0.36–0.50 | **Detail 2** (`chest-logo`): rect (0.375, 0.36, 0.625, 0.66), centre (0.50, 0.51) | **z = 1.8** | vignette 0.6 | "DISTRESSED CHEST LOGO" |
 | 0.50–0.63 | **Detail 3** (`shoulder`): rect (0.365, 0.17, 0.475, 0.43), centre (0.42, 0.30) | **z = 2.4** | vignette 0.6 | "SHOULDER EMBELLISHMENT" |
-| 0.63–0.74 | **Detail 4** (`cuff-label`): rect (0.625, 0.76, 0.705, 0.90), centre (0.665, 0.83) | **z = 2.4** (cap; the source is dark and soft here) | vignette 0.5 | "SLEEVE LABEL" |
+| 0.63–0.74 | **Detail 4** (`cuff-label`): the garment's **left** cuff (revision round 1: more frontal and legible, only black between it and the caption): label rect (0.330, 0.813, 0.376, 0.840), centre (0.353, 0.826) | **z = 2.4** (cap; the source is dark and soft here) | vignette 0.5 | "SLEEVE LABEL" |
 | 0.74–0.80 | **Return** | z →1.0, centred | vignette →0 | Caption out |
 | 0.80–0.90 | **Front → back** ("a cut in the dark", sequential, never a double exposure) | 0.80–0.85: front rotateY 0→−6°, opacity 1→0. 0.85–0.90: back rotateY 6°→0, opacity 0→1. Both faces are 0 at 0.85 | overlay 0→0.92 over 0.80–0.85, 0.92→0 over 0.85–0.90 | No caption |
 | 0.90–1.00 | **CTA** | back holds, scale 1.0→0.96 | 0 | Right column (cols 9–12, centred): product title (Spectral `--sf-text-xl`), live price, Primary CTA (`cta_label`, default "Shop the zip hoodie"), `--sf-text-2xs` "FRONT / BACK" segmented control |
@@ -938,7 +942,7 @@ All reviewer revisions to this file and to `FILM-STORYBOARD.md` were applied. Wh
 
 1. **F layered lockup threshold.** The reviewer asked for the SVG-over-streaks layering "above ~900 CSS px", but the requested F cap (880px) means a box never reaches 900. At DPR 2, an 880px box is 1760 device px, 1.45× the 1210px native raster, right at the limit. So the layered lockup is the default on F at ≥990px viewport, and the 900 CSS px rule stays as a hard ceiling for the plain raster anywhere else.
 2. **D body copy.** Used "The tracksuit in stone, seen from behind." instead of the suggested "The embossed tracksuit in stone, under a single light." "Embossed" is a construction term that the client hasn't confirmed (the same rule the reviewer applied to Part B), and "light" would repeat the D line "Under one light."
-3. **Single campaign label.** Kept the label in the hero (it's the only text under the wordmark on mobile) and removed it from D. The label reads "FIXED POINT" (the proposed campaign name) instead of "CAMPAIGN": on mobile it stands alone under the wordmark, and "CAMPAIGN" by itself says nothing. The desktop italic line became "The figure stays. The light moves." so that it doesn't repeat the label.
+3. **Single campaign label.** Kept the label in the hero (it's the only text under the wordmark on mobile) and removed it from D. The label reads "FIXED POINT" (the proposed campaign name) instead of "CAMPAIGN": on mobile it stands alone under the wordmark, and "CAMPAIGN" by itself says nothing. The desktop italic line became "The figure stays. The light moves." so that it doesn't repeat the label. *(Superseded in revision round 1: the eyebrow is blank by default and renders only with the italic line, which now also shows on mobile; FIXED POINT stays the proposed campaign name for the merchant to set.)*
 4. **Tops still.** Chose the reflective tracksuit front (top crop), not the IMG_4913 crewneck. The crewneck isn't one of the five garments evidenced for fixtures (CONTEXT), so a "Tops" tile showing it would imply a product that may not exist. The usable frames also carry the unidentified "S7" monogram.
 5. **Storyboard rhythm.** The revision says "make S1→S2 and S5→S6 hard cuts" and "keep the dips only into S2 (still) and S7". These conflict, since S1→S2 *is* the cut into S2. I read "S2" as "S5", the other still. Result: dips only into S5 (footage → still) and S7. The other four transitions are hard cuts on matched darkness, and total runtime stays 12.8s. If the reviewer meant a dip into S2, swap S1→S2 to a dip and make S4→S5 a hard cut; the runtime doesn't change.
 6. **S6 / loop window.** Verified on graded renders at 3.4–5.0s with the SHOTLOG crop (0.04, 0, 0.80, 0.76): **no tail-light** anywhere in the plate. But a bright light pole enters the plate's left edge (plate x < 0.04, y 0.21–0.28) from about **4.85s**. So the loop uses 3.40–**4.80** (still 5.6s ping-pong), with a safety burn on the left 6% and top 6%. S6 uses 3.70–4.50, which contains the head turn.
