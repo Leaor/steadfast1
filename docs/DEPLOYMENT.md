@@ -101,7 +101,7 @@ Prepared product images (from the client's own photography; cropped, colour-mana
 
 | Garment (as evidenced by the supplied assets) | Upload order |
 |---|---|
-| Zip hoodie, washed blue-grey | `--front`, `--back`, `--front-alt`, then `--detail-chest-logo`, `--detail-zip`, `--detail-neck-label`, `--detail-shoulder`, `--detail-cuff-label` (the hanger has been painted out of all of them) |
+| Zip hoodie, washed blue-grey | `--front` (the clean hood-up still), `--back`, then `--detail-chest-logo`, `--detail-neck-label` (neck label with the zip), `--detail-cuff-label` (the hanger has been painted out of all of them; the old front-alt, zip, shoulder and hem views are no longer published) |
 | Tracksuit, black speckle with white piping | `--front`, `--back` (source is a phone screenshot: soft above ~900 px) |
 | Stone tracksuit (campaign figure) | `--back` |
 | Gothic hoodie | `--back-charcoal` (graded, sky burnt out), `--back-grey`; attach each to its colour variant as the variant image |

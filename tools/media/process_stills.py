@@ -1295,7 +1295,7 @@ def best_frame(clip: Path, t0, t1, roi, window):
 
 def burn_poly(im: Image.Image, poly_frac, feather=0.035) -> Image.Image:
     """Burn a polygon (fractions of the frame) to black with a Gaussian feather of `feather` x width.
-    Used for the IMG_4913 sky + foliage behind the hood (CD-02/F6: the first card must not read as daylight)."""
+    Used for IMG_4376's pavement + foliage (review r1 item 4)."""
     w, h = im.size
     m = Image.new("L", (w, h), 0)
     ImageDraw.Draw(m).polygon([(x * w, y * h) for x, y in poly_frac], fill=255)
@@ -1304,10 +1304,34 @@ def burn_poly(im: Image.Image, poly_frac, feather=0.035) -> Image.Image:
     return Image.fromarray(np.clip(a + 0.5, 0, 255).astype(np.uint8))
 
 
-# IMG_4913 crop (0,230,576,950): sky + trees right of the hood edge, down to the shoulder line; the supercar
-# below it at x > 0.86 is burnt separately. Traced on the t=3.333 s frame (frames/IMG_4913-*.png).
-SKY_4913 = [(0.645, -0.02), (1.02, -0.02), (1.02, 0.445), (0.93, 0.435), (0.80, 0.415), (0.762, 0.365),
-            (0.742, 0.22), (0.70, 0.08)]
+# IMG_4913 crop (0,230,576,950): the garment's right-hand silhouette, traced per row on frame 100 (t=3.333 s) and
+# stored in tools/media/masks/IMG_4913-f100-garment-edge.json (method in its "_about"). Review r2 item 2: the old
+# sky polygon burn (3.5 % Gaussian feather, ~20 px) left a soft grey glow 40-80 px wide along the shoulder and
+# the supercar burn (floor 0.15) a lit strip at the right edge; everything right of the silhouette is now #000.
+EDGE_4913 = ROOT / "tools/media/masks/IMG_4913-f100-garment-edge.json"
+
+
+def silhouette_alpha(size, edge_json: Path, inset=1.0, feather=0.6) -> np.ndarray:
+    """Garment alpha from a per-row right-edge trace: 1 left of (edge - inset), anti-aliased, Gaussian `feather`
+    (sigma, px) -> 10-90 % edge width <= 3 px at the published widths. Right of the edge = 0 (background)."""
+    d = json.loads(edge_json.read_text())
+    W, H = size
+    if tuple(d["size"]) != (W, H):
+        raise SystemExit(f"{edge_json.name}: traced on {d['size']}, plate is {[W, H]}")
+    # rows outside the trace (y0 .. y0+len) keep alpha 1; the edge slides out of the frame over 10 rows
+    y0 = int(d.get("y0", 0))
+    e = np.full(H, float(W) + 50, np.float32)
+    tr = np.asarray(d["edge_x"], np.float32)
+    e[y0:y0 + len(tr)] = tr
+    e[:y0], e[y0 + len(tr):] = tr[0], tr[-1]
+    rows = np.arange(H, dtype=np.float32)
+    ramp = np.clip(np.minimum(rows - y0 + 10, y0 + len(tr) - 1 + 10 - rows) / 10, 0, 1)
+    e = e * ramp + (float(W) + 50) * (1 - ramp)
+    e = e[:, None]
+    x = np.arange(W, dtype=np.float32)[None, :] + 0.5
+    a = np.clip(e - inset - x + 0.5, 0, 1)
+    m = Image.fromarray(np.clip(a * 255 + 0.5, 0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(feather))
+    return np.asarray(m).astype(np.float32) / 255
 
 
 # IMG_4376 crop (0,262,640,1062), fractions of the 4:5 crop. Pavement/garment boundary measured per row on the 800 px
@@ -1318,6 +1342,11 @@ PAVE_4376 = [(-0.02, 0.28), (0.15, 0.28), (0.158, 0.40), (0.163, 0.47), (0.165, 
              (0.19, 0.60), (0.21, 0.625), (0.233, 0.65), (0.248, 0.675), (0.258, 0.70), (0.262, 0.725), (0.276, 0.75),
              (0.284, 0.775), (0.293, 0.80), (0.299, 0.85), (0.302, 0.90), (0.308, 0.95), (0.316, 1.02), (-0.02, 1.02)]
 FOLIAGE_4376 = [(-0.02, -0.02), (0.36, -0.02), (0.28, 0.065), (0.24, 0.09), (0.205, 0.13), (0.19, 0.17), (-0.02, 0.25)]
+# Review r2 item 1: lit leaves/blossom left of the hood (x 75-165, y 45-155 px of the 640x800 crop) survived the
+# soft FOLIAGE burn; this polygon runs 3-4 px outside the hood's traced left edge, burnt with a 1.5 px feather.
+HOOD_LEFT_4376 = [(-10, 20), (150, 20), (175, 40), (162, 52), (158, 62), (156, 80), (147, 93), (127, 100), (121, 110),
+                  (119, 130), (120, 148), (118, 168), (113, 190), (-10, 195)]
+EDGE_4376 = ROOT / "tools/media/masks/IMG_4376-f128-garment-right-edge.json"
 
 
 def luma_regions(im: Image.Image) -> dict:
@@ -1382,11 +1411,18 @@ def stage_footage():
             # product still now gets the same film grade as the lookbook/category stills (grade.sh IMG_4913 pre
             # + LOOK), the sky/trees burnt to black behind the hood edge and the supercar burnt at the right.
             pl = grade(plate(frame, bx), grade_part("pre:IMG_4913"))
-            pl = burn_poly(pl, SKY_4913)
-            pl = burn(pl, 0.86, 0.98, "right", floor=0.15)
+            if fpng.name != json.loads(EDGE_4913.read_text())["frame"]:
+                raise SystemExit(f"IMG_4913: picked {fpng.name}, the silhouette trace is for another frame")
+            sa = silhouette_alpha(pl.size, EDGE_4913)
+            pl = Image.fromarray(np.clip(np.asarray(pl).astype(np.float32) * sa[..., None] + 0.5, 0, 255).astype(np.uint8))
+            pl = burn(pl, 0.86, 0.98, "right", floor=0.15)          # garment only now: the sleeve fades at the edge
+            QA_INFO["back_charcoal_background"] = {
+                "outside_silhouette_mean_luma": round(float(luminance(np.asarray(pl).astype(np.float32))[sa < 0.01].mean()), 3),
+                "edge_trace": rel(EDGE_4913)}
             ops = ["HLG -> SDR tone map", f"4:5 crop {bx[2]-bx[0]}x{bx[3]-bx[1]}"] + grade_ops("IMG_4913") + \
-                  ["sky + foliage behind the hood burnt to black (traced polygon, 3.5% feather)",
-                   "right burn 0.86-0.98 (supercar)"]
+                  ["background right of the garment silhouette (sky, trees, grass, supercar) to #000: per-row edge "
+                   "trace (tools/media/masks/IMG_4913-f100-garment-edge.json), 1 px inset, Gaussian 0.6 px feather",
+                   "right burn 0.86-0.98 to 15 % (sleeve fades at the frame edge)"]
             kind = "lifestyle"
         if cid == "IMG_4376":
             # lifestyle (DESIGN §5.3): grade.sh IMG_4376 pre + LOOK; burn the SUV / tail light at the right edge
@@ -1404,16 +1440,38 @@ def stage_footage():
             pl = burn_poly(pl, PAVE_4376, feather=0.010)
             pl = burn_poly(pl, FOLIAGE_4376, feather=0.012)
             pl = burn(pl, 0.04, 0.24, "left", floor=0.0)
+            # Review r2 item 1: the leaves left of the hood, and right of the sleeve a bystander behind the SUV (head
+            # and shoulder, luma 60-85 after the soft right burn), car parts and a lit speck above the shoulder.
+            pl = burn_poly(pl, [(x / bw_, y / (bx[3] - bx[1])) for x, y in HOOD_LEFT_4376], feather=1.5 / bw_)
+            if fpng.name != json.loads(EDGE_4376.read_text())["frame"]:
+                raise SystemExit(f"IMG_4376: picked {fpng.name}, the sleeve trace is for another frame")
+            sa = silhouette_alpha(pl.size, EDGE_4376)
+            pl = Image.fromarray(np.clip(np.asarray(pl).astype(np.float32) * sa[..., None] + 0.5, 0, 255).astype(np.uint8))
             QA_INFO["back_grey_left"] = luma_regions(pl)
+            QA_INFO["back_grey_left"]["right_of_sleeve_mean_luma"] = round(float(
+                luminance(np.asarray(pl).astype(np.float32))[sa < 0.01].mean()), 3)
             ops = ["HLG -> SDR tone map", f"4:5 crop {bw_}x{bx[3]-bx[1]}"] + grade_ops("IMG_4376") + \
                   [f"right burn x {f0:.3f}-{f0 + 0.12:.3f} (SUV + tail light, sleeve fades)",
                    "pavement left of the figure + foliage above the hood burnt to black (traced polygons, soft feather)",
-                   "left burn 0.04-0.24 to black"]
+                   "left burn 0.04-0.24 to black",
+                   "leaves left of the hood burnt to black (traced polygon 3-4 px off the hood, 1.5 px feather)",
+                   "everything right of the sleeve (bystander, car, speck) to #000: per-row edge trace "
+                   "(tools/media/masks/IMG_4376-f128-garment-right-edge.json), 1 px inset, 0.6 px feather"]
             kind = "lifestyle"
         emit(pl, D_PROD, f"{handle}--{view}", PRODUCT_WIDTHS, "max", group="product",
              purpose=f"Product still from footage: {purpose}", source=rel(clip),
              crop=dict(crop_dict(bx, (720, 1280)), frame=n, t=t), ops=ops, notes=note, add_cap=True,
              fixture=(handle, view, kind))
+        if cid == "IMG_4376":
+            # Review r2 item 1: the Hoodies collection image (preview fixture: collection banner, category stage and
+            # mega-menu tile) is this retouched night back view, rendered straight from the 640 px graded + burnt
+            # plate (not from the 800 px rendition). Not a theme asset. 900/1080 exceed the 1.25x rule: the review
+            # asked for 540/900/1080 and the clip is 720 px wide, so they are recorded as source-limited upscales.
+            emit(pl, D_STILLS, "sf-collection-hoodies", [540, 900, 1080], 900, group="collection",
+                 purpose="Collection image: Hoodies (embossed gothic hoodie, night back view, graded + burnt)",
+                 source=rel(clip), crop=dict(crop_dict(bx, (720, 1280)), frame=n, t=t), ops=ops,
+                 notes=note + " 900/1080 are x1.41/x1.69 Lanczos upscales of the 640 px plate (review r2 item 1).",
+                 max_up=1080 / bx[2] + 0.01)
         if cid == "IMG_4913":
             # graded close-up (grade.sh IMG_4913 pre + LOOK), the supercar edge (x > 0.80 of the crop) burnt
             g = pl  # the same graded, sky-burnt still as the product image (one look for one garment)
@@ -1568,6 +1626,9 @@ def write_manifest():
             "mix is the film's treatment of the still, not applied to the editorial stills.",
             "The campaign still had a small third-party logo on the balaclava; it was toned down by a diffusion fill "
             "(no other retouching).",
+            "sf-collection-hoodies (preview fixture only, not bundled) is the embossed gothic hoodie night back view "
+            "(the back-grey plate, same grade and burns); its 900/1080 renditions are x1.41/x1.69 upscales of the "
+            "640 px video plate, by review request (r2 item 1).",
         ],
         "files": RECORDS,
     }
@@ -1585,7 +1646,8 @@ def main(argv):
         if mp.exists():
             old = json.loads(mp.read_text()).get("stills", {})
             run_dirs = {"logo": ["logo/", "_qa/svg"], "stills": ["stills/sf-", "products/", "_qa/show", "_qa/camp"],
-                        "footage": ["frames/", "products/embossed-gothic-hoodie", "stills/sf-lookbook-embossed", "stills/sf-category-new-arrivals"],
+                        "footage": ["frames/", "products/embossed-gothic-hoodie", "stills/sf-lookbook-embossed", "stills/sf-category-new-arrivals",
+                                    "stills/sf-collection-hoodies"],
                         "grain": ["stills/sf-grain"], "sheet": ["stills/_contact"]}
             pref = [f"media/processed/{p}" for s in stages for p in run_dirs[s]]
             RECORDS.extend(r for r in old.get("files", []) if not any(r["path"].startswith(p) for p in pref))

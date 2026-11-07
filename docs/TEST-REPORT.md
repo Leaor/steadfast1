@@ -7,12 +7,12 @@
 
 | | |
 |---|---|
-| Command | `SF_PREVIEW_PORT=9320 npm --prefix dev test` (full suite, both projects; integration round 2) |
-| Started | 2026-11-07 01:23:58 UTC (`stats.startTime`), duration 365 s |
+| Command | `npm --prefix dev test` (full suite, both projects; integration, revision round 1, run 2); Playwright started its own preview on `:9292` (no other server was running there) |
+| Started | 2026-11-07 02:56:39 UTC (`stats.startTime`), duration 384 s |
 | Runner | `@playwright/test` 1.63.0, preinstalled Chromium, 2 workers, 0 retries |
 | Projects | **desktop**: Chromium 1440×900, DPR 1 · **mobile**: Chromium 390×844, touch, DPR 3, iPhone user agent |
 | Server | the local preview (`dev/preview/server.mjs`) with **placeholder** fixtures; no Shopify store was contacted |
-| Result | **424 passed, 0 failed, 0 flaky, 158 skipped** (`stats.expected` 424, `unexpected` 0, `flaky` 0, `skipped` 158) |
+| Result | **426 passed, 0 failed, 0 flaky, 158 skipped** (`stats.expected` 426, `unexpected` 0, `flaky` 0, `skipped` 158) |
 
 | Spec | Pass | Fail | Skip |
 |---|---:|---:|---:|
@@ -32,9 +32,9 @@
 | 13-search | 8 | 0 | 0 |
 | 14-quick-view | 4 | 0 | 0 |
 | 15-templates-smoke | 50 | 0 | 40 |
-| 16-performance | 25 | 0 | 1 |
+| 16-performance | 27 | 0 | 1 |
 | 17-data-honesty | 46 | 0 | 36 |
-| **Total** | **424** | **0** | **158** |
+| **Total** | **426** | **0** | **158** |
 
 **Skips are by design**, not failures: project-specific cases (desktop-only keyboard and mega-menu flows, mobile-only menu drawer, the responsive matrix split by project, the template-smoke and honesty route lists run on desktop with key routes on mobile, theme check and file-size checks once).
 
@@ -54,21 +54,22 @@
 | Reduced motion | 10 (static hero, no mp4 until PLAY, no pin, visitor toggle persists) |
 | Responsive layouts | 11 (6 viewports × 7 routes: no horizontal overflow, CLS < 0.05, 44 px targets) |
 | Keyboard accessibility | 12 (skip link, focus rings, landmarks, focus traps; axe 0 serious/critical on 7 routes at rest **and** with motion on after a scroll-through, and in 8 open states; contact and newsletter error focus; every home Tab stop visible and not under the header) |
-| (extra) | 13 search (incl. result limits), 14 quick view, 15 every §8.2 route, 16 compressed performance budgets (ARCHITECTURE §6.1 v1.2), 17 data honesty |
+| (extra) | 13 search (incl. result limits), 14 quick view, 15 every §8.2 route, 16 compressed performance budgets (ARCHITECTURE §6.1 v1.2, home and product rows tightened in revision round 1) and the preview's `preload_tag` emulation, 17 data honesty |
 
-Theme validity: spec 00 runs `shopify theme check --path theme` and passed (0 errors). A separate CLI run in this pass reported **0 errors, 4 warnings** across 105 files.
+Theme validity: spec 00 runs `shopify theme check --path theme` and passed (0 errors). A separate CLI run in this pass reported **0 errors, 0 warnings** across 105 files (the 4 former `AssetPreload` warnings were removed by moving the font preloads to `preload_tag`).
 
 ## 3. Failures from the previous report and how they were resolved
 
-`dev/tests/reports/INTEGRATION.md` §4–§5 (run of 2026-11-06) ended at 381 passed / **3 failed** / 154 skipped. All three are resolved; none by weakening a check without a ruling:
+The previous report (integration round 2, `INTEGRATION.md` §9) ended at 424 passed / **0 failed** / 158 skipped. In revision round 1 the fixers saw these failures in their own batch runs; none reproduced in the integrator's two full runs (426 / 0 / 158 both times):
 
-| Previous failure | Resolution |
+| Fixer-reported failure | Resolution |
 |---|---|
-| 16 · budget: home, **desktop** (36 requests vs 25) | Orchestrator ruling §15.10 (ARCHITECTURE): the raw-byte / 25-request budgets measured the wrong thing for an HTTP/2 + brotli CDN and conflicted with §3.1's per-section files. §6.1 v1.2 replaces them with compressed, HTTP/2-aware budgets (requests, brotli JS and CSS, render-blocking CSS, compressed transfer at mobile DPR 3, per-file brotli caps), each set to the measured value + ~15 % with the rationale written in §6.1. Home now: 36 requests (≤ 41), JS 29.0 KB br (≤ 33.5), CSS 24.7 KB br (≤ 28.5), 3 render-blocking files / 12.2 KB br. |
-| 16 · budget: home, **mobile** (37 requests vs 25) | Same ruling. Mobile home: 33 requests, transfer 404 KB compressed at DPR 3 (≤ 465 KB). |
-| 16 · lazy images not requested before scrolling, **mobile** (flaky) | Root cause: the test assumed Chromium's 3000 px lazy distance, which applies only to an *unknown* connection type. The spec now pins the connection to `cellular4g` (CDP) and uses Chromium's 4g distance (1250 px); it passed on both projects. |
+| 16 · per-file cap, `sf-header.css` 4,780 B br vs 4,608 | CORE trimmed comments: 4,540 B (68 B headroom). Cap unchanged |
+| 02 · nav dropdown focus / Esc focus return (once each, batch only) | Passed alone 3/3 (fixers) and in both full runs here; load-related, not reproduced |
+| 11 · home CLS ×2 (batch only) | Passed alone (HOME) and in both full runs here |
+| 04 · 404 on `zip-hoodie-washed-blue-grey--front-alt-800.webp` | MEDIA deleted the file during COMMERCE's run; the fixtures no longer reference it |
 
-Also fixed in this pass and now covered: the preview never applied `template_suffix`, so `/pages/contact` had rendered without its contact form and specs 11, 12, 16 and 17 had not seen it; they do now (INTEGRATION §8.1).
+Tests changed in this round, none weakened: 07 now reads the `/collections/all` heading from the locale key `collections.all_title` and also checks `<title>` (the old expectation "Products" was the behaviour being replaced); 16 gained the `preload_tag` harness check and its home (≤ 37 requests, ≤ 27 KB JS br) and product (≤ 23 requests, ≤ 285 KB) budgets were **tightened** to the new measurements + ~15 % (ARCHITECTURE §6.1).
 
 ## 4. Not executed / not covered
 
@@ -79,5 +80,7 @@ Also fixed in this pass and now covered: the preview never applied `template_suf
 
 ## 5. Open items found by the suite and its reviewers (not failures)
 
-- **Product page transfer**: 563 KB compressed at DPR 3 before the first scroll, above the reviewer's 350 KB target; §6.1 records it (≤ 650 KB) so it can't grow. COMMERCE: lazy-load gallery slides 2+ and size the related-product cards.
-- **Hero wordmark** (`sf-logo-textured`): now 800/1000 w renditions and alpha quality 60 (the hero pulls 29.5 KB on desktop and 43.6 KB on a DPR 3 phone, was 106 KB). HOME/CORE may also pass `fetchpriority: 'low'` (it is never the LCP).
+- **Product page transfer** is now 244 KB compressed at DPR 3 before the first scroll on mobile (was 563 KB), 19 requests; the budget is 285 KB / 23. The zoom viewer's ~1 KB br of JS still ships inside `sf-product.js`.
+- **Home** makes 32 requests before first scroll on desktop, 29 on mobile (HOME's own target was ≤ 31 on desktop); budget 37.
+- **`sf-header.css`** is 68 B under its 4,608 B brotli cap.
+- **Hoodies collection image (preview fixture)** is now the zip hoodie chest close-up, which repeats the signature garment in the homepage category grid against DESIGN §5.6; ORCH to decide (INTEGRATION §10.5).

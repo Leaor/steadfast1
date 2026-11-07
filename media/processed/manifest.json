@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-07T02:20:55+00:00",
+ "generated_at": "2026-11-07T03:28:12+00:00",
  "tool_versions": {
   "python": "3.13.18",
   "pillow": "12.3.0",
@@ -2580,162 +2580,6 @@
    "owner": "tools/media/process_stills.py"
   },
   {
-   "file": "sf-lookbook-embossed-hoodie-400.webp",
-   "base": "sf-lookbook-embossed-hoodie",
-   "path": "media/processed/stills/sf-lookbook-embossed-hoodie-400.webp",
-   "width": 400,
-   "height": 500,
-   "bytes": 28612,
-   "sha1": "db9d873816eea9250ab7edd10289c8c6458365af",
-   "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
-   "crop": [
-    0,
-    230,
-    576,
-    720
-   ],
-   "ops": [
-    "HLG -> SDR tone map",
-    "4:5 crop 576x720",
-    "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
-    "sky + foliage behind the hood burnt to black (traced polygon, 3.5% feather)",
-    "right burn 0.86-0.98 (supercar)",
-    "resize lanczos x0.6944",
-    "black-point clamp luma<=6 -> 0, smooth ramp to 12"
-   ],
-   "owner": "tools/media/process_stills.py"
-  },
-  {
-   "file": "sf-lookbook-embossed-hoodie-720.webp",
-   "base": "sf-lookbook-embossed-hoodie",
-   "path": "media/processed/stills/sf-lookbook-embossed-hoodie-720.webp",
-   "width": 720,
-   "height": 900,
-   "bytes": 61634,
-   "sha1": "e4bc09c53ebd69de9c0d14cb437dc9d6711f70d2",
-   "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
-   "crop": [
-    0,
-    230,
-    576,
-    720
-   ],
-   "ops": [
-    "HLG -> SDR tone map",
-    "4:5 crop 576x720",
-    "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
-    "sky + foliage behind the hood burnt to black (traced polygon, 3.5% feather)",
-    "right burn 0.86-0.98 (supercar)",
-    "resize lanczos x1.25",
-    "black-point clamp luma<=6 -> 0, smooth ramp to 12"
-   ],
-   "owner": "tools/media/process_stills.py"
-  },
-  {
-   "file": "sf-lookbook-embossed-hoodie-720.jpg",
-   "base": "sf-lookbook-embossed-hoodie",
-   "path": "media/processed/stills/sf-lookbook-embossed-hoodie-720.jpg",
-   "width": 720,
-   "height": 900,
-   "bytes": 107641,
-   "sha1": "d8adf0687a39399e083905a2ae41c341bb00f860",
-   "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
-   "crop": [
-    0,
-    230,
-    576,
-    720
-   ],
-   "ops": [
-    "HLG -> SDR tone map",
-    "4:5 crop 576x720",
-    "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
-    "sky + foliage behind the hood burnt to black (traced polygon, 3.5% feather)",
-    "right burn 0.86-0.98 (supercar)",
-    "resize lanczos x1.25",
-    "black-point clamp luma<=6 -> 0, smooth ramp to 12"
-   ],
-   "owner": "tools/media/process_stills.py"
-  },
-  {
-   "file": "sf-category-new-arrivals-540.webp",
-   "base": "sf-category-new-arrivals",
-   "path": "media/processed/stills/sf-category-new-arrivals-540.webp",
-   "width": 540,
-   "height": 675,
-   "bytes": 42664,
-   "sha1": "98ed68a00b844d1fccb0f16a449dd45c191f3dc7",
-   "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
-   "crop": [
-    0,
-    230,
-    576,
-    720
-   ],
-   "ops": [
-    "HLG -> SDR tone map",
-    "4:5 crop 576x720",
-    "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
-    "sky + foliage behind the hood burnt to black (traced polygon, 3.5% feather)",
-    "right burn 0.86-0.98 (supercar)",
-    "resize lanczos x0.9375",
-    "black-point clamp luma<=6 -> 0, smooth ramp to 12"
-   ],
-   "owner": "tools/media/process_stills.py"
-  },
-  {
-   "file": "sf-category-new-arrivals-720.webp",
-   "base": "sf-category-new-arrivals",
-   "path": "media/processed/stills/sf-category-new-arrivals-720.webp",
-   "width": 720,
-   "height": 900,
-   "bytes": 61634,
-   "sha1": "e4bc09c53ebd69de9c0d14cb437dc9d6711f70d2",
-   "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
-   "crop": [
-    0,
-    230,
-    576,
-    720
-   ],
-   "ops": [
-    "HLG -> SDR tone map",
-    "4:5 crop 576x720",
-    "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
-    "sky + foliage behind the hood burnt to black (traced polygon, 3.5% feather)",
-    "right burn 0.86-0.98 (supercar)",
-    "resize lanczos x1.25",
-    "black-point clamp luma<=6 -> 0, smooth ramp to 12"
-   ],
-   "owner": "tools/media/process_stills.py"
-  },
-  {
-   "file": "sf-category-new-arrivals-720.jpg",
-   "base": "sf-category-new-arrivals",
-   "path": "media/processed/stills/sf-category-new-arrivals-720.jpg",
-   "width": 720,
-   "height": 900,
-   "bytes": 107641,
-   "sha1": "d8adf0687a39399e083905a2ae41c341bb00f860",
-   "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
-   "crop": [
-    0,
-    230,
-    576,
-    720
-   ],
-   "ops": [
-    "HLG -> SDR tone map",
-    "4:5 crop 576x720",
-    "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
-    "sky + foliage behind the hood burnt to black (traced polygon, 3.5% feather)",
-    "right burn 0.86-0.98 (supercar)",
-    "resize lanczos x1.25",
-    "black-point clamp luma<=6 -> 0, smooth ramp to 12"
-   ],
-   "owner": "tools/media/process_stills.py"
-  },
-  {
    "file": "sf-grain-256.webp",
    "base": "sf-grain",
    "path": "media/processed/stills/sf-grain-256.webp",
@@ -2762,6 +2606,162 @@
    "crop": null,
    "ops": [
     "mid-grey luma noise sigma 26"
+   ],
+   "owner": "tools/media/process_stills.py"
+  },
+  {
+   "file": "sf-lookbook-embossed-hoodie-400.webp",
+   "base": "sf-lookbook-embossed-hoodie",
+   "path": "media/processed/stills/sf-lookbook-embossed-hoodie-400.webp",
+   "width": 400,
+   "height": 500,
+   "bytes": 28416,
+   "sha1": "d5001d66dd53b67b8300ab5b5270289daccdf1a7",
+   "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+   "crop": [
+    0,
+    230,
+    576,
+    720
+   ],
+   "ops": [
+    "HLG -> SDR tone map",
+    "4:5 crop 576x720",
+    "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
+    "background right of the garment silhouette (sky, trees, grass, supercar) to #000: per-row edge trace (tools/media/masks/IMG_4913-f100-garment-edge.json), 1 px inset, Gaussian 0.6 px feather",
+    "right burn 0.86-0.98 to 15 % (sleeve fades at the frame edge)",
+    "resize lanczos x0.6944",
+    "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+   ],
+   "owner": "tools/media/process_stills.py"
+  },
+  {
+   "file": "sf-lookbook-embossed-hoodie-720.webp",
+   "base": "sf-lookbook-embossed-hoodie",
+   "path": "media/processed/stills/sf-lookbook-embossed-hoodie-720.webp",
+   "width": 720,
+   "height": 900,
+   "bytes": 60720,
+   "sha1": "3971b9da65143b974ef6027aa66edb41b7076896",
+   "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+   "crop": [
+    0,
+    230,
+    576,
+    720
+   ],
+   "ops": [
+    "HLG -> SDR tone map",
+    "4:5 crop 576x720",
+    "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
+    "background right of the garment silhouette (sky, trees, grass, supercar) to #000: per-row edge trace (tools/media/masks/IMG_4913-f100-garment-edge.json), 1 px inset, Gaussian 0.6 px feather",
+    "right burn 0.86-0.98 to 15 % (sleeve fades at the frame edge)",
+    "resize lanczos x1.25",
+    "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+   ],
+   "owner": "tools/media/process_stills.py"
+  },
+  {
+   "file": "sf-lookbook-embossed-hoodie-720.jpg",
+   "base": "sf-lookbook-embossed-hoodie",
+   "path": "media/processed/stills/sf-lookbook-embossed-hoodie-720.jpg",
+   "width": 720,
+   "height": 900,
+   "bytes": 107214,
+   "sha1": "531b338f593cef75fb16248b8c98ce1c97a59071",
+   "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+   "crop": [
+    0,
+    230,
+    576,
+    720
+   ],
+   "ops": [
+    "HLG -> SDR tone map",
+    "4:5 crop 576x720",
+    "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
+    "background right of the garment silhouette (sky, trees, grass, supercar) to #000: per-row edge trace (tools/media/masks/IMG_4913-f100-garment-edge.json), 1 px inset, Gaussian 0.6 px feather",
+    "right burn 0.86-0.98 to 15 % (sleeve fades at the frame edge)",
+    "resize lanczos x1.25",
+    "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+   ],
+   "owner": "tools/media/process_stills.py"
+  },
+  {
+   "file": "sf-category-new-arrivals-540.webp",
+   "base": "sf-category-new-arrivals",
+   "path": "media/processed/stills/sf-category-new-arrivals-540.webp",
+   "width": 540,
+   "height": 675,
+   "bytes": 42826,
+   "sha1": "f769c515ba3a24698eed26cc6e78b21db09b5ac9",
+   "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+   "crop": [
+    0,
+    230,
+    576,
+    720
+   ],
+   "ops": [
+    "HLG -> SDR tone map",
+    "4:5 crop 576x720",
+    "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
+    "background right of the garment silhouette (sky, trees, grass, supercar) to #000: per-row edge trace (tools/media/masks/IMG_4913-f100-garment-edge.json), 1 px inset, Gaussian 0.6 px feather",
+    "right burn 0.86-0.98 to 15 % (sleeve fades at the frame edge)",
+    "resize lanczos x0.9375",
+    "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+   ],
+   "owner": "tools/media/process_stills.py"
+  },
+  {
+   "file": "sf-category-new-arrivals-720.webp",
+   "base": "sf-category-new-arrivals",
+   "path": "media/processed/stills/sf-category-new-arrivals-720.webp",
+   "width": 720,
+   "height": 900,
+   "bytes": 60720,
+   "sha1": "3971b9da65143b974ef6027aa66edb41b7076896",
+   "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+   "crop": [
+    0,
+    230,
+    576,
+    720
+   ],
+   "ops": [
+    "HLG -> SDR tone map",
+    "4:5 crop 576x720",
+    "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
+    "background right of the garment silhouette (sky, trees, grass, supercar) to #000: per-row edge trace (tools/media/masks/IMG_4913-f100-garment-edge.json), 1 px inset, Gaussian 0.6 px feather",
+    "right burn 0.86-0.98 to 15 % (sleeve fades at the frame edge)",
+    "resize lanczos x1.25",
+    "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+   ],
+   "owner": "tools/media/process_stills.py"
+  },
+  {
+   "file": "sf-category-new-arrivals-720.jpg",
+   "base": "sf-category-new-arrivals",
+   "path": "media/processed/stills/sf-category-new-arrivals-720.jpg",
+   "width": 720,
+   "height": 900,
+   "bytes": 107214,
+   "sha1": "531b338f593cef75fb16248b8c98ce1c97a59071",
+   "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+   "crop": [
+    0,
+    230,
+    576,
+    720
+   ],
+   "ops": [
+    "HLG -> SDR tone map",
+    "4:5 crop 576x720",
+    "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
+    "background right of the garment silhouette (sky, trees, grass, supercar) to #000: per-row edge trace (tools/media/masks/IMG_4913-f100-garment-edge.json), 1 px inset, Gaussian 0.6 px feather",
+    "right burn 0.86-0.98 to 15 % (sleeve fades at the frame edge)",
+    "resize lanczos x1.25",
+    "black-point clamp luma<=6 -> 0, smooth ramp to 12"
    ],
    "owner": "tools/media/process_stills.py"
   }
@@ -3512,8 +3512,8 @@
  ],
  "stills": {
   "script": "tools/media/process_stills.py",
-  "generated_at": "2026-11-07T02:20:55+00:00",
-  "count": 163,
+  "generated_at": "2026-11-07T03:28:12+00:00",
+  "count": 167,
   "logo": {
    "source": "media/source/photos/steadfast-wordmark.png",
    "source_size": [
@@ -3832,8 +3832,13 @@
     "figure_fraction": 0.1428
    },
    "back_grey_left": {
-    "left_30pct_mean": 6.14,
-    "top_left_25pct_mean": 5.88
+    "left_30pct_mean": 6.03,
+    "top_left_25pct_mean": 5.34,
+    "right_of_sleeve_mean_luma": 0.0
+   },
+   "back_charcoal_background": {
+    "outside_silhouette_mean_luma": 0.003,
+    "edge_trace": "tools/media/masks/IMG_4913-f100-garment-edge.json"
    }
   },
   "quality_notes": [
@@ -3846,7 +3851,8 @@
    "Every still and product image is black-point clamped (luma <= 6 -> 0, smooth ramp to 12; DESIGN \u00a75.3). This removes the lifted noise band at the bottom of the signature stills.",
    "Lifestyle product views (heavyweight-zip-hoodie-black, wide-sweatpants-black, embossed-gothic-hoodie back-grey) carry the grade.sh editorial grade and edge burns that remove the third-party SUV/supercar; fixtures mark them kind=lifestyle (never the first gallery image).",
    "sf-campaign-* keep the source grade (already graded at source) + the clamp; grade.sh's campaign mono mix is the film's treatment of the still, not applied to the editorial stills.",
-   "The campaign still had a small third-party logo on the balaclava; it was toned down by a diffusion fill (no other retouching)."
+   "The campaign still had a small third-party logo on the balaclava; it was toned down by a diffusion fill (no other retouching).",
+   "sf-collection-hoodies (preview fixture only, not bundled) is the embossed gothic hoodie night back view (the back-grey plate, same grade and burns); its 900/1080 renditions are x1.41/x1.69 upscales of the 640 px video plate, by review request (r2 item 1)."
   ],
   "files": [
    {
@@ -9434,553 +9440,6 @@
     "upscaled": true
    },
    {
-    "path": "media/processed/frames/IMG_4913-t3.333s-f100.png",
-    "file": "IMG_4913-t3.333s-f100.png",
-    "group": "frame",
-    "base": "IMG_4913-frame",
-    "width": 720,
-    "height": 1280,
-    "bytes": 1084521,
-    "sha1": "4498eda348fba0baff498e4d7dddc663b7884bfe",
-    "format": "png",
-    "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
-    "purpose": "Selected source frame (tone-mapped, ungraded)",
-    "crop": null,
-    "ops": [
-     "HLG/BT.2020 -> BT.709 SDR (zscale + mobius)"
-    ],
-    "notes": "",
-    "theme_asset": false,
-    "owner": "tools/media/process_stills.py"
-   },
-   {
-    "path": "media/processed/products/embossed-gothic-hoodie--back-charcoal-400.webp",
-    "file": "embossed-gothic-hoodie--back-charcoal-400.webp",
-    "group": "product",
-    "base": "embossed-gothic-hoodie--back-charcoal",
-    "width": 400,
-    "height": 500,
-    "bytes": 28612,
-    "sha1": "db9d873816eea9250ab7edd10289c8c6458365af",
-    "format": "webp",
-    "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
-    "purpose": "Product still from footage: Embossed back close-up (washed charcoal): blackletter 'steadfast' + ornamental hood embossing",
-    "crop": {
-     "x": 0,
-     "y": 230,
-     "w": 576,
-     "h": 720,
-     "frac": [
-      0.0,
-      0.1797,
-      0.8,
-      0.7422
-     ],
-     "extends_beyond_source": false,
-     "frame": 100,
-     "t": 3.333
-    },
-    "ops": [
-     "HLG -> SDR tone map",
-     "4:5 crop 576x720",
-     "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
-     "sky + foliage behind the hood burnt to black (traced polygon, 3.5% feather)",
-     "right burn 0.86-0.98 (supercar)",
-     "resize lanczos x0.6944",
-     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
-    ],
-    "notes": "Video frame 100 at t=3.333s (sharpest by Laplacian variance in the garment ROI within 3.3-3.8s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 720px wide.",
-    "theme_asset": false,
-    "owner": "tools/media/process_stills.py",
-    "scale": 0.6944,
-    "upscaled": false
-   },
-   {
-    "path": "media/processed/products/embossed-gothic-hoodie--back-charcoal-720.webp",
-    "file": "embossed-gothic-hoodie--back-charcoal-720.webp",
-    "group": "product",
-    "base": "embossed-gothic-hoodie--back-charcoal",
-    "width": 720,
-    "height": 900,
-    "bytes": 61634,
-    "sha1": "e4bc09c53ebd69de9c0d14cb437dc9d6711f70d2",
-    "format": "webp",
-    "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
-    "purpose": "Product still from footage: Embossed back close-up (washed charcoal): blackletter 'steadfast' + ornamental hood embossing",
-    "crop": {
-     "x": 0,
-     "y": 230,
-     "w": 576,
-     "h": 720,
-     "frac": [
-      0.0,
-      0.1797,
-      0.8,
-      0.7422
-     ],
-     "extends_beyond_source": false,
-     "frame": 100,
-     "t": 3.333
-    },
-    "ops": [
-     "HLG -> SDR tone map",
-     "4:5 crop 576x720",
-     "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
-     "sky + foliage behind the hood burnt to black (traced polygon, 3.5% feather)",
-     "right burn 0.86-0.98 (supercar)",
-     "resize lanczos x1.25",
-     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
-    ],
-    "notes": "Video frame 100 at t=3.333s (sharpest by Laplacian variance in the garment ROI within 3.3-3.8s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 720px wide.",
-    "theme_asset": false,
-    "owner": "tools/media/process_stills.py",
-    "scale": 1.25,
-    "upscaled": true
-   },
-   {
-    "path": "media/processed/products/embossed-gothic-hoodie--back-charcoal-720.jpg",
-    "file": "embossed-gothic-hoodie--back-charcoal-720.jpg",
-    "group": "product",
-    "base": "embossed-gothic-hoodie--back-charcoal",
-    "width": 720,
-    "height": 900,
-    "bytes": 107641,
-    "sha1": "d8adf0687a39399e083905a2ae41c341bb00f860",
-    "format": "jpeg",
-    "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
-    "purpose": "Product still from footage: Embossed back close-up (washed charcoal): blackletter 'steadfast' + ornamental hood embossing (JPG fallback/master)",
-    "crop": {
-     "x": 0,
-     "y": 230,
-     "w": 576,
-     "h": 720,
-     "frac": [
-      0.0,
-      0.1797,
-      0.8,
-      0.7422
-     ],
-     "extends_beyond_source": false,
-     "frame": 100,
-     "t": 3.333
-    },
-    "ops": [
-     "HLG -> SDR tone map",
-     "4:5 crop 576x720",
-     "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
-     "sky + foliage behind the hood burnt to black (traced polygon, 3.5% feather)",
-     "right burn 0.86-0.98 (supercar)",
-     "resize lanczos x1.25",
-     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
-    ],
-    "notes": "Video frame 100 at t=3.333s (sharpest by Laplacian variance in the garment ROI within 3.3-3.8s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 720px wide.",
-    "theme_asset": false,
-    "owner": "tools/media/process_stills.py",
-    "scale": 1.25,
-    "upscaled": true
-   },
-   {
-    "path": "media/processed/stills/sf-lookbook-embossed-hoodie-400.webp",
-    "file": "sf-lookbook-embossed-hoodie-400.webp",
-    "group": "lookbook",
-    "base": "sf-lookbook-embossed-hoodie",
-    "width": 400,
-    "height": 500,
-    "bytes": 28612,
-    "sha1": "db9d873816eea9250ab7edd10289c8c6458365af",
-    "format": "webp",
-    "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
-    "purpose": "Lookbook: embossed lettering, washed charcoal hoodie (graded)",
-    "crop": {
-     "x": 0,
-     "y": 230,
-     "w": 576,
-     "h": 720,
-     "frac": [
-      0.0,
-      0.1797,
-      0.8,
-      0.7422
-     ],
-     "extends_beyond_source": false,
-     "frame": 100,
-     "t": 3.333
-    },
-    "ops": [
-     "HLG -> SDR tone map",
-     "4:5 crop 576x720",
-     "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
-     "sky + foliage behind the hood burnt to black (traced polygon, 3.5% feather)",
-     "right burn 0.86-0.98 (supercar)",
-     "resize lanczos x0.6944",
-     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
-    ],
-    "notes": "Video frame 100 at t=3.333s (sharpest by Laplacian variance in the garment ROI within 3.3-3.8s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 720px wide.",
-    "theme_asset": true,
-    "owner": "tools/media/process_stills.py",
-    "scale": 0.6944,
-    "upscaled": false
-   },
-   {
-    "path": "media/processed/stills/sf-lookbook-embossed-hoodie-720.webp",
-    "file": "sf-lookbook-embossed-hoodie-720.webp",
-    "group": "lookbook",
-    "base": "sf-lookbook-embossed-hoodie",
-    "width": 720,
-    "height": 900,
-    "bytes": 61634,
-    "sha1": "e4bc09c53ebd69de9c0d14cb437dc9d6711f70d2",
-    "format": "webp",
-    "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
-    "purpose": "Lookbook: embossed lettering, washed charcoal hoodie (graded)",
-    "crop": {
-     "x": 0,
-     "y": 230,
-     "w": 576,
-     "h": 720,
-     "frac": [
-      0.0,
-      0.1797,
-      0.8,
-      0.7422
-     ],
-     "extends_beyond_source": false,
-     "frame": 100,
-     "t": 3.333
-    },
-    "ops": [
-     "HLG -> SDR tone map",
-     "4:5 crop 576x720",
-     "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
-     "sky + foliage behind the hood burnt to black (traced polygon, 3.5% feather)",
-     "right burn 0.86-0.98 (supercar)",
-     "resize lanczos x1.25",
-     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
-    ],
-    "notes": "Video frame 100 at t=3.333s (sharpest by Laplacian variance in the garment ROI within 3.3-3.8s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 720px wide.",
-    "theme_asset": true,
-    "owner": "tools/media/process_stills.py",
-    "scale": 1.25,
-    "upscaled": true
-   },
-   {
-    "path": "media/processed/stills/sf-lookbook-embossed-hoodie-720.jpg",
-    "file": "sf-lookbook-embossed-hoodie-720.jpg",
-    "group": "lookbook",
-    "base": "sf-lookbook-embossed-hoodie",
-    "width": 720,
-    "height": 900,
-    "bytes": 107641,
-    "sha1": "d8adf0687a39399e083905a2ae41c341bb00f860",
-    "format": "jpeg",
-    "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
-    "purpose": "Lookbook: embossed lettering, washed charcoal hoodie (graded) (JPG fallback/master)",
-    "crop": {
-     "x": 0,
-     "y": 230,
-     "w": 576,
-     "h": 720,
-     "frac": [
-      0.0,
-      0.1797,
-      0.8,
-      0.7422
-     ],
-     "extends_beyond_source": false,
-     "frame": 100,
-     "t": 3.333
-    },
-    "ops": [
-     "HLG -> SDR tone map",
-     "4:5 crop 576x720",
-     "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
-     "sky + foliage behind the hood burnt to black (traced polygon, 3.5% feather)",
-     "right burn 0.86-0.98 (supercar)",
-     "resize lanczos x1.25",
-     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
-    ],
-    "notes": "Video frame 100 at t=3.333s (sharpest by Laplacian variance in the garment ROI within 3.3-3.8s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 720px wide.",
-    "theme_asset": true,
-    "owner": "tools/media/process_stills.py",
-    "scale": 1.25,
-    "upscaled": true
-   },
-   {
-    "path": "media/processed/stills/sf-category-new-arrivals-540.webp",
-    "file": "sf-category-new-arrivals-540.webp",
-    "group": "category",
-    "base": "sf-category-new-arrivals",
-    "width": 540,
-    "height": 675,
-    "bytes": 42664,
-    "sha1": "98ed68a00b844d1fccb0f16a449dd45c191f3dc7",
-    "format": "webp",
-    "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
-    "purpose": "Category tile: New Arrivals (embossed charcoal hoodie close-up, graded)",
-    "crop": {
-     "x": 0,
-     "y": 230,
-     "w": 576,
-     "h": 720,
-     "frac": [
-      0.0,
-      0.1797,
-      0.8,
-      0.7422
-     ],
-     "extends_beyond_source": false,
-     "frame": 100,
-     "t": 3.333
-    },
-    "ops": [
-     "HLG -> SDR tone map",
-     "4:5 crop 576x720",
-     "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
-     "sky + foliage behind the hood burnt to black (traced polygon, 3.5% feather)",
-     "right burn 0.86-0.98 (supercar)",
-     "resize lanczos x0.9375",
-     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
-    ],
-    "notes": "Video frame 100 at t=3.333s (sharpest by Laplacian variance in the garment ROI within 3.3-3.8s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 720px wide.",
-    "theme_asset": true,
-    "owner": "tools/media/process_stills.py",
-    "scale": 0.9375,
-    "upscaled": false
-   },
-   {
-    "path": "media/processed/stills/sf-category-new-arrivals-720.webp",
-    "file": "sf-category-new-arrivals-720.webp",
-    "group": "category",
-    "base": "sf-category-new-arrivals",
-    "width": 720,
-    "height": 900,
-    "bytes": 61634,
-    "sha1": "e4bc09c53ebd69de9c0d14cb437dc9d6711f70d2",
-    "format": "webp",
-    "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
-    "purpose": "Category tile: New Arrivals (embossed charcoal hoodie close-up, graded)",
-    "crop": {
-     "x": 0,
-     "y": 230,
-     "w": 576,
-     "h": 720,
-     "frac": [
-      0.0,
-      0.1797,
-      0.8,
-      0.7422
-     ],
-     "extends_beyond_source": false,
-     "frame": 100,
-     "t": 3.333
-    },
-    "ops": [
-     "HLG -> SDR tone map",
-     "4:5 crop 576x720",
-     "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
-     "sky + foliage behind the hood burnt to black (traced polygon, 3.5% feather)",
-     "right burn 0.86-0.98 (supercar)",
-     "resize lanczos x1.25",
-     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
-    ],
-    "notes": "Video frame 100 at t=3.333s (sharpest by Laplacian variance in the garment ROI within 3.3-3.8s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 720px wide.",
-    "theme_asset": true,
-    "owner": "tools/media/process_stills.py",
-    "scale": 1.25,
-    "upscaled": true
-   },
-   {
-    "path": "media/processed/stills/sf-category-new-arrivals-720.jpg",
-    "file": "sf-category-new-arrivals-720.jpg",
-    "group": "category",
-    "base": "sf-category-new-arrivals",
-    "width": 720,
-    "height": 900,
-    "bytes": 107641,
-    "sha1": "d8adf0687a39399e083905a2ae41c341bb00f860",
-    "format": "jpeg",
-    "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
-    "purpose": "Category tile: New Arrivals (embossed charcoal hoodie close-up, graded) (JPG fallback/master)",
-    "crop": {
-     "x": 0,
-     "y": 230,
-     "w": 576,
-     "h": 720,
-     "frac": [
-      0.0,
-      0.1797,
-      0.8,
-      0.7422
-     ],
-     "extends_beyond_source": false,
-     "frame": 100,
-     "t": 3.333
-    },
-    "ops": [
-     "HLG -> SDR tone map",
-     "4:5 crop 576x720",
-     "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
-     "sky + foliage behind the hood burnt to black (traced polygon, 3.5% feather)",
-     "right burn 0.86-0.98 (supercar)",
-     "resize lanczos x1.25",
-     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
-    ],
-    "notes": "Video frame 100 at t=3.333s (sharpest by Laplacian variance in the garment ROI within 3.3-3.8s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 720px wide.",
-    "theme_asset": true,
-    "owner": "tools/media/process_stills.py",
-    "scale": 1.25,
-    "upscaled": true
-   },
-   {
-    "path": "media/processed/frames/IMG_4376-t4.267s-f128.png",
-    "file": "IMG_4376-t4.267s-f128.png",
-    "group": "frame",
-    "base": "IMG_4376-frame",
-    "width": 720,
-    "height": 1280,
-    "bytes": 817480,
-    "sha1": "f72414e2b8bc5cc60e39ae65560ff4c53de963e2",
-    "format": "png",
-    "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
-    "purpose": "Selected source frame (tone-mapped, ungraded)",
-    "crop": null,
-    "ops": [
-     "HLG/BT.2020 -> BT.709 SDR (zscale + mobius)"
-    ],
-    "notes": "",
-    "theme_asset": false,
-    "owner": "tools/media/process_stills.py"
-   },
-   {
-    "path": "media/processed/products/embossed-gothic-hoodie--back-grey-400.webp",
-    "file": "embossed-gothic-hoodie--back-grey-400.webp",
-    "group": "product",
-    "base": "embossed-gothic-hoodie--back-grey",
-    "width": 400,
-    "height": 500,
-    "bytes": 13956,
-    "sha1": "0a0434ae1ebe69ea13c8c654b56fa6d4ecb83057",
-    "format": "webp",
-    "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
-    "purpose": "Product still from footage: Back view at night (washed grey): arched back panel, embossed lettering on the shoulders",
-    "crop": {
-     "x": 0,
-     "y": 262,
-     "w": 640,
-     "h": 800,
-     "frac": [
-      0.0,
-      0.2047,
-      0.8889,
-      0.8297
-     ],
-     "extends_beyond_source": false,
-     "frame": 128,
-     "t": 4.267
-    },
-    "ops": [
-     "HLG -> SDR tone map",
-     "4:5 crop 640x800",
-     "grade.sh pre (IMG_4376) + STEADFAST_LOOK (no grain)",
-     "right burn x 0.844-0.964 (SUV + tail light, sleeve fades)",
-     "pavement left of the figure + foliage above the hood burnt to black (traced polygons, soft feather)",
-     "left burn 0.04-0.24 to black",
-     "resize lanczos x0.625",
-     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
-    ],
-    "notes": "Video frame 128 at t=4.267s (sharpest by Laplacian variance in the garment ROI within 3.3-5.3s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 800px wide.",
-    "theme_asset": false,
-    "owner": "tools/media/process_stills.py",
-    "scale": 0.625,
-    "upscaled": false
-   },
-   {
-    "path": "media/processed/products/embossed-gothic-hoodie--back-grey-800.webp",
-    "file": "embossed-gothic-hoodie--back-grey-800.webp",
-    "group": "product",
-    "base": "embossed-gothic-hoodie--back-grey",
-    "width": 800,
-    "height": 1000,
-    "bytes": 30576,
-    "sha1": "bab4bb192234e3bb70df2cf46f0029b4fa4997c3",
-    "format": "webp",
-    "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
-    "purpose": "Product still from footage: Back view at night (washed grey): arched back panel, embossed lettering on the shoulders",
-    "crop": {
-     "x": 0,
-     "y": 262,
-     "w": 640,
-     "h": 800,
-     "frac": [
-      0.0,
-      0.2047,
-      0.8889,
-      0.8297
-     ],
-     "extends_beyond_source": false,
-     "frame": 128,
-     "t": 4.267
-    },
-    "ops": [
-     "HLG -> SDR tone map",
-     "4:5 crop 640x800",
-     "grade.sh pre (IMG_4376) + STEADFAST_LOOK (no grain)",
-     "right burn x 0.844-0.964 (SUV + tail light, sleeve fades)",
-     "pavement left of the figure + foliage above the hood burnt to black (traced polygons, soft feather)",
-     "left burn 0.04-0.24 to black",
-     "resize lanczos x1.25",
-     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
-    ],
-    "notes": "Video frame 128 at t=4.267s (sharpest by Laplacian variance in the garment ROI within 3.3-5.3s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 800px wide.",
-    "theme_asset": false,
-    "owner": "tools/media/process_stills.py",
-    "scale": 1.25,
-    "upscaled": true
-   },
-   {
-    "path": "media/processed/products/embossed-gothic-hoodie--back-grey-800.jpg",
-    "file": "embossed-gothic-hoodie--back-grey-800.jpg",
-    "group": "product",
-    "base": "embossed-gothic-hoodie--back-grey",
-    "width": 800,
-    "height": 1000,
-    "bytes": 69866,
-    "sha1": "644fdb2558bf0a16a309e232c03d886323eca797",
-    "format": "jpeg",
-    "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
-    "purpose": "Product still from footage: Back view at night (washed grey): arched back panel, embossed lettering on the shoulders (JPG fallback/master)",
-    "crop": {
-     "x": 0,
-     "y": 262,
-     "w": 640,
-     "h": 800,
-     "frac": [
-      0.0,
-      0.2047,
-      0.8889,
-      0.8297
-     ],
-     "extends_beyond_source": false,
-     "frame": 128,
-     "t": 4.267
-    },
-    "ops": [
-     "HLG -> SDR tone map",
-     "4:5 crop 640x800",
-     "grade.sh pre (IMG_4376) + STEADFAST_LOOK (no grain)",
-     "right burn x 0.844-0.964 (SUV + tail light, sleeve fades)",
-     "pavement left of the figure + foliage above the hood burnt to black (traced polygons, soft feather)",
-     "left burn 0.04-0.24 to black",
-     "resize lanczos x1.25",
-     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
-    ],
-    "notes": "Video frame 128 at t=4.267s (sharpest by Laplacian variance in the garment ROI within 3.3-5.3s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 800px wide.",
-    "theme_asset": false,
-    "owner": "tools/media/process_stills.py",
-    "scale": 1.25,
-    "upscaled": true
-   },
-   {
     "path": "media/processed/stills/sf-grain-256.webp",
     "file": "sf-grain-256.webp",
     "group": "texture",
@@ -10021,14 +9480,747 @@
     "owner": "tools/media/process_stills.py"
    },
    {
+    "path": "media/processed/frames/IMG_4913-t3.333s-f100.png",
+    "file": "IMG_4913-t3.333s-f100.png",
+    "group": "frame",
+    "base": "IMG_4913-frame",
+    "width": 720,
+    "height": 1280,
+    "bytes": 1084521,
+    "sha1": "4498eda348fba0baff498e4d7dddc663b7884bfe",
+    "format": "png",
+    "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+    "purpose": "Selected source frame (tone-mapped, ungraded)",
+    "crop": null,
+    "ops": [
+     "HLG/BT.2020 -> BT.709 SDR (zscale + mobius)"
+    ],
+    "notes": "",
+    "theme_asset": false,
+    "owner": "tools/media/process_stills.py"
+   },
+   {
+    "path": "media/processed/products/embossed-gothic-hoodie--back-charcoal-400.webp",
+    "file": "embossed-gothic-hoodie--back-charcoal-400.webp",
+    "group": "product",
+    "base": "embossed-gothic-hoodie--back-charcoal",
+    "width": 400,
+    "height": 500,
+    "bytes": 28416,
+    "sha1": "d5001d66dd53b67b8300ab5b5270289daccdf1a7",
+    "format": "webp",
+    "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+    "purpose": "Product still from footage: Embossed back close-up (washed charcoal): blackletter 'steadfast' + ornamental hood embossing",
+    "crop": {
+     "x": 0,
+     "y": 230,
+     "w": 576,
+     "h": 720,
+     "frac": [
+      0.0,
+      0.1797,
+      0.8,
+      0.7422
+     ],
+     "extends_beyond_source": false,
+     "frame": 100,
+     "t": 3.333
+    },
+    "ops": [
+     "HLG -> SDR tone map",
+     "4:5 crop 576x720",
+     "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
+     "background right of the garment silhouette (sky, trees, grass, supercar) to #000: per-row edge trace (tools/media/masks/IMG_4913-f100-garment-edge.json), 1 px inset, Gaussian 0.6 px feather",
+     "right burn 0.86-0.98 to 15 % (sleeve fades at the frame edge)",
+     "resize lanczos x0.6944",
+     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+    ],
+    "notes": "Video frame 100 at t=3.333s (sharpest by Laplacian variance in the garment ROI within 3.3-3.8s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 720px wide.",
+    "theme_asset": false,
+    "owner": "tools/media/process_stills.py",
+    "scale": 0.6944,
+    "upscaled": false
+   },
+   {
+    "path": "media/processed/products/embossed-gothic-hoodie--back-charcoal-720.webp",
+    "file": "embossed-gothic-hoodie--back-charcoal-720.webp",
+    "group": "product",
+    "base": "embossed-gothic-hoodie--back-charcoal",
+    "width": 720,
+    "height": 900,
+    "bytes": 60720,
+    "sha1": "3971b9da65143b974ef6027aa66edb41b7076896",
+    "format": "webp",
+    "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+    "purpose": "Product still from footage: Embossed back close-up (washed charcoal): blackletter 'steadfast' + ornamental hood embossing",
+    "crop": {
+     "x": 0,
+     "y": 230,
+     "w": 576,
+     "h": 720,
+     "frac": [
+      0.0,
+      0.1797,
+      0.8,
+      0.7422
+     ],
+     "extends_beyond_source": false,
+     "frame": 100,
+     "t": 3.333
+    },
+    "ops": [
+     "HLG -> SDR tone map",
+     "4:5 crop 576x720",
+     "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
+     "background right of the garment silhouette (sky, trees, grass, supercar) to #000: per-row edge trace (tools/media/masks/IMG_4913-f100-garment-edge.json), 1 px inset, Gaussian 0.6 px feather",
+     "right burn 0.86-0.98 to 15 % (sleeve fades at the frame edge)",
+     "resize lanczos x1.25",
+     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+    ],
+    "notes": "Video frame 100 at t=3.333s (sharpest by Laplacian variance in the garment ROI within 3.3-3.8s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 720px wide.",
+    "theme_asset": false,
+    "owner": "tools/media/process_stills.py",
+    "scale": 1.25,
+    "upscaled": true
+   },
+   {
+    "path": "media/processed/products/embossed-gothic-hoodie--back-charcoal-720.jpg",
+    "file": "embossed-gothic-hoodie--back-charcoal-720.jpg",
+    "group": "product",
+    "base": "embossed-gothic-hoodie--back-charcoal",
+    "width": 720,
+    "height": 900,
+    "bytes": 107214,
+    "sha1": "531b338f593cef75fb16248b8c98ce1c97a59071",
+    "format": "jpeg",
+    "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+    "purpose": "Product still from footage: Embossed back close-up (washed charcoal): blackletter 'steadfast' + ornamental hood embossing (JPG fallback/master)",
+    "crop": {
+     "x": 0,
+     "y": 230,
+     "w": 576,
+     "h": 720,
+     "frac": [
+      0.0,
+      0.1797,
+      0.8,
+      0.7422
+     ],
+     "extends_beyond_source": false,
+     "frame": 100,
+     "t": 3.333
+    },
+    "ops": [
+     "HLG -> SDR tone map",
+     "4:5 crop 576x720",
+     "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
+     "background right of the garment silhouette (sky, trees, grass, supercar) to #000: per-row edge trace (tools/media/masks/IMG_4913-f100-garment-edge.json), 1 px inset, Gaussian 0.6 px feather",
+     "right burn 0.86-0.98 to 15 % (sleeve fades at the frame edge)",
+     "resize lanczos x1.25",
+     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+    ],
+    "notes": "Video frame 100 at t=3.333s (sharpest by Laplacian variance in the garment ROI within 3.3-3.8s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 720px wide.",
+    "theme_asset": false,
+    "owner": "tools/media/process_stills.py",
+    "scale": 1.25,
+    "upscaled": true
+   },
+   {
+    "path": "media/processed/stills/sf-lookbook-embossed-hoodie-400.webp",
+    "file": "sf-lookbook-embossed-hoodie-400.webp",
+    "group": "lookbook",
+    "base": "sf-lookbook-embossed-hoodie",
+    "width": 400,
+    "height": 500,
+    "bytes": 28416,
+    "sha1": "d5001d66dd53b67b8300ab5b5270289daccdf1a7",
+    "format": "webp",
+    "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+    "purpose": "Lookbook: embossed lettering, washed charcoal hoodie (graded)",
+    "crop": {
+     "x": 0,
+     "y": 230,
+     "w": 576,
+     "h": 720,
+     "frac": [
+      0.0,
+      0.1797,
+      0.8,
+      0.7422
+     ],
+     "extends_beyond_source": false,
+     "frame": 100,
+     "t": 3.333
+    },
+    "ops": [
+     "HLG -> SDR tone map",
+     "4:5 crop 576x720",
+     "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
+     "background right of the garment silhouette (sky, trees, grass, supercar) to #000: per-row edge trace (tools/media/masks/IMG_4913-f100-garment-edge.json), 1 px inset, Gaussian 0.6 px feather",
+     "right burn 0.86-0.98 to 15 % (sleeve fades at the frame edge)",
+     "resize lanczos x0.6944",
+     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+    ],
+    "notes": "Video frame 100 at t=3.333s (sharpest by Laplacian variance in the garment ROI within 3.3-3.8s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 720px wide.",
+    "theme_asset": true,
+    "owner": "tools/media/process_stills.py",
+    "scale": 0.6944,
+    "upscaled": false
+   },
+   {
+    "path": "media/processed/stills/sf-lookbook-embossed-hoodie-720.webp",
+    "file": "sf-lookbook-embossed-hoodie-720.webp",
+    "group": "lookbook",
+    "base": "sf-lookbook-embossed-hoodie",
+    "width": 720,
+    "height": 900,
+    "bytes": 60720,
+    "sha1": "3971b9da65143b974ef6027aa66edb41b7076896",
+    "format": "webp",
+    "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+    "purpose": "Lookbook: embossed lettering, washed charcoal hoodie (graded)",
+    "crop": {
+     "x": 0,
+     "y": 230,
+     "w": 576,
+     "h": 720,
+     "frac": [
+      0.0,
+      0.1797,
+      0.8,
+      0.7422
+     ],
+     "extends_beyond_source": false,
+     "frame": 100,
+     "t": 3.333
+    },
+    "ops": [
+     "HLG -> SDR tone map",
+     "4:5 crop 576x720",
+     "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
+     "background right of the garment silhouette (sky, trees, grass, supercar) to #000: per-row edge trace (tools/media/masks/IMG_4913-f100-garment-edge.json), 1 px inset, Gaussian 0.6 px feather",
+     "right burn 0.86-0.98 to 15 % (sleeve fades at the frame edge)",
+     "resize lanczos x1.25",
+     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+    ],
+    "notes": "Video frame 100 at t=3.333s (sharpest by Laplacian variance in the garment ROI within 3.3-3.8s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 720px wide.",
+    "theme_asset": true,
+    "owner": "tools/media/process_stills.py",
+    "scale": 1.25,
+    "upscaled": true
+   },
+   {
+    "path": "media/processed/stills/sf-lookbook-embossed-hoodie-720.jpg",
+    "file": "sf-lookbook-embossed-hoodie-720.jpg",
+    "group": "lookbook",
+    "base": "sf-lookbook-embossed-hoodie",
+    "width": 720,
+    "height": 900,
+    "bytes": 107214,
+    "sha1": "531b338f593cef75fb16248b8c98ce1c97a59071",
+    "format": "jpeg",
+    "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+    "purpose": "Lookbook: embossed lettering, washed charcoal hoodie (graded) (JPG fallback/master)",
+    "crop": {
+     "x": 0,
+     "y": 230,
+     "w": 576,
+     "h": 720,
+     "frac": [
+      0.0,
+      0.1797,
+      0.8,
+      0.7422
+     ],
+     "extends_beyond_source": false,
+     "frame": 100,
+     "t": 3.333
+    },
+    "ops": [
+     "HLG -> SDR tone map",
+     "4:5 crop 576x720",
+     "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
+     "background right of the garment silhouette (sky, trees, grass, supercar) to #000: per-row edge trace (tools/media/masks/IMG_4913-f100-garment-edge.json), 1 px inset, Gaussian 0.6 px feather",
+     "right burn 0.86-0.98 to 15 % (sleeve fades at the frame edge)",
+     "resize lanczos x1.25",
+     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+    ],
+    "notes": "Video frame 100 at t=3.333s (sharpest by Laplacian variance in the garment ROI within 3.3-3.8s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 720px wide.",
+    "theme_asset": true,
+    "owner": "tools/media/process_stills.py",
+    "scale": 1.25,
+    "upscaled": true
+   },
+   {
+    "path": "media/processed/stills/sf-category-new-arrivals-540.webp",
+    "file": "sf-category-new-arrivals-540.webp",
+    "group": "category",
+    "base": "sf-category-new-arrivals",
+    "width": 540,
+    "height": 675,
+    "bytes": 42826,
+    "sha1": "f769c515ba3a24698eed26cc6e78b21db09b5ac9",
+    "format": "webp",
+    "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+    "purpose": "Category tile: New Arrivals (embossed charcoal hoodie close-up, graded)",
+    "crop": {
+     "x": 0,
+     "y": 230,
+     "w": 576,
+     "h": 720,
+     "frac": [
+      0.0,
+      0.1797,
+      0.8,
+      0.7422
+     ],
+     "extends_beyond_source": false,
+     "frame": 100,
+     "t": 3.333
+    },
+    "ops": [
+     "HLG -> SDR tone map",
+     "4:5 crop 576x720",
+     "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
+     "background right of the garment silhouette (sky, trees, grass, supercar) to #000: per-row edge trace (tools/media/masks/IMG_4913-f100-garment-edge.json), 1 px inset, Gaussian 0.6 px feather",
+     "right burn 0.86-0.98 to 15 % (sleeve fades at the frame edge)",
+     "resize lanczos x0.9375",
+     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+    ],
+    "notes": "Video frame 100 at t=3.333s (sharpest by Laplacian variance in the garment ROI within 3.3-3.8s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 720px wide.",
+    "theme_asset": true,
+    "owner": "tools/media/process_stills.py",
+    "scale": 0.9375,
+    "upscaled": false
+   },
+   {
+    "path": "media/processed/stills/sf-category-new-arrivals-720.webp",
+    "file": "sf-category-new-arrivals-720.webp",
+    "group": "category",
+    "base": "sf-category-new-arrivals",
+    "width": 720,
+    "height": 900,
+    "bytes": 60720,
+    "sha1": "3971b9da65143b974ef6027aa66edb41b7076896",
+    "format": "webp",
+    "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+    "purpose": "Category tile: New Arrivals (embossed charcoal hoodie close-up, graded)",
+    "crop": {
+     "x": 0,
+     "y": 230,
+     "w": 576,
+     "h": 720,
+     "frac": [
+      0.0,
+      0.1797,
+      0.8,
+      0.7422
+     ],
+     "extends_beyond_source": false,
+     "frame": 100,
+     "t": 3.333
+    },
+    "ops": [
+     "HLG -> SDR tone map",
+     "4:5 crop 576x720",
+     "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
+     "background right of the garment silhouette (sky, trees, grass, supercar) to #000: per-row edge trace (tools/media/masks/IMG_4913-f100-garment-edge.json), 1 px inset, Gaussian 0.6 px feather",
+     "right burn 0.86-0.98 to 15 % (sleeve fades at the frame edge)",
+     "resize lanczos x1.25",
+     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+    ],
+    "notes": "Video frame 100 at t=3.333s (sharpest by Laplacian variance in the garment ROI within 3.3-3.8s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 720px wide.",
+    "theme_asset": true,
+    "owner": "tools/media/process_stills.py",
+    "scale": 1.25,
+    "upscaled": true
+   },
+   {
+    "path": "media/processed/stills/sf-category-new-arrivals-720.jpg",
+    "file": "sf-category-new-arrivals-720.jpg",
+    "group": "category",
+    "base": "sf-category-new-arrivals",
+    "width": 720,
+    "height": 900,
+    "bytes": 107214,
+    "sha1": "531b338f593cef75fb16248b8c98ce1c97a59071",
+    "format": "jpeg",
+    "source": "media/source/footage/IMG_4913-day-embossed-closeup.MOV",
+    "purpose": "Category tile: New Arrivals (embossed charcoal hoodie close-up, graded) (JPG fallback/master)",
+    "crop": {
+     "x": 0,
+     "y": 230,
+     "w": 576,
+     "h": 720,
+     "frac": [
+      0.0,
+      0.1797,
+      0.8,
+      0.7422
+     ],
+     "extends_beyond_source": false,
+     "frame": 100,
+     "t": 3.333
+    },
+    "ops": [
+     "HLG -> SDR tone map",
+     "4:5 crop 576x720",
+     "grade.sh pre (IMG_4913) + STEADFAST_LOOK (no grain)",
+     "background right of the garment silhouette (sky, trees, grass, supercar) to #000: per-row edge trace (tools/media/masks/IMG_4913-f100-garment-edge.json), 1 px inset, Gaussian 0.6 px feather",
+     "right burn 0.86-0.98 to 15 % (sleeve fades at the frame edge)",
+     "resize lanczos x1.25",
+     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+    ],
+    "notes": "Video frame 100 at t=3.333s (sharpest by Laplacian variance in the garment ROI within 3.3-3.8s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 720px wide.",
+    "theme_asset": true,
+    "owner": "tools/media/process_stills.py",
+    "scale": 1.25,
+    "upscaled": true
+   },
+   {
+    "path": "media/processed/frames/IMG_4376-t4.267s-f128.png",
+    "file": "IMG_4376-t4.267s-f128.png",
+    "group": "frame",
+    "base": "IMG_4376-frame",
+    "width": 720,
+    "height": 1280,
+    "bytes": 817480,
+    "sha1": "f72414e2b8bc5cc60e39ae65560ff4c53de963e2",
+    "format": "png",
+    "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+    "purpose": "Selected source frame (tone-mapped, ungraded)",
+    "crop": null,
+    "ops": [
+     "HLG/BT.2020 -> BT.709 SDR (zscale + mobius)"
+    ],
+    "notes": "",
+    "theme_asset": false,
+    "owner": "tools/media/process_stills.py"
+   },
+   {
+    "path": "media/processed/products/embossed-gothic-hoodie--back-grey-400.webp",
+    "file": "embossed-gothic-hoodie--back-grey-400.webp",
+    "group": "product",
+    "base": "embossed-gothic-hoodie--back-grey",
+    "width": 400,
+    "height": 500,
+    "bytes": 13620,
+    "sha1": "24c85486c15c5c82a0bfb8b30132b9c6e0b604e1",
+    "format": "webp",
+    "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+    "purpose": "Product still from footage: Back view at night (washed grey): arched back panel, embossed lettering on the shoulders",
+    "crop": {
+     "x": 0,
+     "y": 262,
+     "w": 640,
+     "h": 800,
+     "frac": [
+      0.0,
+      0.2047,
+      0.8889,
+      0.8297
+     ],
+     "extends_beyond_source": false,
+     "frame": 128,
+     "t": 4.267
+    },
+    "ops": [
+     "HLG -> SDR tone map",
+     "4:5 crop 640x800",
+     "grade.sh pre (IMG_4376) + STEADFAST_LOOK (no grain)",
+     "right burn x 0.844-0.964 (SUV + tail light, sleeve fades)",
+     "pavement left of the figure + foliage above the hood burnt to black (traced polygons, soft feather)",
+     "left burn 0.04-0.24 to black",
+     "leaves left of the hood burnt to black (traced polygon 3-4 px off the hood, 1.5 px feather)",
+     "everything right of the sleeve (bystander, car, speck) to #000: per-row edge trace (tools/media/masks/IMG_4376-f128-garment-right-edge.json), 1 px inset, 0.6 px feather",
+     "resize lanczos x0.625",
+     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+    ],
+    "notes": "Video frame 128 at t=4.267s (sharpest by Laplacian variance in the garment ROI within 3.3-5.3s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 800px wide.",
+    "theme_asset": false,
+    "owner": "tools/media/process_stills.py",
+    "scale": 0.625,
+    "upscaled": false
+   },
+   {
+    "path": "media/processed/products/embossed-gothic-hoodie--back-grey-800.webp",
+    "file": "embossed-gothic-hoodie--back-grey-800.webp",
+    "group": "product",
+    "base": "embossed-gothic-hoodie--back-grey",
+    "width": 800,
+    "height": 1000,
+    "bytes": 29908,
+    "sha1": "21a2ed762ec9a18f36cc86fe05571ae1ffa8ab67",
+    "format": "webp",
+    "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+    "purpose": "Product still from footage: Back view at night (washed grey): arched back panel, embossed lettering on the shoulders",
+    "crop": {
+     "x": 0,
+     "y": 262,
+     "w": 640,
+     "h": 800,
+     "frac": [
+      0.0,
+      0.2047,
+      0.8889,
+      0.8297
+     ],
+     "extends_beyond_source": false,
+     "frame": 128,
+     "t": 4.267
+    },
+    "ops": [
+     "HLG -> SDR tone map",
+     "4:5 crop 640x800",
+     "grade.sh pre (IMG_4376) + STEADFAST_LOOK (no grain)",
+     "right burn x 0.844-0.964 (SUV + tail light, sleeve fades)",
+     "pavement left of the figure + foliage above the hood burnt to black (traced polygons, soft feather)",
+     "left burn 0.04-0.24 to black",
+     "leaves left of the hood burnt to black (traced polygon 3-4 px off the hood, 1.5 px feather)",
+     "everything right of the sleeve (bystander, car, speck) to #000: per-row edge trace (tools/media/masks/IMG_4376-f128-garment-right-edge.json), 1 px inset, 0.6 px feather",
+     "resize lanczos x1.25",
+     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+    ],
+    "notes": "Video frame 128 at t=4.267s (sharpest by Laplacian variance in the garment ROI within 3.3-5.3s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 800px wide.",
+    "theme_asset": false,
+    "owner": "tools/media/process_stills.py",
+    "scale": 1.25,
+    "upscaled": true
+   },
+   {
+    "path": "media/processed/products/embossed-gothic-hoodie--back-grey-800.jpg",
+    "file": "embossed-gothic-hoodie--back-grey-800.jpg",
+    "group": "product",
+    "base": "embossed-gothic-hoodie--back-grey",
+    "width": 800,
+    "height": 1000,
+    "bytes": 68404,
+    "sha1": "c8fb1bdefc66e8387819f0f53389d8de503bf5cb",
+    "format": "jpeg",
+    "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+    "purpose": "Product still from footage: Back view at night (washed grey): arched back panel, embossed lettering on the shoulders (JPG fallback/master)",
+    "crop": {
+     "x": 0,
+     "y": 262,
+     "w": 640,
+     "h": 800,
+     "frac": [
+      0.0,
+      0.2047,
+      0.8889,
+      0.8297
+     ],
+     "extends_beyond_source": false,
+     "frame": 128,
+     "t": 4.267
+    },
+    "ops": [
+     "HLG -> SDR tone map",
+     "4:5 crop 640x800",
+     "grade.sh pre (IMG_4376) + STEADFAST_LOOK (no grain)",
+     "right burn x 0.844-0.964 (SUV + tail light, sleeve fades)",
+     "pavement left of the figure + foliage above the hood burnt to black (traced polygons, soft feather)",
+     "left burn 0.04-0.24 to black",
+     "leaves left of the hood burnt to black (traced polygon 3-4 px off the hood, 1.5 px feather)",
+     "everything right of the sleeve (bystander, car, speck) to #000: per-row edge trace (tools/media/masks/IMG_4376-f128-garment-right-edge.json), 1 px inset, 0.6 px feather",
+     "resize lanczos x1.25",
+     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+    ],
+    "notes": "Video frame 128 at t=4.267s (sharpest by Laplacian variance in the garment ROI within 3.3-5.3s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 800px wide.",
+    "theme_asset": false,
+    "owner": "tools/media/process_stills.py",
+    "scale": 1.25,
+    "upscaled": true
+   },
+   {
+    "path": "media/processed/stills/sf-collection-hoodies-540.webp",
+    "file": "sf-collection-hoodies-540.webp",
+    "group": "collection",
+    "base": "sf-collection-hoodies",
+    "width": 540,
+    "height": 675,
+    "bytes": 19242,
+    "sha1": "24a34e7e311b9d6049cda3ece56dd271773c12bb",
+    "format": "webp",
+    "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+    "purpose": "Collection image: Hoodies (embossed gothic hoodie, night back view, graded + burnt)",
+    "crop": {
+     "x": 0,
+     "y": 262,
+     "w": 640,
+     "h": 800,
+     "frac": [
+      0.0,
+      0.2047,
+      0.8889,
+      0.8297
+     ],
+     "extends_beyond_source": false,
+     "frame": 128,
+     "t": 4.267
+    },
+    "ops": [
+     "HLG -> SDR tone map",
+     "4:5 crop 640x800",
+     "grade.sh pre (IMG_4376) + STEADFAST_LOOK (no grain)",
+     "right burn x 0.844-0.964 (SUV + tail light, sleeve fades)",
+     "pavement left of the figure + foliage above the hood burnt to black (traced polygons, soft feather)",
+     "left burn 0.04-0.24 to black",
+     "leaves left of the hood burnt to black (traced polygon 3-4 px off the hood, 1.5 px feather)",
+     "everything right of the sleeve (bystander, car, speck) to #000: per-row edge trace (tools/media/masks/IMG_4376-f128-garment-right-edge.json), 1 px inset, 0.6 px feather",
+     "resize lanczos x0.8438",
+     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+    ],
+    "notes": "Video frame 128 at t=4.267s (sharpest by Laplacian variance in the garment ROI within 3.3-5.3s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 800px wide. 900/1080 are x1.41/x1.69 Lanczos upscales of the 640 px plate (review r2 item 1).",
+    "theme_asset": false,
+    "owner": "tools/media/process_stills.py",
+    "scale": 0.8438,
+    "upscaled": false
+   },
+   {
+    "path": "media/processed/stills/sf-collection-hoodies-900.webp",
+    "file": "sf-collection-hoodies-900.webp",
+    "group": "collection",
+    "base": "sf-collection-hoodies",
+    "width": 900,
+    "height": 1125,
+    "bytes": 34036,
+    "sha1": "014633e0f7adbb145822ef7408cbd1b6617d4910",
+    "format": "webp",
+    "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+    "purpose": "Collection image: Hoodies (embossed gothic hoodie, night back view, graded + burnt)",
+    "crop": {
+     "x": 0,
+     "y": 262,
+     "w": 640,
+     "h": 800,
+     "frac": [
+      0.0,
+      0.2047,
+      0.8889,
+      0.8297
+     ],
+     "extends_beyond_source": false,
+     "frame": 128,
+     "t": 4.267
+    },
+    "ops": [
+     "HLG -> SDR tone map",
+     "4:5 crop 640x800",
+     "grade.sh pre (IMG_4376) + STEADFAST_LOOK (no grain)",
+     "right burn x 0.844-0.964 (SUV + tail light, sleeve fades)",
+     "pavement left of the figure + foliage above the hood burnt to black (traced polygons, soft feather)",
+     "left burn 0.04-0.24 to black",
+     "leaves left of the hood burnt to black (traced polygon 3-4 px off the hood, 1.5 px feather)",
+     "everything right of the sleeve (bystander, car, speck) to #000: per-row edge trace (tools/media/masks/IMG_4376-f128-garment-right-edge.json), 1 px inset, 0.6 px feather",
+     "resize lanczos x1.4062",
+     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+    ],
+    "notes": "Video frame 128 at t=4.267s (sharpest by Laplacian variance in the garment ROI within 3.3-5.3s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 800px wide. 900/1080 are x1.41/x1.69 Lanczos upscales of the 640 px plate (review r2 item 1).",
+    "theme_asset": false,
+    "owner": "tools/media/process_stills.py",
+    "scale": 1.4062,
+    "upscaled": true
+   },
+   {
+    "path": "media/processed/stills/sf-collection-hoodies-900.jpg",
+    "file": "sf-collection-hoodies-900.jpg",
+    "group": "collection",
+    "base": "sf-collection-hoodies",
+    "width": 900,
+    "height": 1125,
+    "bytes": 81153,
+    "sha1": "328eb9d2b4988f5a3f6f5648ee6e21c239be5142",
+    "format": "jpeg",
+    "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+    "purpose": "Collection image: Hoodies (embossed gothic hoodie, night back view, graded + burnt) (JPG fallback/master)",
+    "crop": {
+     "x": 0,
+     "y": 262,
+     "w": 640,
+     "h": 800,
+     "frac": [
+      0.0,
+      0.2047,
+      0.8889,
+      0.8297
+     ],
+     "extends_beyond_source": false,
+     "frame": 128,
+     "t": 4.267
+    },
+    "ops": [
+     "HLG -> SDR tone map",
+     "4:5 crop 640x800",
+     "grade.sh pre (IMG_4376) + STEADFAST_LOOK (no grain)",
+     "right burn x 0.844-0.964 (SUV + tail light, sleeve fades)",
+     "pavement left of the figure + foliage above the hood burnt to black (traced polygons, soft feather)",
+     "left burn 0.04-0.24 to black",
+     "leaves left of the hood burnt to black (traced polygon 3-4 px off the hood, 1.5 px feather)",
+     "everything right of the sleeve (bystander, car, speck) to #000: per-row edge trace (tools/media/masks/IMG_4376-f128-garment-right-edge.json), 1 px inset, 0.6 px feather",
+     "resize lanczos x1.4062",
+     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+    ],
+    "notes": "Video frame 128 at t=4.267s (sharpest by Laplacian variance in the garment ROI within 3.3-5.3s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 800px wide. 900/1080 are x1.41/x1.69 Lanczos upscales of the 640 px plate (review r2 item 1).",
+    "theme_asset": false,
+    "owner": "tools/media/process_stills.py",
+    "scale": 1.4062,
+    "upscaled": true
+   },
+   {
+    "path": "media/processed/stills/sf-collection-hoodies-1080.webp",
+    "file": "sf-collection-hoodies-1080.webp",
+    "group": "collection",
+    "base": "sf-collection-hoodies",
+    "width": 1080,
+    "height": 1350,
+    "bytes": 41778,
+    "sha1": "f85589759202b35c59c9d797e8172776821c0f26",
+    "format": "webp",
+    "source": "media/source/footage/IMG_4376-night-back-grey-embossed-hoodie.MOV",
+    "purpose": "Collection image: Hoodies (embossed gothic hoodie, night back view, graded + burnt)",
+    "crop": {
+     "x": 0,
+     "y": 262,
+     "w": 640,
+     "h": 800,
+     "frac": [
+      0.0,
+      0.2047,
+      0.8889,
+      0.8297
+     ],
+     "extends_beyond_source": false,
+     "frame": 128,
+     "t": 4.267
+    },
+    "ops": [
+     "HLG -> SDR tone map",
+     "4:5 crop 640x800",
+     "grade.sh pre (IMG_4376) + STEADFAST_LOOK (no grain)",
+     "right burn x 0.844-0.964 (SUV + tail light, sleeve fades)",
+     "pavement left of the figure + foliage above the hood burnt to black (traced polygons, soft feather)",
+     "left burn 0.04-0.24 to black",
+     "leaves left of the hood burnt to black (traced polygon 3-4 px off the hood, 1.5 px feather)",
+     "everything right of the sleeve (bystander, car, speck) to #000: per-row edge trace (tools/media/masks/IMG_4376-f128-garment-right-edge.json), 1 px inset, 0.6 px feather",
+     "resize lanczos x1.6875",
+     "black-point clamp luma<=6 -> 0, smooth ramp to 12"
+    ],
+    "notes": "Video frame 128 at t=4.267s (sharpest by Laplacian variance in the garment ROI within 3.3-5.3s, where the full lettering faces camera). Source is 720x1280 phone video (HEVC): soft and noisy compared with the stills; max 800px wide. 900/1080 are x1.41/x1.69 Lanczos upscales of the 640 px plate (review r2 item 1).",
+    "theme_asset": false,
+    "owner": "tools/media/process_stills.py",
+    "scale": 1.6875,
+    "upscaled": true
+   },
+   {
     "path": "media/processed/stills/_contact-sheet.jpg",
     "file": "_contact-sheet.jpg",
     "group": "qa",
     "base": "_contact-sheet",
     "width": 1870,
     "height": 3512,
-    "bytes": 701783,
-    "sha1": "6702bfe44238f75093dbba4baad3b13591b1afcd",
+    "bytes": 719863,
+    "sha1": "8b719c53baab3c6f564b52d5eb0a60a45c985886",
     "format": "jpeg",
     "source": "(all)",
     "purpose": "Contact sheet of every processed still",

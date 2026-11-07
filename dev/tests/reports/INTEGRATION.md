@@ -288,3 +288,82 @@ Spec 16 measurements, theme-owned requests before first scroll / JS br / CSS br 
 
 What I checked by eye: hero lockup and CTAs (Explore collection + View the campaign, PAUSE label); zip hoodie leads the rail, grid and showcase with no hanger; the signature pin ends on BACK with title, price and "Shop the zip hoodie"; the category index with stage on the right; brand story with no default copy (F8); the textured wordmark in the full-height desktop header and the footer, the flat one when condensed and on mobile (F9); the mega menu as an index plus 3:4 stage, no promo (CD-11); the collection title block and "6 pieces" count (CD-08, CD-17); PDP "Select a size" with no size pre-selected (UX-07) and the mobile sticky buy bar (CD-16); cart drawer with one line and a single tax line (PLAT-04). The Gothic hoodie card no longer shows daylight (CD-02).
 
+
+## 10. Revision round 1: integration after the MEDIA-HARNESS, HOME and CORE-COMMERCE-DOCS fixers (2026-11-07)
+
+Integrator pass on the fixers' revision-round-1 output. Every number below comes from a command run in this pass, against a fresh preview on `:9340` (smoke, screenshots, probes; the Playwright runs started their own on `:9292`). The pass was interrupted by a container restart and resumed from its progress log; the checks were re-run after the restart, so the counts below are from after it.
+
+### 10.1 Checklist (§11)
+
+| Step | Command | Result |
+|---|---|---|
+| 1 | `python3 tools/media/gen_asset_snippet.py` | exit 0: 129 bundled media files (13.21 MB), 0 copied, 0 removed; `theme/assets` 166 files, 13.70 MB |
+| 1 | `node tools/locales/merge-locales.mjs` | exit 0: `en.default.json` (26 namespaces, 376 keys; +1 `collections.all_title`) |
+| 2 | `npx @shopify/cli theme check --path theme` | **0 errors, 0 warnings**, 105 files. The 4 `AssetPreload` warnings are gone: both layouts use `preload_tag` (now in §8.6) |
+| 3 | `node dev/preview/tools/smoke.mjs --base http://127.0.0.1:9340` | **56/56 routes clean** |
+| 4 | Fixture media | no fixture or theme reference to the deleted `--front-alt` / `--detail-zip` / `--detail-shoulder` / `--detail-hem` files (COMMERCE's 404 was a file MEDIA removed mid-run; it does not reproduce) |
+| 5 | §11.5 greps | see §10.3 |
+| 6 | `npm --prefix dev test` (both projects) | run 1 (before the budget tightening): 426 / 0 / 158; **run 2 (final): 426 passed, 0 failed, 0 flaky, 158 skipped** |
+
+### 10.2 What I changed (file: change)
+
+No test was weakened. Spec 16 budgets were *tightened* to the new measurements.
+
+- **HARNESS** `dev/tests/16-performance.spec.mjs`: `BUDGETS.product` 29 req / 650 KB → **23 req / 285 KB** (COMMERCE's measured 20 / 245 KB + ~15 %, as §6.1 prescribes). `BUDGETS.home` 41 req / 33.5 KB JS br → **37 req / 27 KB** (HOME's lazy `data-sf-module` sections, measured 32 / 23.2 KB + ~15 %). `docs/ARCHITECTURE.md` §6.1 rows updated with the measured values and the old ones.
+- **COMMERCE** `theme/snippets/sf-product-gallery.liquid`, `theme/assets/sf-product.css`: on the stacked desktop gallery, when the number of detail media (everything after front and back) is odd, the first detail gets `sf-gallery__item--wide` (`grid-column: 1 / -1`). The zip hoodie's three details now read chest logo full width, then neck label + cuff label side by side, with no empty cell (MEDIA's open note). Measured: wide item 755×944, the pair 376×470 each at y 2940 (`desktop-43-pdp-gallery-3.png`).
+- **DOCS** `docs/DESIGN.md`, `docs/ARCHITECTURE.md`, `docs/DEPLOYMENT.md`: hero eyebrow blank by default (FIXED POINT stays the proposed campaign name for the merchant to set; it renders only with the italic line); hero CTAs fade once to full cream over 500 ms from the film's first cut (no more 0.8 opacity); signature "sleeve label" step targets the left cuff; Section D's static four-sided edge mask and whole-pixel reveal; DEPLOYMENT's upload order for the zip hoodie lists the five published views (front, back, chest logo, neck label, cuff label) instead of the eight old ones.
+
+### 10.3 Grep checks (§11.5)
+
+- Forbidden tags and filters (§8.6), `console.log`, `backdrop-filter`: none in `theme/`.
+- `box-shadow`: the `:focus-visible` ring in `sf-base.css:76` and `none` resets only.
+- `filter` in transitions, keyframes or JS tweens: none.
+- `/\bbag\b/i`: only the internal icon name `sf-icon name: 'bag'` (SVG, labelled "Cart").
+
+### 10.4 Final test counts (run 2, `node dev/tests/helpers/summarize.mjs`)
+
+| Spec | Pass | Fail | Skip |
+|---|---:|---:|---:|
+| 00-theme-check | 1 | 0 | 1 |
+| 01-homepage | 10 | 0 | 0 |
+| 02-nav-desktop | 7 | 0 | 7 |
+| 03-nav-mobile | 5 | 0 | 5 |
+| 04-product | 50 | 0 | 0 |
+| 05-variants | 8 | 0 | 0 |
+| 06-cart | 20 | 0 | 0 |
+| 07-collection-filtering | 26 | 0 | 4 |
+| 08-hero-film | 22 | 0 | 2 |
+| 09-animation | 9 | 0 | 1 |
+| 10-reduced-motion | 8 | 0 | 0 |
+| 11-responsive | 58 | 0 | 56 |
+| 12-a11y-keyboard | 67 | 0 | 5 |
+| 13-search | 8 | 0 | 0 |
+| 14-quick-view | 4 | 0 | 0 |
+| 15-templates-smoke | 50 | 0 | 40 |
+| 16-performance | 27 | 0 | 1 |
+| 17-data-honesty | 46 | 0 | 36 |
+| **Total** | **426** | **0** | **158** |
+
+Started 2026-11-07 02:56:39 UTC, 384 s, 2 workers, 0 retries, `flaky` 0. The +2 against round 2 are spec 16's new `preload_tag` harness check (both projects). The batch-run failures the fixers saw (02 Esc focus, 02 dropdown focus, 11 home CLS ×2, 16 `sf-header.css` cap, the `front-alt` 404) did not reproduce in either run.
+
+Spec 16 measurements before first scroll, requests desktop · mobile / JS br / CSS br / transfer desktop · mobile (KB): home **32 · 29** / 22.6 / 25.6 / 513 · 451; product **19 · 19** / 24.2 / 18.0 / 303 · 244; collection 22 · 21 / 20.6 / 17.9 / 187 · 304; search 20 / 20.6 / 19.5; cart 16 / 17.7 / 16.3; content 16 / 19.1 / 16.0; customer 17 / 19.1 / 17.4. Render-blocking CSS: 3 files, 12.4 KB br on every template. Per-file brotli: `sf-header.css` **4,540 B of 4,608** (68 B headroom), `sf-core.js` 8,113 B br / 33,503 B raw (at its cap), `sf-base.css` 5,736 B.
+
+### 10.5 Remaining failures and open items
+
+**No failing tests.** Open, none blocking:
+
+1. **Hoodies collection image vs DESIGN §5.6 (ORCH decision).** MEDIA's item 6 set the *fixture* Hoodies collection image to the zip hoodie chest close-up (800 px source). Because the category grid and the mega-menu tile use the collection image when one is set, the preview homepage now shows the blue-grey zip hoodie in the featured rail, the signature showcase **and** the category stage, which DESIGN §5.6 rules out ("five tiles mean five garments"), and the crop is soft at 2× on the ~480 px desktop stage. The theme default (`sf-category-hoodies`, the black hoodie) is unchanged, so a real store is affected only if the merchant picks the same image. Either revert the fixture to `sf-category-hoodies` or amend §5.6; I left it as the fixer delivered it.
+2. **HOME item 5 (partial):** desktop home is 32 requests before first scroll against HOME's own target of 31 (the two large signature stills that Chromium's lazy loading fetches early). Within the tightened budget (37).
+3. **COMMERCE zoom viewer (partial):** its ~1 KB br of JS is still inside `sf-product.js`, not split out. Its images load only when it opens.
+4. **`sf-header.css`** has 68 B of brotli headroom; the next header CSS change has to trim something or ask for a cap change.
+5. **Screenshot note:** `*-00-intro-t2.45-cta-fading.png` shows the CTAs nearly fully faded in because the capture script seeks the film. The live timing was probed separately: desktop CTA opacity 0 at 2.03 s, 0.34 at 2.29 s, 0.99 at 2.54 s, 1 from 2.79 s; mobile 0 at 2.08 s, 0.82 at 2.34 s, 1 from 2.84 s.
+6. Carried over: WebKit / real iOS not executed; no Shopify store contacted (TEST-REPORT §4).
+
+### 10.6 Screenshots (`dev/tests/screenshots/integration/`, overwritten, DPR 1)
+
+58 files from `scratchpad/rev1-INTEGRATOR/shots.mjs` against `:9340`: no console errors, no failed requests, `scrollWidth − innerWidth` = 0 on home, `/collections/all`, `/collections/hoodies` and the PDP in both projects.
+
+- **Desktop 1440×900** (28): intro at 1.2 / 2.45 / 6 / 10 s, hero end state, featured, signature at 0/25/50/75/100 %, campaign at rest / mid-reveal / revealed, categories, story, newsletter, footer, mega menu, collection all (+ grid), hoodies (+ grid), PDP + gallery 1–3, cart drawer.
+- **Mobile 390×844** (30): the same home set, menu drawer, both collections, PDP + gallery slides 2–5, PDP scrolled to related products, cart drawer.
+
+Checked by eye: the hero's film frames and its end state (lockup, italic line on the left, CTAs, PAUSE); the signature ends on BACK with title, price and button; the sleeve-label step frames the left-cuff label centre-right with only black between it and the caption; the campaign still has no visible top or side edge at rest, mid-reveal or revealed; the mega menu is a list plus a 4:5 tile starting at column 7; "The collection" heading on `/collections/all`; the zip hoodie PDP leads with the clean hood-up front and shows its three details without an empty cell; the mobile gallery has 5 slides; the cart drawer has one line and one tax line. Issues found: only §10.5 item 1 (the repeated zip hoodie on the homepage), plus the cosmetic note that `desktop-13-home-newsletter.png` and `desktop-14-home-footer.png` are the same frame (both are the page bottom at 900 px).

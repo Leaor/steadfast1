@@ -141,11 +141,21 @@ function fixtureRef(handle, view, alt) {
   return files.length ? imageRefFromFiles(files, alt) : null;
 }
 
-// Review r1 item 6: the Hoodies collection image (collection banner, and the category grid / mega-menu tile when
-// their own image is blank) is the 4:5 chest-logo fabric close-up, not the night photo that already leads the
-// black zip hoodie card on the same page (that photo also feeds Bottoms, the lookbook and the editorial stills).
+// A MEDIA still that is not a theme asset (manifest stills.files), e.g. a collection-only image.
+function processedRef(base, alt) {
+  const files = ((manifest.stills || {}).files || []).filter((r) => r.base === base).map((r) => ({
+    file: r.path, width: r.width, height: r.height, format: r.format === 'jpeg' ? 'jpg' : r.format,
+  }));
+  return files.length ? imageRefFromFiles(files, alt) : null;
+}
+
+// Review r2 item 1: the Hoodies collection image (collection banner, and the category grid / mega-menu tile when
+// their own image is blank) is the retouched night back view of the embossed gothic hoodie (the back-grey plate,
+// MEDIA's stills/sf-collection-hoodies at 540/900/1080). It is a hoodie, it is no product card's lead image
+// (the gothic hoodie's cards lead with back-charcoal) and it is not the blue-grey zip hoodie, which the homepage
+// keeps for the featured rail and the signature showcase only.
 const collections = [
-  { id: 4001, handle: 'hoodies', title: 'Hoodies', products: [1001, 1004, 1005], image: fixtureRef('zip-hoodie-washed-blue-grey', 'detail-chest-logo', 'Hoodies') },
+  { id: 4001, handle: 'hoodies', title: 'Hoodies', products: [1001, 1004, 1005], image: processedRef('sf-collection-hoodies', 'Hoodies') },
   { id: 4002, handle: 'tracksuits', title: 'Tracksuits', products: [1002, 1003], image: stillRef('sf-category-tracksuits', 'Tracksuits') },
   { id: 4003, handle: 'tops', title: 'Tops', products: [], image: null },
   { id: 4004, handle: 'bottoms', title: 'Bottoms', products: [1006], image: stillRef('sf-category-bottoms', 'Bottoms') },
