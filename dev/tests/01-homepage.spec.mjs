@@ -67,6 +67,28 @@ test.describe('homepage', () => {
     await expect(d.locator('sf-product-card')).toHaveCount(0);
   });
 
+  // Review r2 item 1: the blue-grey zip hoodie is the hero garment of the featured rail and the signature showcase
+  // only; the Hoodies tile (category stage + header mega tile) is the Hoodies collection image, a different garment.
+  test('the blue-grey zip hoodie appears only in the featured rail and the signature showcase', async ({ page }) => {
+    await markIntroSeen(page);
+    await gotoOk(page, '/');
+    const hoodies = fx.collection('hoodies');
+    expect(hoodies && hoodies.image, 'hoodies collection has an image').toBeTruthy();
+    expect(hoodies.image.base, 'Hoodies image is not the zip hoodie').not.toMatch(/zip-hoodie-washed-blue-grey/);
+    const imgs = await page.locator('img').evaluateAll((els) => els.map((i) => ({
+      urls: [i.currentSrc, i.getAttribute('src'), i.getAttribute('srcset'), ...[...(i.closest('picture')?.querySelectorAll('source') || [])].map((s) => s.getAttribute('srcset'))].filter(Boolean).join(' '),
+      section: i.closest('[data-sf-section]')?.getAttribute('data-sf-section') || (i.closest('header, .sf-header') ? 'header' : 'other'),
+      hoodiesTile: !!i.closest('[data-sf-section="category-grid"] [data-sf-cat-item="0"], [data-sf-section="category-grid"] [data-sf-cat-slide="0"]'),
+    })));
+    const zip = imgs.filter((i) => /zip-hoodie-washed-blue-grey/.test(i.urls));
+    expect(zip.length, 'the zip hoodie is in the featured rail').toBeGreaterThan(0);
+    expect(zip.filter((i) => !['featured-collection', 'signature-showcase'].includes(i.section)).map((i) => i.section),
+      'zip hoodie images outside the featured rail / signature showcase').toEqual([]);
+    const tiles = imgs.filter((i) => i.hoodiesTile);
+    expect(tiles.length, 'Hoodies tile images in the category stage').toBeGreaterThan(0);
+    for (const t of tiles) expect(t.urls, 'Hoodies tile shows the Hoodies collection image').toContain(hoodies.image.base);
+  });
+
   test('Section E: index list of 5 category links with a visually hidden h2', async ({ page }) => {
     await markIntroSeen(page);
     await gotoOk(page, '/');

@@ -101,6 +101,23 @@ test.describe('collection filtering', () => {
     });
   }
 
+  // Review r2 item 1: the banner never repeats a card on the same screen and is no product's lead image.
+  test('collection banner: the fixture image, no product lead image, not repeated by any card', async ({ page }) => {
+    const c = fx.collection('hoodies');
+    expect(c && c.image, 'hoodies collection has an image').toBeTruthy();
+    const leads = fx.products().map((p) => p.media && p.media[0] && p.media[0].image && p.media[0].image.base).filter(Boolean);
+    expect(leads, 'the Hoodies image is no product card lead image').not.toContain(c.image.base);
+    await gotoOk(page, '/collections/hoodies');
+    const banner = page.locator('.sf-collection-header__banner img').first();
+    await expect(banner).toBeVisible();
+    const bannerSrc = await banner.evaluate((i) => i.currentSrc || i.src);
+    expect(bannerSrc).toContain(c.image.base);
+    const stem = (u) => decodeURIComponent(new URL(u, 'http://x').pathname).replace(/^.*\/(products|stills|assets)\//, '$1/').replace(/-\d+\.(webp|jpe?g|png)$/, '');
+    const cardSrcs = await cards(page).locator('img').evaluateAll((els) => els.map((i) => i.currentSrc || i.src).filter(Boolean));
+    expect(cardSrcs.length, 'card images rendered').toBeGreaterThan(0);
+    expect(cardSrcs.map(stem), 'no card shows the banner image').not.toContain(stem(bannerSrc));
+  });
+
   test('filter: price range (major units)', async ({ page }, testInfo) => {
     const prices = all().map(fx.priceMin).sort((a, b) => a - b);
     const lte = Math.floor(prices[0] / 100);
